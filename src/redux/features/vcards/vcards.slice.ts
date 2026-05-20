@@ -1,0 +1,155 @@
+import { createDefaultVCardData, type VCardData, type VCardRecord } from '@/types/vcard'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+
+export type VCardsState = {
+  byId: Record<string, VCardRecord>
+  ids: string[]
+  slugToId: Record<string, string>
+}
+
+const initialState: VCardsState = {
+  byId: {},
+  ids: [],
+  slugToId: {},
+}
+
+function newId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  return `vc_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+}
+
+function reindexSlugs(state: VCardsState) {
+  const next: Record<string, string> = {}
+  for (const id of state.ids) {
+    const slug = state.byId[id]?.slug?.trim()
+    if (slug) next[slug] = id
+  }
+  state.slugToId = next
+}
+
+const vcardsSlice = createSlice({
+  name: 'vcards',
+  initialState,
+  reducers: {
+    addVCard(
+      state,
+      action: PayloadAction<
+        | {
+            id?: string
+            seed?: Partial<VCardData>
+            branding?: { primaryColor: string; accentColor: string; fontFamily?: string }
+          }
+        | undefined
+      >
+    ) {
+      const id = action.payload?.id ?? newId()
+      const now = new Date().toISOString()
+      const branding = action.payload?.branding
+      const data = createDefaultVCardData({
+        ...action.payload?.seed,
+        slug: action.payload?.seed?.slug?.trim() || `card-${id.slice(0, 8)}`,
+        theme: {
+          ...createDefaultVCardData().theme,
+          ...(action.payload?.seed?.theme || {}),
+          ...(branding
+            ? {
+                primaryColor: branding.primaryColor,
+                accentColor: branding.accentColor,
+                ...(branding.fontFamily ? { fontFamily: branding.fontFamily } : {}),
+              }
+            : {}),
+        },
+      })
+      const record: VCardRecord = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+        views: 0,
+        saves: 0,
+        avatarImageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+        isActive: true,
+      }
+      state.byId[id] = record
+      state.ids.unshift(id)
+      reindexSlugs(state)
+    },
+    updateVCard(state, action: PayloadAction<{ id: string; patch: Partial<VCardRecord> }>) {
+      const cur = state.byId[action.payload.id]
+      if (!cur) return
+      const next = {
+        ...cur,
+        ...action.payload.patch,
+        updatedAt: new Date().toISOString(),
+      } as VCardRecord
+      state.byId[action.payload.id] = next
+      reindexSlugs(state)
+    },
+    replaceVCardData(state, action: PayloadAction<{ id: string; data: VCardData }>) {
+      const cur = state.byId[action.payload.id]
+      if (!cur) return
+      state.byId[action.payload.id] = {
+        ...cur,
+        ...action.payload.data,
+        id: cur.id,
+        createdAt: cur.createdAt,
+        updatedAt: new Date().toISOString(),
+        views: cur.views,
+        saves: cur.saves,
+        avatarImageUrl: cur.avatarImageUrl,
+        isActive: cur.isActive,
+      }
+      reindexSlugs(state)
+    },
+    removeVCard(state, action: PayloadAction<string>) {
+      const id = action.payload
+      delete state.byId[id]
+      state.ids = state.ids.filter((x) => x !== id)
+      reindexSlugs(state)
+    },
+    seedDemoIfEmpty(state) {
+      if (state.ids.length > 0) return
+      const id = newId()
+      const now = new Date().toISOString()
+      const data = createDefaultVCardData({
+        slug: 'zakir',
+        personal: {
+          ...createDefaultVCardData().personal,
+          fullName: 'Zakir Hosen',
+          designation: 'FrontEnd Developer',
+        },
+      })
+      state.byId[id] = {
+        ...data,
+        id,
+        createdAt: now,
+        updatedAt: now,
+        views: 1200,
+        saves: 342,
+        avatarImageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+        isActive: true,
+      }
+      state.ids = [id]
+      reindexSlugs(state)
+    },
+  },
+})
+
+export const { addVCard, updateVCard, replaceVCardData, removeVCard, seedDemoIfEmpty } = vcardsSlice.actions
+
+export default vcardsSlice.reducer
+
+export function selectVCardById(state: { vcards: VCardsState }, id: string | null) {
+  if (!id) return null
+  return state.vcards.byId[id] ?? null
+}
+
+export function selectVCardIdBySlug(state: { vcards: VCardsState }, slug: string) {
+  return state.vcards.slugToId[slug] ?? null
+}
+
+export function selectVCardList(state: { vcards: VCardsState }) {
+  return state.vcards.ids.map((id) => state.vcards.byId[id]).filter(Boolean)
+}

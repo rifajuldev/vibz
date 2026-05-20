@@ -1,0 +1,288 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Playfair Display', ui-serif, Georgia, serif;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .mask-edges {
+    mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);
+  }
+  .mask-vertical {
+    mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 40px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 40px), transparent);
+  }
+}
+
+/* Live preview phone frame — container queries apply to embedded profile at any viewport */
+.vbiz-preview-frame {
+  container-type: inline-size;
+  container-name: vbiz-preview;
+}
+
+/*
+ * Embedded preview uses viewport breakpoints (md/lg) but renders inside a ~420px frame.
+ * Force single-column bento layout whenever data-embedded is set.
+ */
+.vbiz-profile-root[data-embedded] {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  align-items: stretch;
+}
+
+.vbiz-profile-root[data-embedded] .vbiz-profile-main,
+.vbiz-profile-root[data-embedded] main,
+.vbiz-profile-root[data-embedded] .vbiz-bento-grid,
+.vbiz-profile-root[data-embedded] .vbiz-floating-nav {
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.vbiz-profile-root[data-embedded] .vbiz-floating-nav-inner {
+  margin-inline: auto;
+}
+
+.vbiz-profile-root[data-embedded] .mask-edges {
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+.vbiz-profile-root[data-embedded] .grid[class*='md:grid-cols'],
+.vbiz-profile-root[data-embedded] .grid[class*='lg:grid-cols'],
+.vbiz-profile-root[data-embedded] .grid[class*='xl:grid-cols'] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.vbiz-profile-root[data-embedded] .grid[class*='md:grid-cols'] > *,
+.vbiz-profile-root[data-embedded] .grid[class*='lg:grid-cols'] > *,
+.vbiz-profile-root[data-embedded] .grid[class*='xl:grid-cols'] > * {
+  grid-column: 1 / -1 !important;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vbiz-profile-root[data-embedded] .grid[class*='sm:grid-cols'] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.vbiz-profile-root[data-embedded] .grid[class*='sm:grid-cols'] > * {
+  grid-column: 1 / -1 !important;
+  min-width: 0;
+}
+
+/* Keep 2×2 social icon grids inside Network cards */
+.vbiz-profile-root[data-embedded]
+  .grid.grid-cols-2:not([class*='sm:grid-cols']):not([class*='md:grid-cols']):not([class*='lg:grid-cols']) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.vbiz-profile-root[data-embedded] .grid.grid-cols-2:not([class*='sm:grid-cols']) > * {
+  grid-column: auto !important;
+}
+
+.vbiz-profile-root[data-embedded] [class*='md:flex-row'] {
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+.vbiz-profile-root[data-embedded] header[class*='md:items-center'],
+.vbiz-profile-root[data-embedded] .vbiz-bento-grid [class*='md:items-center'] {
+  align-items: center !important;
+}
+
+.vbiz-profile-root[data-embedded] [class*='hidden'][class*='lg:flex'] {
+  display: none !important;
+}
+
+.vbiz-profile-root[data-embedded] .vbiz-bento-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.vbiz-profile-root[data-embedded] .vbiz-bento-grid > * {
+  grid-column: 1 / -1 !important;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.vbiz-profile-root[data-embedded] .vbiz-theme-toggle {
+  flex-shrink: 0;
+}
+
+@container vbiz-preview (max-width: 480px) {
+  .vbiz-profile-root[data-embedded] {
+    min-height: auto;
+    padding-bottom: 5rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-cover-video {
+    height: min(52vh, 320px);
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-profile-main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 7rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-profile-avatar {
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-badges {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.375rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-title {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    word-break: break-word;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-tagline {
+    font-size: 0.8125rem;
+    margin-bottom: 1.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-cta {
+    max-width: 100%;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-cta .vbiz-cta-primary {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-cta .vbiz-cta-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex-shrink: 0;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-floating-nav {
+    top: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: center;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-floating-nav-inner {
+    padding: 0.375rem;
+    border-radius: 1.5rem;
+    max-width: 100%;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-floating-nav-scroll {
+    gap: 0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-nav-tab {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-nav-tab-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Section content inside narrow preview */
+  .vbiz-profile-root[data-embedded] h2 {
+    font-size: clamp(1.25rem, 5cqi, 1.75rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  .vbiz-profile-root[data-embedded] .grid > [class*='rounded-'] {
+    min-width: 0;
+  }
+
+  .vbiz-profile-root[data-embedded] button[class*='px-8'] {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .vbiz-profile-root[data-embedded] [class*='p-8'],
+  .vbiz-profile-root[data-embedded] [class*='lg:p-10'] {
+    padding: 1.25rem;
+  }
+
+  .vbiz-profile-root[data-embedded] [class*='p-6']:not(.vbiz-floating-nav-inner) {
+    padding: 1rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .grid.grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .vbiz-profile-root[data-embedded] [class*='max-w-[1000px]'],
+  .vbiz-profile-root[data-embedded] [class*='max-w-[1100px]'],
+  .vbiz-profile-root[data-embedded] [class*='max-w-[1200px]'] {
+    max-width: 100%;
+  }
+
+  .vbiz-profile-root[data-embedded] [class*='h-[460px]'],
+  .vbiz-profile-root[data-embedded] [class*='h-[440px]'] {
+    height: auto;
+    min-height: 16rem;
+    max-height: 22rem;
+  }
+
+  .vbiz-profile-root[data-embedded] [class*='w-[300px]'],
+  .vbiz-profile-root[data-embedded] [class*='w-[260px]'] {
+    width: min(100%, 280px) !important;
+  }
+
+  .vbiz-profile-root[data-embedded] .group.relative.flex.items-center.p-3 {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+
+  .vbiz-profile-root[data-embedded] .group.relative.flex.items-center.p-3 > div:last-child {
+    margin-left: auto;
+  }
+}
+
+@container vbiz-preview (max-width: 340px) {
+  .vbiz-profile-root[data-embedded] .vbiz-header-cta {
+    flex-wrap: wrap;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-cta .vbiz-cta-primary {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .vbiz-profile-root[data-embedded] .vbiz-header-cta .vbiz-cta-icon-row {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}

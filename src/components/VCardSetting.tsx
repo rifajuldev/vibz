@@ -1,0 +1,1084 @@
+'use client'
+
+import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { useVCard } from '@/lib/VCardContext'
+import { setButtonStyle, setCornerStyle, setLayoutStyle } from '@/redux/features/designSettings/designSettings.slice'
+import { cn } from '@/utils/cn'
+import {
+  ChevronDown,
+  Globe,
+  Home,
+  Image as ImageIcon,
+  LayoutTemplate,
+  Link2,
+  Menu,
+  Palette,
+  Settings2,
+  Star,
+  Zap,
+} from 'lucide-react'
+import React, { useState } from 'react'
+
+const settingTabs = [
+  { id: 'info', label: 'My Info Color Settings', icon: Palette },
+  { id: 'social', label: 'Social and general Links', icon: Link2 },
+  { id: 'icons', label: 'Icons', icon: Star },
+  { id: 'general', label: 'General Settings', icon: Settings2 },
+  { id: 'home', label: 'Home Page Settings', icon: Home },
+  { id: 'navbar', label: 'Nav Bar settings', icon: Menu },
+  { id: 'template', label: 'Template', icon: LayoutTemplate },
+]
+
+const myInfoFields = [
+  'MyInfo section Name',
+  'MyInfo Profession',
+  'MyInfo Designation',
+  'MyInfo Company',
+  'MyInfo Address',
+  'MyInfo Email',
+  'MyInfo Phone',
+  'MyInfo Whatsapp',
+  'MyInfo Company / Office Name',
+  'MyInfo section Company / Office Name',
+  'MyInfo Relationship Status',
+  'MyInfo Website',
+  'Name',
+  'Profession',
+  'Designation',
+  'Age',
+  'Gender',
+  'About Me',
+]
+
+const socialLinks = [
+  'FaceBook',
+  'Twitter',
+  'Instagram',
+  'TikTok',
+  'Youtube',
+  'LinkedIn',
+  'Whatsapp',
+  'Rumble',
+  'Truth',
+  'Pinterest',
+  'Share',
+  'Vcard View Counter',
+  'Language',
+  'CRM',
+  'Website',
+]
+
+const iconFields = [
+  'Profession Icon',
+  'Name',
+  'Age Icon',
+  'Address Icon',
+  'Email Icon',
+  'Phone Icon',
+  'Company/Office Icon',
+  'Gender Icon',
+  'Relationship Status Icon',
+  'My Info Website Icon',
+  'My Info Whatsapp',
+]
+
+const generalSettings = [
+  'Zip',
+  'Pages Header',
+  'Save Contact',
+  'My Info Btn',
+  'My vCard Btn',
+  'Share Btn',
+  'Get your VCard Now',
+  'Your QR Code',
+  'Home Page BG Color',
+  'Home Page Banner Color',
+]
+
+const homePageSettings = [
+  'Intro vCard Video',
+  'Intro YouTube vCard Video Link',
+  'Background Music',
+  'YouTube Background Music Link',
+  'Background Video/Image',
+  'Profile Image/Video',
+  'Save Contact',
+  'Skills',
+  'vCard Header Color',
+  'Info Box Style',
+  'Repeat Background Music',
+]
+
+const navBarSettings = [
+  'About Me',
+  'Additional Services',
+  'Announcement',
+  'BBB',
+  'Blog',
+  'Booking',
+  'Breakfast',
+  'Calender',
+  'Certifications/Licenses',
+  'Clients',
+  'Company Mission Statement',
+  'Contact Us',
+  'DCP',
+  'Dinner',
+  'Events',
+  'Faq',
+  'Gallery',
+  'Home',
+  'Home Solar',
+  'Inventory',
+  'Join My Team',
+  'Lunch',
+  'Menu',
+  'Meet Our Team',
+  'Nav Background Color',
+  'Press/Media',
+  'Property Listing',
+  'Public Cards',
+  'Resiliency Products',
+  'Resume',
+  'Reviews',
+  'See Product',
+  'Services',
+  '24/h SalesPerson',
+  'Video Links',
+  'Videos',
+  'Who We Are',
+  '2D Explainer',
+]
+
+function SettingSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-8 flex flex-col gap-3">
+      <h3 className="text-[14px] font-bold text-slate-900 dark:text-white">{title}</h3>
+      {children}
+    </div>
+  )
+}
+
+function OptionCard({
+  label,
+  selected,
+  onClick,
+  children,
+  isPro = false,
+}: {
+  label: string
+  selected: boolean
+  onClick: () => void
+  children: React.ReactNode
+  isPro?: boolean
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'relative flex flex-col items-center justify-center rounded-2xl border p-3 transition-all duration-200',
+        selected
+          ? 'border-primary-600 bg-primary-600/5 dark:bg-primary-500/15 dark:text-primary-400 dark:border-primary-500/30 shadow-sm'
+          : 'hover:border-primary-500/50 border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+      )}
+    >
+      {isPro && (
+        <div className="absolute top-2 right-2 mx-auto flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
+          <Zap className="text-primary-600 fill-primary-600 dark:text-primary-400 dark:fill-primary-400 h-2.5 w-2.5" />
+        </div>
+      )}
+      <div className="mb-2 flex h-12 w-full items-center justify-center">{children}</div>
+      <span
+        className={cn(
+          'text-[12px] font-semibold transition-colors',
+          selected ? 'dark:text-primary-400 text-slate-900' : 'text-slate-500 dark:text-slate-400'
+        )}
+      >
+        {label}
+      </span>
+    </button>
+  )
+}
+
+function ColorPicker({
+  label,
+  value,
+  onChange,
+  defaultValue,
+}: {
+  label: string
+  value?: string
+  onChange?: (val: string) => void
+  defaultValue?: string
+}) {
+  const [localValue, setLocalValue] = useState(defaultValue || '#000000')
+  const displayValue = value !== undefined ? value : localValue
+
+  const handleChange = (val: string) => {
+    if (onChange) {
+      onChange(val)
+    } else {
+      setLocalValue(val)
+    }
+  }
+
+  return (
+    <div className="hover:border-primary-500/50 flex items-center justify-between rounded-[16px] border border-slate-200 bg-white px-4 py-3 shadow-sm transition-colors dark:border-white/10 dark:bg-[#070a13]">
+      <span className="text-[13px] font-semibold text-slate-900 dark:text-white">{label}</span>
+      <div className="flex items-center gap-3">
+        <input
+          type="text"
+          value={displayValue}
+          onChange={(e) => handleChange(e.target.value)}
+          className="focus:text-primary-600 dark:focus:text-primary-400 w-20 bg-transparent text-right font-mono text-[12px] font-medium text-slate-500 uppercase outline-none dark:text-slate-400"
+        />
+        <div className="relative h-7 w-7 shrink-0 cursor-pointer overflow-hidden rounded-full border border-slate-200 shadow-sm dark:border-white/20">
+          <input
+            type="color"
+            value={displayValue}
+            onChange={(e) => handleChange(e.target.value)}
+            className="absolute inset-[-10px] h-14 w-14 cursor-pointer"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Toggle({ isPro = false, defaultChecked = false }: { isPro?: boolean; defaultChecked?: boolean }) {
+  return (
+    <div className="flex shrink-0 items-center gap-3">
+      {isPro && (
+        <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-6 w-6 items-center justify-center rounded-full border shadow-sm">
+          <Zap className="text-primary-600 fill-primary-600 dark:text-primary-400 dark:fill-primary-400 h-3.5 w-3.5" />
+        </div>
+      )}
+      <label className="group relative flex cursor-pointer items-center justify-center">
+        <input type="checkbox" className="peer sr-only" defaultChecked={defaultChecked} />
+        <div className="peer peer-checked:bg-primary-600 h-6 w-11 rounded-full bg-slate-200 shadow-sm peer-hover:bg-slate-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700 dark:peer-hover:bg-slate-600"></div>
+      </label>
+    </div>
+  )
+}
+
+function TemplateDesigner() {
+  const { vCardData, updateData } = useVCard()
+  const dispatch = useAppDispatch()
+  const layoutStyle = useAppSelector((s) => s.designSettings.layoutStyle)
+  const buttonStyle = useAppSelector((s) => s.designSettings.buttonStyle)
+  const cornerStyle = useAppSelector((s) => s.designSettings.cornerStyle)
+
+  const layoutFromStyle = layoutStyle === 'hero' ? 'Hero' : 'Classic'
+
+  const [layoutPick, setLayoutPick] = useState(layoutFromStyle)
+  const [prevLayoutStyle, setPrevLayoutStyle] = useState(layoutStyle)
+
+  if (layoutStyle !== prevLayoutStyle) {
+    setPrevLayoutStyle(layoutStyle)
+    setLayoutPick(layoutFromStyle)
+  }
+
+  const setLayout = (value: string) => {
+    setLayoutPick(value)
+    dispatch(setLayoutStyle(value === 'Hero' ? 'hero' : 'classic'))
+  }
+  const setBtnStyle = (value: string) => {
+    dispatch(setButtonStyle(value.toLowerCase()))
+  }
+  const setBtnRadius = (value: string) => {
+    const mapped = value === 'Square' ? 'square' : value === 'Rounder' ? 'soft' : value === 'Full' ? 'pill' : 'round'
+    dispatch(setCornerStyle(mapped))
+  }
+
+  const btnStyle = buttonStyle.charAt(0).toUpperCase() + buttonStyle.slice(1)
+  const btnRadius =
+    cornerStyle === 'square' ? 'Square' : cornerStyle === 'soft' ? 'Rounder' : cornerStyle === 'pill' ? 'Full' : 'Round'
+
+  const [titleStyle, setTitleStyle] = useState('Text')
+  const [titleSize, setTitleSize] = useState('Small')
+
+  const [btnShadow, setBtnShadow] = useState('None')
+
+  const [wallpaperStyle, setWallpaperStyle] = useState('Gradient')
+  const [gradientStyle, setGradientStyle] = useState('Custom')
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [canvaConnected, setCanvaConnected] = useState(false)
+  const [showCanvaModal, setShowCanvaModal] = useState(false)
+  const [canvaModalStep, setCanvaModalStep] = useState<'Connect' | 'Connecting' | 'Connected'>('Connect')
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size exceeds 2MB limit!')
+        return
+      }
+      setLogoFile(file)
+    }
+  }
+
+  return (
+    <div className="col-span-1 mx-auto flex w-full max-w-2xl flex-col pb-12 lg:col-span-2">
+      {/* Identity Section */}
+      <SettingSection title="Identity & URL">
+        <div className="space-y-4">
+          <div className="bg-primary-50 dark:bg-primary-500/5 border-primary-100 dark:border-primary-500/20 rounded-2xl border p-5">
+            <div className="mb-3 flex items-center gap-3">
+              <Globe className="text-primary-600 dark:text-primary-400 h-4 w-4" />
+              <span className="text-[13px] font-semibold text-slate-900 dark:text-white">Custom Profile Slug</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#070a13]">
+              <span className="text-[13px] font-medium text-slate-400">vbiz.me/</span>
+              <input
+                type="text"
+                value={vCardData.slug}
+                onChange={(e) => updateData('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                placeholder="your-name"
+                className="dark:text-primary-400 flex-1 bg-transparent text-[13px] font-semibold text-slate-900 outline-none"
+              />
+            </div>
+            <p className="mt-2.5 ml-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+              This will be your live URL. Use only lowercase letters, numbers, and dashes.
+            </p>
+          </div>
+        </div>
+      </SettingSection>
+
+      <div className="mb-8 flex gap-4 border-b border-slate-200 pb-4 dark:border-white/10">
+        <button className="dark:text-primary-400 dark:border-primary-400 mb-[-17px] border-b-2 border-slate-900 pb-4 text-sm font-semibold text-slate-900 transition-colors">
+          Customizable
+        </button>
+        <button className="pb-4 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+          Curated
+        </button>
+      </div>
+
+      {/* Theme Colors */}
+      <SettingSection title="Theme Colors">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ColorPicker
+            label="Primary Theme Color"
+            value={vCardData.theme.primaryColor}
+            onChange={(val) => {
+              updateData('theme.primaryColor', val)
+            }}
+          />
+          <ColorPicker
+            label="Accent Theme Color"
+            value={vCardData.theme.accentColor}
+            onChange={(val) => {
+              updateData('theme.accentColor', val)
+            }}
+          />
+        </div>
+      </SettingSection>
+
+      <SettingSection title="Canva Integration">
+        <div className="flex items-center justify-between rounded-[16px] border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#070a13]">
+          <div className="flex flex-col">
+            <span className="text-[14px] font-semibold text-slate-900 dark:text-white">Canva</span>
+            <span className="text-[12px] text-slate-500">Status: {canvaConnected ? 'Connected' : 'Not connected'}</span>
+          </div>
+          <button
+            onClick={() => {
+              if (!canvaConnected) {
+                setCanvaModalStep('Connect')
+                setShowCanvaModal(true)
+              } else {
+                setCanvaConnected(false)
+              }
+            }}
+            className={cn(
+              'min-w-[100px] rounded-full px-4 py-2 text-[13px] font-semibold transition-colors',
+              canvaConnected
+                ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
+                : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100'
+            )}
+          >
+            {canvaConnected ? 'Disconnect' : 'Connect'}
+          </button>
+        </div>
+      </SettingSection>
+
+      {showCanvaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-8 shadow-xl dark:border-white/10 dark:bg-[#0b0f19]">
+            <h2 className="mb-6 text-xl font-bold text-slate-900 dark:text-white">Canva Integration</h2>
+
+            {canvaModalStep === 'Connect' && (
+              <div className="space-y-4">
+                <p className="text-slate-600 dark:text-slate-400">
+                  Connect your Canva account to easily design and import your vCard.
+                </p>
+                <button
+                  onClick={() => {
+                    setCanvaModalStep('Connecting')
+                    setTimeout(() => setCanvaModalStep('Connected'), 2000)
+                  }}
+                  className="bg-primary-600 hover:bg-primary-700 w-full rounded-xl py-3 font-semibold text-white transition"
+                >
+                  Connect Canva
+                </button>
+              </div>
+            )}
+
+            {canvaModalStep === 'Connecting' && (
+              <div className="py-8 text-center">
+                <div className="border-primary-600/30 border-t-primary-600 mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4" />
+                <p className="text-slate-600 dark:text-slate-400">Connecting...</p>
+              </div>
+            )}
+
+            {canvaModalStep === 'Connected' && (
+              <div className="py-8 text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+                  ✓
+                </div>
+                <p className="mb-6 font-semibold text-slate-900 dark:text-white">Connected successfully!</p>
+                <button
+                  onClick={() => {
+                    setCanvaConnected(true)
+                    setShowCanvaModal(false)
+                  }}
+                  className="w-full rounded-xl bg-slate-900 py-3 font-semibold text-white transition hover:bg-slate-800"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Layout */}
+      <div className="mt-6 border-t border-black/10 pt-4 dark:border-white/10">
+        <SettingSection title="Layout">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <OptionCard label="Classic" selected={layoutPick === 'Classic'} onClick={() => setLayout('Classic')}>
+              <div className="mt-2 mb-auto h-8 w-8 rounded-full bg-red-500" />
+            </OptionCard>
+            <OptionCard label="Hero" selected={layoutPick === 'Hero'} onClick={() => setLayout('Hero')} isPro>
+              <div className="flex h-full w-full items-center justify-center rounded-xl bg-linear-to-b from-red-500 to-transparent">
+                <div className="h-8 w-8 rounded-full bg-red-600" />
+              </div>
+            </OptionCard>
+            <OptionCard label="Bento" selected={layoutPick === 'Bento'} onClick={() => setLayout('Bento')} isPro>
+              <div className="grid h-8 w-8 grid-cols-2 grid-rows-2 gap-1">
+                <div className="rounded-sm bg-slate-400" />
+                <div className="rounded-sm bg-slate-400" />
+                <div className="col-span-2 rounded-sm bg-slate-400" />
+              </div>
+            </OptionCard>
+            <OptionCard label="Minimal" selected={layoutPick === 'Minimal'} onClick={() => setLayout('Minimal')}>
+              <div className="h-8 w-8 rounded-sm border-2 border-slate-400" />
+            </OptionCard>
+          </div>
+        </SettingSection>
+
+        {/* Hero Background - only show if layout === "Hero" */}
+        {layoutPick === 'Hero' && (
+          <SettingSection title="Hero Background">
+            <div className="flex flex-col gap-4">
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 transition-colors hover:bg-slate-100 dark:border-white/10 dark:bg-white/2 dark:hover:bg-white/5">
+                <ImageIcon className="h-5 w-5 text-slate-400" />
+                <span className="text-[14px] font-semibold text-slate-600 dark:text-slate-300">Upload Hero Image</span>
+                <input type="file" className="hidden" accept="image/*" />
+              </label>
+              <input
+                type="text"
+                placeholder="Or Hero video URL"
+                className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:border-white/10 dark:bg-[#070a13] dark:text-white"
+              />
+            </div>
+          </SettingSection>
+        )}
+      </div>
+
+      {/* Profile image */}
+      <SettingSection title="Profile image">
+        <div className="flex items-center gap-4">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-slate-200 bg-slate-100 shadow-sm dark:border-white/10 dark:bg-slate-800">
+            <svg className="h-6 w-6 text-slate-400 dark:text-slate-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+          </div>
+          <button className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+            + Add
+          </button>
+        </div>
+      </SettingSection>
+
+      <SettingSection title="Title">
+        <input
+          type="text"
+          defaultValue="@zakirhossaib736"
+          className="focus:border-primary-500 focus:ring-primary-500 w-full rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm text-slate-900 shadow-sm transition-shadow outline-none focus:ring-1 dark:border-white/10 dark:bg-[#070a13] dark:text-white"
+        />
+      </SettingSection>
+
+      <SettingSection title="Title style">
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-4">
+            <button
+              onClick={() => setTitleStyle('Text')}
+              className={cn(
+                'flex-1 rounded-2xl border py-4 text-sm font-semibold transition-all',
+                titleStyle === 'Text'
+                  ? 'border-primary-600 bg-primary-600/5 dark:text-primary-400 dark:bg-primary-500/15 dark:border-primary-500/30 text-slate-900 shadow-sm'
+                  : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+              )}
+            >
+              Aa Text
+            </button>
+            <button
+              onClick={() => setTitleStyle('Logo')}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-2 rounded-2xl border py-4 text-sm font-semibold transition-all',
+                titleStyle === 'Logo'
+                  ? 'border-primary-600 bg-primary-600/5 dark:text-primary-400 dark:bg-primary-500/15 dark:border-primary-500/30 text-slate-900 shadow-sm'
+                  : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+              )}
+            >
+              <ImageIcon className="h-4 w-4" /> Logo
+              <div className="ml-2 flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
+                <Zap className="text-primary-600 fill-primary-600 dark:text-primary-400 dark:fill-primary-400 h-2.5 w-2.5" />
+              </div>
+            </button>
+          </div>
+
+          {titleStyle === 'Logo' && (
+            <div className="animate-in fade-in zoom-in-95 duration-200">
+              <label className="group relative flex h-32 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[20px] border-2 border-dashed border-black/10 bg-slate-50 transition-all hover:border-black/20 hover:bg-slate-100 dark:border-white/10 dark:bg-[#0b0f19] dark:hover:bg-[#27272a]">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  {logoFile ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <ImageIcon className="text-primary-600 dark:text-primary-400 h-8 w-8" />
+                      <span className="max-w-[200px] truncate text-[13px] font-bold text-slate-900 dark:text-white">
+                        {logoFile.name}
+                      </span>
+                      <span className="text-[11px] font-medium text-slate-500">Click to change</span>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 shadow-sm transition-transform group-hover:scale-110 dark:bg-slate-800">
+                        <svg
+                          className="h-5 w-5 text-slate-500 dark:text-slate-400"
+                          aria-hidden="true"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 20 16"
+                        >
+                          <path
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                          />
+                        </svg>
+                      </div>
+                      <p className="mb-1 text-[13px] text-slate-500 dark:text-slate-400">
+                        <span className="font-bold text-slate-900 dark:text-white">Click to upload logo</span> or drag
+                        and drop
+                      </p>
+                      <p className="mt-1 text-[11px] font-medium tracking-widest text-slate-500 uppercase dark:text-slate-400">
+                        SVG, PNG, JPG (MAX. 2MB)
+                      </p>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/svg+xml,image/png,image/jpeg"
+                  onChange={handleLogoUpload}
+                />
+              </label>
+            </div>
+          )}
+        </div>
+      </SettingSection>
+
+      <div className="mt-2 mb-8 flex items-center justify-between">
+        <div>
+          <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">Matches page font by default</p>
+        </div>
+        <Toggle isPro />
+      </div>
+
+      <div className="mb-10">
+        <ColorPicker label="Title font color" defaultValue="#362630" />
+      </div>
+
+      {/* Button Design */}
+      <div className="border-t border-black/10 pt-8 dark:border-white/10">
+        <SettingSection title="Button style">
+          <div className="grid grid-cols-3 gap-4">
+            <OptionCard label="Solid" selected={btnStyle === 'Solid'} onClick={() => setBtnStyle('Solid')}>
+              <div className="flex h-7 w-16 items-center justify-center rounded-[8px] bg-slate-200 dark:bg-[#1e2333]">
+                <div className="bg-slate-1000/30 h-1.5 w-6 rounded-full" />
+              </div>
+            </OptionCard>
+            <OptionCard label="Glass" selected={btnStyle === 'Glass'} onClick={() => setBtnStyle('Glass')} isPro>
+              <div className="flex h-7 w-16 items-center justify-center rounded-[8px] border border-black/20 bg-black/5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-blur-md dark:border-white/20 dark:bg-white/5">
+                <div className="h-1.5 w-6 rounded-full bg-white/30" />
+              </div>
+            </OptionCard>
+            <OptionCard label="Outline" selected={btnStyle === 'Outline'} onClick={() => setBtnStyle('Outline')}>
+              <div className="flex h-7 w-16 items-center justify-center rounded-[8px] border-2 border-slate-600 bg-transparent">
+                <div className="h-1.5 w-6 rounded-full bg-slate-600" />
+              </div>
+            </OptionCard>
+          </div>
+        </SettingSection>
+
+        <SettingSection title="Corner roundness">
+          <div className="grid grid-cols-4 gap-4">
+            <OptionCard label="Square" selected={btnRadius === 'Square'} onClick={() => setBtnRadius('Square')}>
+              <div className="h-6 w-6 border-t-[3px] border-l-[3px] border-slate-400"></div>
+            </OptionCard>
+            <OptionCard label="Round" selected={btnRadius === 'Round'} onClick={() => setBtnRadius('Round')}>
+              <div className="h-6 w-6 rounded-tl-md border-t-[3px] border-l-[3px] border-slate-400"></div>
+            </OptionCard>
+            <OptionCard label="Rounder" selected={btnRadius === 'Rounder'} onClick={() => setBtnRadius('Rounder')}>
+              <div className="h-6 w-6 rounded-tl-[12px] border-t-[3px] border-l-[3px] border-slate-400"></div>
+            </OptionCard>
+            <OptionCard label="Full" selected={btnRadius === 'Full'} onClick={() => setBtnRadius('Full')}>
+              <div className="h-6 w-6 rounded-tl-full border-t-[3px] border-l-[3px] border-slate-400"></div>
+            </OptionCard>
+          </div>
+        </SettingSection>
+
+        <SettingSection title="Button shadow">
+          <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+            {['None', 'Soft', 'Strong', 'Hard'].map((s) => (
+              <button
+                key={s}
+                onClick={() => setBtnShadow(s)}
+                className={cn(
+                  'min-w-[100px] rounded-2xl border px-6 py-4 text-[13px] font-semibold transition-all',
+                  btnShadow === s
+                    ? 'border-primary-600 bg-primary-600/5 dark:text-primary-400 dark:bg-primary-500/15 dark:border-primary-500/30 text-slate-900 shadow-sm'
+                    : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </SettingSection>
+
+        <div className="mb-10 space-y-4">
+          <ColorPicker label="Button color" defaultValue="#FFFFFF" />
+          <ColorPicker label="Button text color" defaultValue="#362630" />
+        </div>
+      </div>
+
+      {/* Typography */}
+      <div className="border-t border-black/10 pt-8 dark:border-white/10">
+        <SettingSection title="Page font">
+          <div className="relative">
+            <select className="w-full cursor-pointer appearance-none rounded-2xl border border-black/10 bg-white px-5 py-4 text-sm text-slate-900 transition-colors outline-none focus:border-white/30 dark:border-white/10 dark:bg-[#0b0f19] dark:text-white">
+              <option>Epilogue</option>
+              <option>Inter</option>
+              <option>Roboto</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
+          </div>
+        </SettingSection>
+
+        <div className="mb-10 space-y-4">
+          <ColorPicker label="Page text color" defaultValue="#362630" />
+        </div>
+
+        <div className="mt-2 mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Matches page font by default</p>
+          </div>
+          <Toggle isPro />
+        </div>
+
+        <div className="mb-8 space-y-4">
+          <ColorPicker label="Title color" defaultValue="#362630" />
+        </div>
+
+        <SettingSection title="Title size">
+          <div className="flex gap-4">
+            <button
+              onClick={() => setTitleSize('Small')}
+              className={cn(
+                'flex-1 rounded-2xl border py-4 text-sm font-semibold transition-all',
+                titleSize === 'Small'
+                  ? 'border-primary-600 bg-primary-600/5 dark:text-primary-400 dark:bg-primary-500/15 dark:border-primary-500/30 text-slate-900 shadow-sm'
+                  : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+              )}
+            >
+              Small
+            </button>
+            <button
+              onClick={() => setTitleSize('Large')}
+              className={cn(
+                'flex flex-1 items-center justify-center gap-2 rounded-2xl border py-4 text-sm font-semibold transition-all',
+                titleSize === 'Large'
+                  ? 'border-primary-600 bg-primary-600/5 dark:text-primary-400 dark:bg-primary-500/15 dark:border-primary-500/30 text-slate-900 shadow-sm'
+                  : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+              )}
+            >
+              Large
+              <div className="ml-2 flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
+                <Zap className="text-primary-600 fill-primary-600 dark:text-primary-400 dark:fill-primary-400 h-2.5 w-2.5" />
+              </div>
+            </button>
+          </div>
+        </SettingSection>
+      </div>
+
+      {/* Wallpaper */}
+      <div className="border-t border-black/10 pt-8 dark:border-white/10">
+        <SettingSection title="Wallpaper style">
+          <div className="no-scrollbar flex gap-3 overflow-x-auto pt-2 pb-4">
+            <OptionCard label="Fill" selected={wallpaperStyle === 'Fill'} onClick={() => setWallpaperStyle('Fill')}>
+              <div className="h-12 w-12 rounded-[10px] bg-slate-200 dark:bg-[#1e2333]"></div>
+            </OptionCard>
+            <OptionCard
+              label="Gradient"
+              selected={wallpaperStyle === 'Gradient'}
+              onClick={() => setWallpaperStyle('Gradient')}
+            >
+              <div className="h-12 w-12 rounded-[10px] bg-linear-to-t from-[#B04C40] via-[#D1A0A6] to-[#A3C6D3]"></div>
+            </OptionCard>
+            <OptionCard label="Blur" selected={wallpaperStyle === 'Blur'} onClick={() => setWallpaperStyle('Blur')}>
+              <div className="h-12 w-12 rounded-[10px] bg-[#e2e4e9]"></div>
+            </OptionCard>
+            <OptionCard
+              label="Pattern"
+              selected={wallpaperStyle === 'Pattern'}
+              onClick={() => setWallpaperStyle('Pattern')}
+              isPro
+            >
+              <div className="grid h-12 w-12 grid-cols-3 grid-rows-3 gap-[2px] overflow-hidden rounded-[10px] bg-[#e2e4e9] p-1">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="rounded-[2px] bg-white dark:bg-[#0b0f19]" />
+                ))}
+              </div>
+            </OptionCard>
+            <OptionCard
+              label="Image"
+              selected={wallpaperStyle === 'Image'}
+              onClick={() => setWallpaperStyle('Image')}
+              isPro
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-[#e2e4e9]">
+                <ImageIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+              </div>
+            </OptionCard>
+            <OptionCard
+              label="Video"
+              selected={wallpaperStyle === 'Video'}
+              onClick={() => setWallpaperStyle('Video')}
+              isPro
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-[#e2e4e9]">
+                <svg
+                  className="h-5 w-5 text-slate-500 dark:text-slate-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </OptionCard>
+          </div>
+        </SettingSection>
+
+        {wallpaperStyle === 'Gradient' && (
+          <>
+            <SettingSection title="Gradient style">
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setGradientStyle('Custom')}
+                  className={cn(
+                    'flex-1 rounded-2xl border py-4 text-sm font-semibold transition-all',
+                    gradientStyle === 'Custom'
+                      ? 'border-primary-600 bg-primary-600/5 dark:bg-primary-500/15 dark:text-primary-400 dark:border-primary-500/30 text-slate-900 shadow-sm'
+                      : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+                  )}
+                >
+                  Custom
+                </button>
+                <button
+                  onClick={() => setGradientStyle('Pre-made')}
+                  className={cn(
+                    'flex flex-1 items-center justify-center gap-2 rounded-2xl border py-4 text-sm font-semibold transition-all',
+                    gradientStyle === 'Pre-made'
+                      ? 'border-primary-600 bg-primary-600/5 dark:bg-primary-500/15 dark:text-primary-400 dark:border-primary-500/30 text-slate-900 shadow-sm'
+                      : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
+                  )}
+                >
+                  Pre-made
+                  <div className="ml-2 flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
+                    <Zap className="text-primary-600 fill-primary-600 dark:text-primary-400 dark:fill-primary-400 h-2.5 w-2.5" />
+                  </div>
+                </button>
+              </div>
+            </SettingSection>
+
+            {gradientStyle === 'Pre-made' && (
+              <SettingSection title="Gradient">
+                <div className="no-scrollbar flex gap-4 overflow-x-auto pt-2 pb-2">
+                  {[
+                    'from-[#DBA6CA] to-[#E5BDD9]',
+                    'from-[#DF8C4C] to-[#EFC6A6]',
+                    'from-[#CBEA8B] to-[#E3F2BE]',
+                    'from-[#A9E88E] to-[#D5F0C6]',
+                    'from-[#342F79] to-[#804253]',
+                    'from-[#120F3B] to-[#51365F]',
+                    'from-[#3F4882] to-[#B3709B]',
+                    'bg-[linear-gradient(to_top,#B04C40,#D1A0A6,#A3C6D3)]',
+                    'bg-[#B2462E]',
+                  ].map((g, i) => (
+                    <button
+                      key={i}
+                      className={cn(
+                        'h-12 w-12 shrink-0 rounded-full transition-transform hover:scale-110',
+                        g.startsWith('bg-') ? g : `bg-gradient-to-tr ${g}`,
+                        'border-2 border-transparent shadow-lg focus:border-white'
+                      )}
+                    />
+                  ))}
+                </div>
+              </SettingSection>
+            )}
+          </>
+        )}
+
+        <div className="mt-8 flex items-center justify-between">
+          <div>
+            <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Noise</h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Add a subtle grain texture</p>
+          </div>
+          <Toggle />
+        </div>
+      </div>
+
+      <div className="pt-20"></div>
+    </div>
+  )
+}
+
+const FieldCard: React.FC<{
+  title: string
+  showTextCol?: boolean
+  showBgCol?: boolean
+  iconColLabel?: string
+  showInput?: boolean
+  toggleLabel?: string
+}> = ({ title, showTextCol = false, showBgCol = false, iconColLabel = '', showInput = false, toggleLabel = '' }) => {
+  return (
+    <div className="relative flex flex-col rounded-[20px] border border-black/5 bg-white p-5 shadow-sm transition-all hover:border-black/10 hover:shadow-md dark:border-white/5 dark:bg-[#0b0f19] dark:hover:border-white/10">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="-m-1 hidden cursor-grab p-1 text-slate-400 transition-colors hover:text-slate-600 sm:block dark:text-slate-500 dark:hover:text-slate-300">
+            <Menu className="h-5 w-5" />
+          </div>
+          <div>
+            <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">{title}</h3>
+            {toggleLabel && (
+              <p className="mt-0.5 text-[12px] font-medium text-slate-500 dark:text-slate-400">{toggleLabel}</p>
+            )}
+            {!toggleLabel && (
+              <p className="mt-0.5 text-[12px] font-medium text-slate-500 dark:text-slate-400">
+                Manage visibility and styling
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="cursor-grab p-1 text-slate-400 sm:hidden dark:text-slate-500">
+            <Menu className="h-5 w-5" />
+          </div>
+          <Toggle defaultChecked />
+        </div>
+      </div>
+
+      {(showInput || showTextCol || showBgCol || iconColLabel) && (
+        <div className="mt-5 flex flex-col gap-3 sm:pl-9">
+          {showInput && (
+            <input
+              type="text"
+              defaultValue="Example value..."
+              className="focus:border-primary-500 focus:ring-primary-500 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] font-medium text-slate-900 shadow-sm transition-shadow outline-none focus:ring-1 dark:border-white/10 dark:bg-slate-800 dark:text-white"
+            />
+          )}
+
+          {(showTextCol || showBgCol || iconColLabel) && (
+            <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {showTextCol && <ColorPicker label="Text color" defaultValue="#FFFFFF" />}
+              {showBgCol && <ColorPicker label="Background color" defaultValue="#000000" />}
+              {iconColLabel && <ColorPicker label={iconColLabel} defaultValue="#FFFFFF" />}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function TabSetting() {
+  const [activeTab, setActiveTab] = useState('info')
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'info':
+        return myInfoFields.map((f) => <FieldCard key={f} title={f} showTextCol showBgCol />)
+      case 'social':
+        return socialLinks.map((f) => <FieldCard key={f} title={f} showTextCol showBgCol />)
+      case 'icons':
+        return iconFields.map((f) => <FieldCard key={f} title={f} iconColLabel="@Color: MyInfo Icon" />)
+      case 'general':
+        return generalSettings.map((f) => <FieldCard key={f} title={f} showTextCol showBgCol />)
+      case 'home':
+        return homePageSettings.map((f) => <FieldCard key={f} title={f} showInput />)
+      case 'navbar':
+        return navBarSettings.map((f) => <FieldCard key={f} title={f} showBgCol />)
+      case 'template':
+        return <TemplateDesigner />
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
+      <div className="relative flex min-h-[850px] w-full flex-col overflow-hidden rounded-[40px] border border-black/10 bg-slate-100/80 shadow-2xl backdrop-blur-3xl md:flex-row dark:border-white/10 dark:bg-[#0b0f19]/80">
+        {/* Subtle inner top highlight */}
+        <div className="absolute inset-x-0 top-0 z-20 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+        {/* Left Sidebar for Settings */}
+        <div
+          className={cn(
+            'hidden-scrollbar z-10 flex flex-shrink-0 flex-col gap-2 overflow-y-auto border-b border-black/5 bg-transparent transition-all duration-300 md:border-r md:border-b-0 dark:border-white/5',
+            isSidebarCollapsed ? 'w-full p-2 md:w-[90px] md:p-4' : 'w-full p-8 md:w-[300px]'
+          )}
+        >
+          <div
+            className={cn(
+              'mb-6 flex items-center transition-all duration-300',
+              isSidebarCollapsed ? 'justify-center gap-0' : 'gap-4'
+            )}
+          >
+            <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border shadow-sm">
+              <Settings2 className="text-primary-600 dark:text-primary-400 h-6 w-6" />
+            </div>
+            <h2
+              className={cn(
+                'text-[18px] leading-tight font-black whitespace-nowrap text-slate-900 transition-all duration-300 dark:text-white',
+                isSidebarCollapsed ? 'hidden w-0 opacity-0 md:block' : 'opacity-100'
+              )}
+            >
+              Card Settings
+            </h2>
+          </div>
+
+          <div className="mt-4 mb-3 flex items-center justify-between px-2">
+            <h3
+              className={cn(
+                'text-[11px] font-black tracking-widest whitespace-nowrap text-slate-500 uppercase transition-all duration-300 dark:text-slate-400',
+                isSidebarCollapsed ? 'hidden w-0 opacity-0 md:block' : 'opacity-100'
+              )}
+            >
+              Configuration
+            </h3>
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="hidden rounded-xl p-1.5 text-slate-500 transition-colors hover:bg-black/5 md:flex dark:hover:bg-white/5"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+          </div>
+
+          {settingTabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'group relative flex w-full items-center overflow-hidden rounded-[20px] px-5 py-4 text-left text-[13.5px] font-bold transition-all duration-300',
+                activeTab === tab.id
+                  ? 'bg-primary-600 border-primary-500/50 dark:bg-primary-500/15 dark:text-primary-400 dark:border-primary-500/30 my-1 scale-[1.02] border text-white shadow-sm'
+                  : 'border border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200',
+                isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5'
+              )}
+              title={tab.label}
+            >
+              <tab.icon
+                className={cn(
+                  'h-4.5 w-4.5 shrink-0',
+                  activeTab === tab.id ? 'dark:text-primary-400 text-white' : 'text-slate-500'
+                )}
+              />
+              <span
+                className={cn(
+                  'truncate whitespace-nowrap transition-all duration-300',
+                  isSidebarCollapsed ? 'w-0 opacity-0 md:hidden' : 'opacity-100'
+                )}
+              >
+                {tab.label}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Right Content Area */}
+        <div className="relative z-0 flex h-full flex-1 flex-col bg-transparent pb-10">
+          <div className="bg-primary-500/5 pointer-events-none absolute top-0 right-0 h-[500px] w-[500px] rounded-full blur-[150px]" />
+
+          {/* Sticky Header */}
+          <div className="relative z-10 flex shrink-0 flex-col justify-between gap-6 p-8 md:flex-row md:items-start md:p-10">
+            <div className="relative z-10 max-w-xl">
+              <h2 className="mb-2 text-2xl font-black text-slate-900 dark:text-white">
+                {settingTabs.find((t) => t.id === activeTab)?.label}
+              </h2>
+              <p className="text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
+                Configure how elements are displayed on your vCard. Changes take effect automatically.
+              </p>
+            </div>
+            {activeTab !== 'template' && (
+              <div className="relative z-10 flex items-center gap-4 self-start rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/5 dark:bg-[#070a13]">
+                <span className="text-[13px] font-bold text-slate-900 dark:text-white">Enable All</span>
+                <label className="group relative flex cursor-pointer items-center justify-center">
+                  <input type="checkbox" className="peer sr-only" defaultChecked />
+                  <div className="peer peer-checked:bg-primary-600 h-6 w-12 rounded-full bg-slate-200 shadow-sm peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700"></div>
+                </label>
+              </div>
+            )}
+          </div>
+
+          {/* Scrollable Grid */}
+          <div className="relative z-10 flex-1 overflow-y-auto scroll-smooth px-8 pb-32 md:px-10">
+            <div
+              className={cn(
+                'animate-in fade-in slide-in-from-bottom-8 fill-mode-both duration-700',
+                activeTab === 'template' ? '' : 'mx-auto flex w-full max-w-4xl flex-col gap-4'
+              )}
+            >
+              {renderContent()}
+            </div>
+          </div>
+
+          {/* Bottom gradient fade for smooth scroll mask */}
+          <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-24 bg-gradient-to-t from-[#09090b] to-transparent" />
+        </div>
+      </div>
+    </div>
+  )
+}
