@@ -2,12 +2,15 @@
 
 import type { ResolvedProfileDesign } from '@/lib/resolvedProfileDesign'
 import { designToCssVars, resolveProfileDesign } from '@/lib/resolvedProfileDesign'
+import { getNavTabBackgroundColor, TAB_ID_TO_NAV_LABEL } from '@/lib/vcardDisplaySettings'
 import {
   Award,
+  Briefcase,
   Calendar,
   Camera,
   FileEdit,
   Film,
+  GraduationCap,
   Home,
   Lightbulb,
   Moon,
@@ -21,11 +24,14 @@ import {
   Wrench,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AboutSection } from './components/AboutSection'
 import { CursorTrail } from './components/CursorTrail'
 import { DoneModal } from './components/DoneModal'
+import { EducationSection } from './components/EducationSection'
+import { ExperienceSection } from './components/ExperienceSection'
 import { FAQSection } from './components/FAQSection'
+import { GeneralPostsSection } from './components/GeneralPostsSection'
 import { HomeSection } from './components/HomeSection'
 import { ImageGallerySection } from './components/ImageGallerySection'
 import { LiveAgent } from './components/LiveAgent'
@@ -39,7 +45,6 @@ import { SaveToWalletModal } from './components/SaveToWalletModal'
 import { ServicesSection } from './components/ServicesSection'
 import {
   AdditionalServicesSection,
-  BlogSection,
   CalendarSection,
   CertificatesSection,
   ExplainerSection,
@@ -49,6 +54,7 @@ import {
 import { SiteGeometricGrid } from './components/SiteGeometricGrid'
 import { VideoLinksSection } from './components/VideoLinksSection'
 import { hasNotificationChoice } from './lib/notificationPrefs'
+import { useProfileDisplay } from './lib/profileDisplayContext'
 import type { VBizProfileAppProps } from './profilePublicProps'
 import { DEMO_PROFILE_PROPS } from './profilePublicProps'
 import { ProfileThemeStyles } from './ProfileThemeStyles'
@@ -62,6 +68,8 @@ const V1_TABS = [
   { id: 'videos', icon: Film, label: 'Videos' },
   { id: 'public-cards', icon: Users, label: 'Public Cards' },
   { id: 'certificates', icon: Award, label: 'Awards' },
+  { id: 'education', icon: GraduationCap, label: 'Education' },
+  { id: 'work', icon: Briefcase, label: 'Experience' },
   { id: 'reviews', icon: Star, label: 'Reviews' },
   { id: 'calendar', icon: Calendar, label: 'Calendar' },
   { id: 'faq', icon: Lightbulb, label: 'FAQ' },
@@ -82,6 +90,17 @@ export function VBizProfileAppV1({
   previewTheme,
   onPreviewThemeChange,
 }: VBizProfileAppProps) {
+  const { isVisible, settings: displaySettings, pageColors } = useProfileDisplay()
+  const visibleV1Tabs = useMemo(
+    () =>
+      V1_TABS.filter((tab) => {
+        const navLabel = TAB_ID_TO_NAV_LABEL[tab.id]
+        if (!navLabel) return true
+        return isVisible(navLabel)
+      }),
+    [isVisible]
+  )
+
   const design: ResolvedProfileDesign =
     designProp ??
     resolveProfileDesign(
@@ -99,6 +118,12 @@ export function VBizProfileAppV1({
     )
 
   const [activeTab, setActiveTab] = useState('home')
+
+  const effectiveActiveTab = useMemo(() => {
+    if (visibleV1Tabs.length === 0) return activeTab
+    return visibleV1Tabs.some((t) => t.id === activeTab) ? activeTab : visibleV1Tabs[0].id
+  }, [visibleV1Tabs, activeTab])
+
   const [internalTheme, setInternalTheme] = useState<'light' | 'dark'>(() => {
     if (embedded) return design.darkMode ? 'dark' : 'light'
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark'
@@ -162,10 +187,13 @@ export function VBizProfileAppV1({
   }
 
   const accent = design.accentColor
-  const rootStyle = designToCssVars(design)
+  const rootStyle = {
+    ...designToCssVars(design),
+    ...(pageColors.pageBg ? { backgroundColor: pageColors.pageBg } : {}),
+  }
 
   const renderContent = () => {
-    switch (activeTab) {
+    switch (effectiveActiveTab) {
       case 'home':
         return <HomeSection key="home" />
       case 'about':
@@ -182,6 +210,10 @@ export function VBizProfileAppV1({
         return <PublicCardsSection key="public-cards" />
       case 'certificates':
         return <CertificatesSection key="certificates" />
+      case 'education':
+        return <EducationSection key="education" />
+      case 'work':
+        return <ExperienceSection key="work" />
       case 'reviews':
         return <ReviewsSection key="reviews" />
       case 'calendar':
@@ -193,7 +225,7 @@ export function VBizProfileAppV1({
       case 'explainer':
         return <ExplainerSection key="explainer" />
       case 'blog':
-        return <BlogSection key="blog" />
+        return <GeneralPostsSection key="blog" />
       default:
         return <HomeSection key="home" />
     }
@@ -272,10 +304,14 @@ export function VBizProfileAppV1({
       )}
 
       <header className="pointer-events-none fixed right-0 bottom-6 left-0 z-50 flex w-full justify-center px-4 lg:top-6 lg:bottom-auto">
-        <div className="pointer-events-auto relative flex w-full max-w-[95vw] items-center overflow-hidden rounded-full border border-black/5 bg-white p-1.5 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] md:max-w-fit md:p-2 dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]">
+        <div
+          className="pointer-events-auto relative flex w-full max-w-[95vw] items-center overflow-hidden rounded-full border border-black/5 bg-white p-1.5 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] md:max-w-fit md:p-2 dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]"
+          style={pageColors.navBg ? { backgroundColor: pageColors.navBg } : undefined}
+        >
           <div className="no-scrollbar flex w-full cursor-grab items-center gap-2 overflow-x-auto scroll-smooth px-3 py-1 active:cursor-grabbing sm:gap-2.5 md:justify-center">
-            {V1_TABS.map((tab) => {
-              const isActive = activeTab === tab.id
+            {visibleV1Tabs.map((tab) => {
+              const isActive = effectiveActiveTab === tab.id
+              const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
               return (
                 <motion.button
                   key={tab.id}
@@ -295,7 +331,7 @@ export function VBizProfileAppV1({
                     <motion.div
                       layoutId="v1-activeTabIndicator"
                       className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(234,179,8,0.5)]"
-                      style={{ backgroundColor: accent }}
+                      style={{ backgroundColor: tabBg || accent }}
                       transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
                     />
                   )}

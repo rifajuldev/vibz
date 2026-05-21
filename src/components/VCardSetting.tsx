@@ -4,7 +4,20 @@ import { ProfileTemplateLayoutSettings } from '@/components/ProfileTemplateLayou
 import { useAppSelector } from '@/hooks/redux'
 import { useVCard } from '@/lib/VCardContext'
 import { appearanceFromDesignSettings } from '@/lib/vcardDesignDefaults'
+import {
+  GENERAL_SETTINGS_FIELDS,
+  getDisplaySettingsFromVCard,
+  getFieldColorPreview,
+  HOME_PAGE_FIELDS,
+  ICON_FIELDS,
+  MY_INFO_FIELDS,
+  NAV_BAR_FIELDS,
+  patchDisplayField,
+  setCategoryEnableAll,
+  SOCIAL_LINK_FIELDS,
+} from '@/lib/vcardDisplaySettings'
 import type { VCardAppearance } from '@/types/vcard'
+import type { DisplayFieldConfig, VCardDisplaySettings } from '@/types/vcardDisplaySettings'
 import { cn } from '@/utils/cn'
 import {
   ChevronDown,
@@ -31,126 +44,14 @@ const settingTabs = [
   { id: 'template', label: 'Template', icon: LayoutTemplate },
 ]
 
-const myInfoFields = [
-  'MyInfo section Name',
-  'MyInfo Profession',
-  'MyInfo Designation',
-  'MyInfo Company',
-  'MyInfo Address',
-  'MyInfo Email',
-  'MyInfo Phone',
-  'MyInfo Whatsapp',
-  'MyInfo Company / Office Name',
-  'MyInfo section Company / Office Name',
-  'MyInfo Relationship Status',
-  'MyInfo Website',
-  'Name',
-  'Profession',
-  'Designation',
-  'Age',
-  'Gender',
-  'About Me',
-]
-
-const socialLinks = [
-  'FaceBook',
-  'Twitter',
-  'Instagram',
-  'TikTok',
-  'Youtube',
-  'LinkedIn',
-  'Whatsapp',
-  'Rumble',
-  'Truth',
-  'Pinterest',
-  'Share',
-  'Vcard View Counter',
-  'Language',
-  'CRM',
-  'Website',
-]
-
-const iconFields = [
-  'Profession Icon',
-  'Name',
-  'Age Icon',
-  'Address Icon',
-  'Email Icon',
-  'Phone Icon',
-  'Company/Office Icon',
-  'Gender Icon',
-  'Relationship Status Icon',
-  'My Info Website Icon',
-  'My Info Whatsapp',
-]
-
-const generalSettings = [
-  'Zip',
-  'Pages Header',
-  'Save Contact',
-  'My Info Btn',
-  'My vCard Btn',
-  'Share Btn',
-  'Get your VCard Now',
-  'Your QR Code',
-  'Home Page BG Color',
-  'Home Page Banner Color',
-]
-
-const homePageSettings = [
-  'Intro vCard Video',
-  'Intro YouTube vCard Video Link',
-  'Background Music',
-  'YouTube Background Music Link',
-  'Background Video/Image',
-  'Profile Image/Video',
-  'Save Contact',
-  'Skills',
-  'vCard Header Color',
-  'Info Box Style',
-  'Repeat Background Music',
-]
-
-const navBarSettings = [
-  'About Me',
-  'Additional Services',
-  'Announcement',
-  'BBB',
-  'Blog',
-  'Booking',
-  'Breakfast',
-  'Calender',
-  'Certifications/Licenses',
-  'Clients',
-  'Company Mission Statement',
-  'Contact Us',
-  'DCP',
-  'Dinner',
-  'Events',
-  'Faq',
-  'Gallery',
-  'Home',
-  'Home Solar',
-  'Inventory',
-  'Join My Team',
-  'Lunch',
-  'Menu',
-  'Meet Our Team',
-  'Nav Background Color',
-  'Press/Media',
-  'Property Listing',
-  'Public Cards',
-  'Resiliency Products',
-  'Resume',
-  'Reviews',
-  'See Product',
-  'Services',
-  '24/h SalesPerson',
-  'Video Links',
-  'Videos',
-  'Who We Are',
-  '2D Explainer',
-]
+const CATEGORY_FIELDS: Record<string, readonly string[]> = {
+  info: MY_INFO_FIELDS,
+  social: SOCIAL_LINK_FIELDS,
+  icons: ICON_FIELDS,
+  general: GENERAL_SETTINGS_FIELDS,
+  home: HOME_PAGE_FIELDS,
+  navbar: NAV_BAR_FIELDS,
+}
 
 function SettingSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -247,7 +148,15 @@ function ColorPicker({
   )
 }
 
-function Toggle({ isPro = false, defaultChecked = false }: { isPro?: boolean; defaultChecked?: boolean }) {
+function Toggle({
+  isPro = false,
+  checked,
+  onChange,
+}: {
+  isPro?: boolean
+  checked: boolean
+  onChange: (value: boolean) => void
+}) {
   return (
     <div className="flex shrink-0 items-center gap-3">
       {isPro && (
@@ -256,7 +165,12 @@ function Toggle({ isPro = false, defaultChecked = false }: { isPro?: boolean; de
         </div>
       )}
       <label className="group relative flex cursor-pointer items-center justify-center">
-        <input type="checkbox" className="peer sr-only" defaultChecked={defaultChecked} />
+        <input
+          type="checkbox"
+          className="peer sr-only"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+        />
         <div className="peer peer-checked:bg-primary-600 h-6 w-11 rounded-full bg-slate-200 shadow-sm peer-hover:bg-slate-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700 dark:peer-hover:bg-slate-600"></div>
       </label>
     </div>
@@ -582,7 +496,7 @@ function TemplateDesigner() {
           <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
           <p className="text-[11px] text-slate-500 dark:text-slate-400">Matches page font by default</p>
         </div>
-        <Toggle isPro />
+        <Toggle isPro checked={false} onChange={() => {}} />
       </div>
 
       <div className="mb-10">
@@ -657,10 +571,15 @@ function TemplateDesigner() {
       <div className="border-t border-black/10 pt-8 dark:border-white/10">
         <SettingSection title="Page font">
           <div className="relative">
-            <select className="w-full cursor-pointer appearance-none rounded-2xl border border-black/10 bg-white px-5 py-4 text-sm text-slate-900 transition-colors outline-none focus:border-white/30 dark:border-white/10 dark:bg-[#0b0f19] dark:text-white">
-              <option>Epilogue</option>
-              <option>Inter</option>
-              <option>Roboto</option>
+            <select
+              value={vCardData.theme.fontFamily ?? 'inter'}
+              onChange={(e) => updateData('theme.fontFamily', e.target.value)}
+              className="w-full cursor-pointer appearance-none rounded-2xl border border-black/10 bg-white px-5 py-4 text-sm text-slate-900 transition-colors outline-none focus:border-white/30 dark:border-white/10 dark:bg-[#0b0f19] dark:text-white"
+            >
+              <option value="inter">Inter</option>
+              <option value="outfit">Outfit</option>
+              <option value="serif">Serif</option>
+              <option value="mono">Mono</option>
             </select>
             <ChevronDown className="pointer-events-none absolute top-1/2 right-4 h-5 w-5 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
           </div>
@@ -675,7 +594,7 @@ function TemplateDesigner() {
             <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Matches page font by default</p>
           </div>
-          <Toggle isPro />
+          <Toggle isPro checked={false} onChange={() => {}} />
         </div>
 
         <div className="mb-8 space-y-4">
@@ -844,7 +763,7 @@ function TemplateDesigner() {
             <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Noise</h3>
             <p className="text-[11px] text-slate-500 dark:text-slate-400">Add a subtle grain texture</p>
           </div>
-          <Toggle />
+          <Toggle checked={false} onChange={() => {}} />
         </div>
       </div>
 
@@ -855,12 +774,25 @@ function TemplateDesigner() {
 
 const FieldCard: React.FC<{
   title: string
+  config: DisplayFieldConfig
+  onPatch: (patch: Partial<DisplayFieldConfig>) => void
+  colorPreview: { text: string; bg: string; icon: string }
   showTextCol?: boolean
   showBgCol?: boolean
   iconColLabel?: string
   showInput?: boolean
   toggleLabel?: string
-}> = ({ title, showTextCol = false, showBgCol = false, iconColLabel = '', showInput = false, toggleLabel = '' }) => {
+}> = ({
+  title,
+  config,
+  onPatch,
+  colorPreview,
+  showTextCol = false,
+  showBgCol = false,
+  iconColLabel = '',
+  showInput = false,
+  toggleLabel = '',
+}) => {
   return (
     <div className="relative flex flex-col rounded-[20px] border border-black/5 bg-white p-5 shadow-sm transition-all hover:border-black/10 hover:shadow-md dark:border-white/5 dark:bg-[#0b0f19] dark:hover:border-white/10">
       <div className="flex items-center justify-between">
@@ -870,10 +802,9 @@ const FieldCard: React.FC<{
           </div>
           <div>
             <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">{title}</h3>
-            {toggleLabel && (
+            {toggleLabel ? (
               <p className="mt-0.5 text-[12px] font-medium text-slate-500 dark:text-slate-400">{toggleLabel}</p>
-            )}
-            {!toggleLabel && (
+            ) : (
               <p className="mt-0.5 text-[12px] font-medium text-slate-500 dark:text-slate-400">
                 Manage visibility and styling
               </p>
@@ -884,7 +815,7 @@ const FieldCard: React.FC<{
           <div className="cursor-grab p-1 text-slate-400 sm:hidden dark:text-slate-500">
             <Menu className="h-5 w-5" />
           </div>
-          <Toggle defaultChecked />
+          <Toggle checked={config.visible} onChange={(visible) => onPatch({ visible })} />
         </div>
       </div>
 
@@ -893,16 +824,36 @@ const FieldCard: React.FC<{
           {showInput && (
             <input
               type="text"
-              defaultValue="Example value..."
+              value={config.customValue ?? ''}
+              onChange={(e) => onPatch({ customValue: e.target.value })}
+              placeholder="Enter URL or value..."
               className="focus:border-primary-500 focus:ring-primary-500 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] font-medium text-slate-900 shadow-sm transition-shadow outline-none focus:ring-1 dark:border-white/10 dark:bg-slate-800 dark:text-white"
             />
           )}
 
           {(showTextCol || showBgCol || iconColLabel) && (
             <div className="mt-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {showTextCol && <ColorPicker label="Text color" defaultValue="#FFFFFF" />}
-              {showBgCol && <ColorPicker label="Background color" defaultValue="#000000" />}
-              {iconColLabel && <ColorPicker label={iconColLabel} defaultValue="#FFFFFF" />}
+              {showTextCol && (
+                <ColorPicker
+                  label="Text color"
+                  value={config.textColor ?? colorPreview.text}
+                  onChange={(textColor) => onPatch({ textColor })}
+                />
+              )}
+              {showBgCol && (
+                <ColorPicker
+                  label="Background color"
+                  value={config.backgroundColor ?? colorPreview.bg}
+                  onChange={(backgroundColor) => onPatch({ backgroundColor })}
+                />
+              )}
+              {iconColLabel && (
+                <ColorPicker
+                  label={iconColLabel}
+                  value={config.iconColor ?? colorPreview.icon}
+                  onChange={(iconColor) => onPatch({ iconColor })}
+                />
+              )}
             </div>
           )}
         </div>
@@ -912,23 +863,57 @@ const FieldCard: React.FC<{
 }
 
 export function TabSetting() {
+  const { vCardData, updateData } = useVCard()
+  const display = getDisplaySettingsFromVCard(vCardData)
   const [activeTab, setActiveTab] = useState('info')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+
+  const patchDisplay = (next: VCardDisplaySettings) => updateData('displaySettings', next)
+
+  const patchField = (key: string, patch: Partial<DisplayFieldConfig>) => {
+    patchDisplay(patchDisplayField(display, key, patch))
+  }
+
+  const categoryKeys = CATEGORY_FIELDS[activeTab] ?? []
+  const categoryAllEnabled =
+    categoryKeys.length > 0 && categoryKeys.every((key) => display.fields[key]?.visible !== false)
+
+  const profileTemplate = (vCardData.appearance?.profileTemplate ?? 'v2') as 'v1' | 'v2'
+  const colorPreview = {
+    text: getFieldColorPreview('text', vCardData.theme, profileTemplate),
+    bg: getFieldColorPreview('bg', vCardData.theme, profileTemplate),
+    icon: getFieldColorPreview('icon', vCardData.theme, profileTemplate),
+  }
+
+  const renderFieldCards = (
+    keys: readonly string[],
+    options: { showTextCol?: boolean; showBgCol?: boolean; iconColLabel?: string; showInput?: boolean }
+  ) =>
+    keys.map((key) => (
+      <FieldCard
+        key={key}
+        title={key}
+        config={display.fields[key] ?? { visible: true }}
+        onPatch={(patch) => patchField(key, patch)}
+        colorPreview={colorPreview}
+        {...options}
+      />
+    ))
 
   const renderContent = () => {
     switch (activeTab) {
       case 'info':
-        return myInfoFields.map((f) => <FieldCard key={f} title={f} showTextCol showBgCol />)
+        return renderFieldCards(MY_INFO_FIELDS, { showTextCol: true, showBgCol: true })
       case 'social':
-        return socialLinks.map((f) => <FieldCard key={f} title={f} showTextCol showBgCol />)
+        return renderFieldCards(SOCIAL_LINK_FIELDS, { showTextCol: true, showBgCol: true })
       case 'icons':
-        return iconFields.map((f) => <FieldCard key={f} title={f} iconColLabel="@Color: MyInfo Icon" />)
+        return renderFieldCards(ICON_FIELDS, { iconColLabel: '@Color: MyInfo Icon' })
       case 'general':
-        return generalSettings.map((f) => <FieldCard key={f} title={f} showTextCol showBgCol />)
+        return renderFieldCards(GENERAL_SETTINGS_FIELDS, { showTextCol: true, showBgCol: true })
       case 'home':
-        return homePageSettings.map((f) => <FieldCard key={f} title={f} showInput />)
+        return renderFieldCards(HOME_PAGE_FIELDS, { showInput: true })
       case 'navbar':
-        return navBarSettings.map((f) => <FieldCard key={f} title={f} showBgCol />)
+        return renderFieldCards(NAV_BAR_FIELDS, { showBgCol: true })
       case 'template':
         return <TemplateDesigner />
       default:
@@ -1033,10 +1018,19 @@ export function TabSetting() {
             {activeTab !== 'template' && (
               <div className="relative z-10 flex items-center gap-4 self-start rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/5 dark:bg-[#070a13]">
                 <span className="text-[13px] font-bold text-slate-900 dark:text-white">Enable All</span>
-                <label className="group relative flex cursor-pointer items-center justify-center">
-                  <input type="checkbox" className="peer sr-only" defaultChecked />
-                  <div className="peer peer-checked:bg-primary-600 h-6 w-12 rounded-full bg-slate-200 shadow-sm peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700"></div>
-                </label>
+                <Toggle
+                  checked={activeTab === 'info' ? display.globalEnabled : categoryAllEnabled}
+                  onChange={(enabled) => {
+                    if (activeTab === 'info') {
+                      patchDisplay(
+                        setCategoryEnableAll({ ...display, globalEnabled: enabled }, MY_INFO_FIELDS, enabled)
+                      )
+                      return
+                    }
+                    const keys = CATEGORY_FIELDS[activeTab]
+                    if (keys) patchDisplay(setCategoryEnableAll(display, keys, enabled))
+                  }}
+                />
               </div>
             )}
           </div>

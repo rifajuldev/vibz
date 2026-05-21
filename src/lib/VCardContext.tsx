@@ -3,7 +3,8 @@
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useCardScopeId, useCardScopeMode } from '@/lib/card-scope'
 import { designSettingsToVCardDefaults } from '@/lib/vcardDesignDefaults'
-import { addVCard, replaceVCardData, selectVCardById } from '@/redux/features/vcards/vcards.slice'
+import { createDefaultVCardSocial } from '@/lib/vcardSocial'
+import { addVCard, replaceVCardData, selectVCardById, updateVCard } from '@/redux/features/vcards/vcards.slice'
 import type { RootState } from '@/redux/store'
 import type { VCardData, VCardRecord } from '@/types/vcard'
 import { createDefaultVCardData } from '@/types/vcard'
@@ -15,6 +16,8 @@ interface VCardContextType {
   isCreateMode: boolean
   vCardData: VCardData
   updateData: (path: string, value: unknown) => void
+  /** Dashboard list avatar / preview thumbnail (Media & Profile tab). */
+  updateMeta: (patch: { avatarImageUrl?: string }) => void
   saveVCard: () => Promise<void>
   loading: boolean
 }
@@ -93,9 +96,16 @@ export function VCardProvider({ children }: { children: React.ReactNode }) {
   }
 
   const vCardData: VCardData = useMemo(() => {
-    if (isCreateMode) return createDraft
-    if (!record) return createDefaultVCardData()
-    return toVCardData(record)
+    const base = isCreateMode ? createDraft : !record ? createDefaultVCardData() : toVCardData(record)
+    return {
+      ...base,
+      social: base.social ?? createDefaultVCardSocial(),
+      extraFields: base.extraFields ?? [],
+      education: base.education ?? [],
+      experience: base.experience ?? [],
+      services: base.services ?? [],
+      generalPosts: base.generalPosts ?? [],
+    }
   }, [isCreateMode, createDraft, record])
 
   const updateData = useCallback(
@@ -112,6 +122,15 @@ export function VCardProvider({ children }: { children: React.ReactNode }) {
       dispatch(replaceVCardData({ id: cardId, data: next }))
     },
     [isCreateMode, cardId, dispatch, record]
+  )
+
+  const updateMeta = useCallback(
+    (patch: { avatarImageUrl?: string }) => {
+      if (isCreateMode) return
+      if (!cardId) return
+      dispatch(updateVCard({ id: cardId, patch }))
+    },
+    [isCreateMode, cardId, dispatch]
   )
 
   const saveVCard = useCallback(async () => {
@@ -154,10 +173,11 @@ export function VCardProvider({ children }: { children: React.ReactNode }) {
       isCreateMode,
       vCardData,
       updateData,
+      updateMeta,
       saveVCard,
       loading: false,
     }),
-    [cardId, isCreateMode, vCardData, updateData, saveVCard]
+    [cardId, isCreateMode, vCardData, updateData, updateMeta, saveVCard]
   )
 
   return <VCardContext.Provider value={value}>{children}</VCardContext.Provider>

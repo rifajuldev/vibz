@@ -1,8 +1,23 @@
 import type { ResolvedProfileDesign } from '@/lib/resolvedProfileDesign'
 import { resolveProfileDesignFromData } from '@/lib/resolvedProfileDesign'
+import { getDisplaySettingsFromVCard, getHomeMediaUrls, isFieldVisible } from '@/lib/vcardDisplaySettings'
+import { normalizeGeneralPostList } from '@/lib/vcardGeneralPosts'
+import { normalizeServiceList } from '@/lib/vcardServices'
+import { createDefaultVCardSocial } from '@/lib/vcardSocial'
 import { DEFAULT_LIVE_AGENT_CARD, type LiveAgentCardData } from '@/profile-app/lib/liveAgentPrompt'
 import type { DesignSettingsState } from '@/redux/features/designSettings/designSettings.slice'
-import type { VCardData, VCardRecord } from '@/types/vcard'
+import type {
+  VCardData,
+  VCardEducationEntry,
+  VCardExperienceEntry,
+  VCardExtraField,
+  VCardGeneralPost,
+  VCardPersonal,
+  VCardRecord,
+  VCardServiceEntry,
+  VCardSocial,
+} from '@/types/vcard'
+import type { VCardDisplaySettings } from '@/types/vcardDisplaySettings'
 
 const DEFAULT_COVER = 'https://app.vbizme.com/storage/ecard/backgroundVideos/91/Untitled%20design-36.mp4'
 const DEFAULT_AVATAR = 'https://app.vbizme.com/storage/ecard/profileimages/91/mc%20vbizme.mp4'
@@ -16,6 +31,14 @@ export type VBizProfileAppProps = {
   avatarVideoUrl?: string
   liveAgentCardData?: LiveAgentCardData
   design?: ResolvedProfileDesign
+  personal?: VCardPersonal
+  social?: VCardSocial
+  extraFields?: VCardExtraField[]
+  education?: VCardEducationEntry[]
+  experience?: VCardExperienceEntry[]
+  services?: VCardServiceEntry[]
+  generalPosts?: VCardGeneralPost[]
+  displaySettings?: VCardDisplaySettings
   /** Public slug used to build the share URL. */
   shareSlug?: string
   /** Skip intro preloader and scope theme (editor preview). */
@@ -40,17 +63,55 @@ export function vCardDataToProfileProps(
   meta?: { id?: string; avatarImageUrl?: string }
 ): VBizProfileAppProps {
   const slug = data.slug.trim()
+  const display = getDisplaySettingsFromVCard(data)
+  const homeMedia = getHomeMediaUrls(display, data.personal)
+  const introUrl = homeMedia.introVideo || data.personal.explainerVideoUrl?.trim() || undefined
+  const coverUrl = homeMedia.bgMedia || DEFAULT_COVER
+  const avatarUrl =
+    homeMedia.profileMedia ||
+    (meta?.avatarImageUrl?.includes('.mp4') ? meta.avatarImageUrl : undefined) ||
+    DEFAULT_AVATAR
+
+  const showName = isFieldVisible(display, 'MyInfo section Name')
+  const showTagline =
+    isFieldVisible(display, 'MyInfo Profession') ||
+    isFieldVisible(display, 'MyInfo Designation') ||
+    isFieldVisible(display, 'MyInfo Company')
+
+  const ownerName = showName ? data.personal.fullName || 'Your Name' : ''
+  const taglineParts: string[] = []
+  if (showTagline) {
+    if (isFieldVisible(display, 'MyInfo Designation') && data.personal.designation) {
+      taglineParts.push(data.personal.designation)
+    }
+    if (isFieldVisible(display, 'MyInfo Profession') && data.personal.profession) {
+      taglineParts.push(data.personal.profession)
+    }
+    if (isFieldVisible(display, 'MyInfo Company') && data.personal.company) {
+      taglineParts.push(data.personal.company)
+    }
+  }
+  const tagline =
+    taglineParts.join(' · ') ||
+    (showTagline && data.personal.about?.trim()) ||
+    (showTagline ? 'Your digital introduction' : '')
+
   return {
-    explainerVideoUrl: data.personal.explainerVideoUrl,
+    explainerVideoUrl: introUrl,
     cardOwnerId: meta?.id ?? 'preview',
-    ownerName: data.personal.fullName || 'Your Name',
-    tagline:
-      data.personal.about?.trim() ||
-      [data.personal.designation, data.personal.company].filter(Boolean).join(' · ') ||
-      'Your digital introduction',
-    coverVideoUrl: DEFAULT_COVER,
-    avatarVideoUrl: meta?.avatarImageUrl?.includes('.mp4') ? meta.avatarImageUrl : DEFAULT_AVATAR,
+    ownerName,
+    tagline,
+    coverVideoUrl: coverUrl,
+    avatarVideoUrl: avatarUrl,
     design: resolveProfileDesignFromData(data, designSettings),
+    personal: data.personal,
+    social: data.social ?? createDefaultVCardSocial(),
+    extraFields: data.extraFields ?? [],
+    education: data.education ?? [],
+    experience: data.experience ?? [],
+    services: normalizeServiceList(data.services),
+    generalPosts: normalizeGeneralPostList(data.generalPosts),
+    displaySettings: display,
     shareSlug: slug || undefined,
     liveAgentCardData: {
       ownerName: data.personal.fullName || DEFAULT_LIVE_AGENT_CARD.ownerName,

@@ -120,6 +120,26 @@ const vcardsSlice = createSlice({
           fullName: 'Zakir Hosen',
           designation: 'FrontEnd Developer',
         },
+        services: [
+          {
+            id: 'svc_demo_1',
+            type: 'Web Development',
+            title: 'Custom Web Apps',
+            description: 'Full-stack builds from landing pages to dashboards, tailored to your brand.',
+            url: '',
+            featuredImage: '',
+            active: true,
+          },
+          {
+            id: 'svc_demo_2',
+            type: 'App Design',
+            title: 'UI/UX Design',
+            description: 'Mobile-first interfaces with polished motion and accessible layouts.',
+            url: '',
+            featuredImage: '',
+            active: true,
+          },
+        ],
       })
       state.byId[id] = {
         ...data,

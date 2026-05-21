@@ -1,7 +1,8 @@
 'use client'
 
+import { useVCard } from '@/lib/VCardContext'
+import type { VCardExtraField } from '@/types/vcard'
 import { ListPlus, Plus, Trash2 } from 'lucide-react'
-import { useState } from 'react'
 
 const inputClasses =
   'w-full bg-white dark:bg-[#0b0f19] border border-slate-200/80 dark:border-white/10 rounded-[16px] px-5 py-4 text-[13px] font-medium text-slate-900 dark:text-white transition-all outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-sm'
@@ -9,17 +10,22 @@ const selectClasses =
   'appearance-none bg-white dark:bg-[#0b0f19] border border-slate-200/80 dark:border-white/10 rounded-[16px] px-5 py-4 w-full text-[13px] font-medium text-slate-900 dark:text-white outline-none cursor-pointer focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all shadow-sm'
 
 export function Tab5ExtraFields() {
-  const [fields, setFields] = useState([{ id: 1, icon: 'Link', name: '', value: '' }])
+  const { vCardData, updateData } = useVCard()
+  const fields =
+    (vCardData.extraFields?.length ?? 0) > 0 ? vCardData.extraFields! : [{ id: '1', icon: 'Link', name: '', value: '' }]
+
+  const setFields = (next: VCardExtraField[]) => updateData('extraFields', next)
 
   const addField = () => {
-    setFields([...fields, { id: Date.now(), icon: 'Link', name: '', value: '' }])
+    setFields([...fields, { id: String(Date.now()), icon: 'Link', name: '', value: '' }])
   }
 
-  const removeField = (id: number) => {
-    setFields(fields.filter((field) => field.id !== id))
+  const removeField = (id: string) => {
+    const next = fields.filter((field) => field.id !== id)
+    setFields(next.length > 0 ? next : [{ id: String(Date.now()), icon: 'Link', name: '', value: '' }])
   }
 
-  const updateField = (id: number, key: 'icon' | 'name' | 'value', value: string) => {
+  const updateField = (id: string, key: 'icon' | 'name' | 'value', value: string) => {
     setFields(fields.map((field) => (field.id === id ? { ...field, [key]: value } : field)))
   }
 

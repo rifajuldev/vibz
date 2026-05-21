@@ -1,21 +1,17 @@
 'use client'
 
+import { cornerStyleToRadius } from '@/lib/resolvedProfileDesign'
 import { GoogleAuthProvider, signInWithPopup, type User } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
 import {
   ArrowRight,
   ArrowUpRight,
   Briefcase,
-  Building2,
   Download,
   Eye,
   Facebook,
-  Globe,
   Instagram,
   Linkedin,
-  Mail,
-  MapPin,
-  Phone,
   PlaySquare,
   QrCode,
   Share2,
@@ -24,11 +20,24 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { AnimatePresence, motion, useScroll, useTransform } from 'motion/react'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { auth, db, isFirebaseAvailable } from '../lib/firebase'
 import { handleFirestoreError, OperationType } from '../lib/firebaseUtils'
+import { useProfileDisplay } from '../lib/profileDisplayContext'
+import { buildExtraFieldContactItems, buildProfileContactItems, splitDisplayName } from '../lib/profileHomeData'
 import { CustomVideoPlayer } from './CustomVideoPlayer'
 import { SectionContainer } from './SectionContainer'
+
+const DEFAULT_COVER = 'https://app.vbizme.com/storage/ecard/backgroundVideos/91/Untitled%20design-36.mp4'
+const DEFAULT_AVATAR = 'https://app.vbizme.com/storage/ecard/profileimages/91/mc%20vbizme.mp4'
+
+const V1_SOCIAL_GRID = [
+  { label: 'Twitter', icon: Twitter },
+  { label: 'FaceBook', icon: Facebook },
+  { label: 'Instagram', icon: Instagram },
+  { label: 'LinkedIn', icon: Linkedin },
+  { label: 'Youtube', icon: PlaySquare },
+] as const
 
 const TypewriterText = ({ text, delay = 0, speed = 100 }: { text: string; delay?: number; speed?: number }) => {
   const [displayedText, setDisplayedText] = useState('')
@@ -71,6 +80,7 @@ type ContactDetailItemData = {
   detail: string
   isLink?: boolean
   href?: string
+  style?: { textColor?: string; backgroundColor?: string; iconColor?: string }
 }
 
 const ContactDetailItem: React.FC<{ item: ContactDetailItemData }> = ({ item }) => {
@@ -84,6 +94,10 @@ const ContactDetailItem: React.FC<{ item: ContactDetailItemData }> = ({ item }) 
     setTimeout(() => setIsClicked(false), 2000)
   }
 
+  const textStyle = item.style?.textColor ? { color: item.style.textColor } : undefined
+  const bgStyle = item.style?.backgroundColor ? { backgroundColor: item.style.backgroundColor } : undefined
+  const iconStyle = item.style?.iconColor ? { color: item.style.iconColor } : undefined
+
   return (
     <motion.div
       variants={{
@@ -93,6 +107,7 @@ const ContactDetailItem: React.FC<{ item: ContactDetailItemData }> = ({ item }) 
       onClick={handleClick}
       whileTap={{ scale: 0.98 }}
       className={`group relative flex flex-col overflow-hidden rounded-3xl border border-black/5 bg-linear-to-br from-black/3 to-black/1 p-4 backdrop-blur-[30px] transition-all duration-700 hover:border-[#dcc969]/40 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.1)] sm:p-5 lg:rounded-4xl dark:border-white/10 dark:from-white/3 dark:to-white/1 dark:hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)] ${!item.isLink ? 'cursor-pointer' : ''}`}
+      style={bgStyle}
     >
       {/* Subtle Shimmer & Glow Overlay */}
       <div className="absolute inset-0 bg-linear-to-tr from-[#dcc969]/5 via-transparent to-black/1 opacity-0 transition-opacity duration-700 group-hover:opacity-100 dark:to-white/2" />
@@ -113,7 +128,10 @@ const ContactDetailItem: React.FC<{ item: ContactDetailItemData }> = ({ item }) 
 
       <div className="relative z-10 flex h-full flex-col">
         <div className="mb-5 flex items-center justify-between">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/5 bg-gray-50 text-gray-500 shadow-inner transition-all duration-500 group-hover:rotate-10 group-hover:border-[#dcc969] group-hover:bg-[#dcc969] group-hover:text-black lg:h-11 lg:w-11 dark:border-white/10 dark:bg-white/5 dark:text-white/50">
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-black/5 bg-gray-50 text-gray-500 shadow-inner transition-all duration-500 group-hover:rotate-10 group-hover:border-[#dcc969] group-hover:bg-[#dcc969] group-hover:text-black lg:h-11 lg:w-11 dark:border-white/10 dark:bg-white/5 dark:text-white/50"
+            style={iconStyle}
+          >
             <item.icon size={18} strokeWidth={1.5} className="group-hover:stroke-2" />
           </div>
           <div className="rounded-md border border-black/5 bg-gray-50 px-2 py-1 text-[7px] font-black tracking-[0.3em] text-[#dcc969]/40 uppercase transition-colors group-hover:text-[#dcc969] lg:text-[8px] dark:border-white/5 dark:bg-white/5">
@@ -122,7 +140,10 @@ const ContactDetailItem: React.FC<{ item: ContactDetailItemData }> = ({ item }) 
         </div>
 
         <div className="mt-auto">
-          <span className="mb-1.5 block text-[7px] font-black tracking-[0.25em] text-gray-500 uppercase opacity-80 transition-opacity group-hover:opacity-100 lg:text-[8px] dark:text-white/20">
+          <span
+            className="mb-1.5 block text-[7px] font-black tracking-[0.25em] text-gray-500 uppercase opacity-80 transition-opacity group-hover:opacity-100 lg:text-[8px] dark:text-white/20"
+            style={textStyle}
+          >
             {item.label}
           </span>
           {item.isLink ? (
@@ -130,6 +151,7 @@ const ContactDetailItem: React.FC<{ item: ContactDetailItemData }> = ({ item }) 
               href={item.href}
               onClick={(e) => e.stopPropagation()}
               className="group/link flex items-center gap-1 truncate text-xs font-semibold text-gray-900 transition-all hover:text-[#dcc969] lg:text-[14px] dark:text-white/90"
+              style={textStyle}
             >
               {item.value}
               <ArrowUpRight
@@ -138,7 +160,10 @@ const ContactDetailItem: React.FC<{ item: ContactDetailItemData }> = ({ item }) 
               />
             </a>
           ) : (
-            <span className="block truncate text-xs font-semibold tracking-wide text-gray-900 lg:text-[14px] dark:text-white/90">
+            <span
+              className="block truncate text-xs font-semibold tracking-wide text-gray-900 lg:text-[14px] dark:text-white/90"
+              style={textStyle}
+            >
               {item.value}
             </span>
           )}
@@ -183,6 +208,31 @@ type PublishUser = Pick<User, 'uid'> & {
 }
 
 export const HomeSection = () => {
+  const { personal, isVisible, field, pageColors, homeMedia, design, socialHref, extraFields } = useProfileDisplay()
+  const showSaveContact = isVisible('Save Contact')
+  const showShare = isVisible('Share Btn')
+  const nameStyle = field('MyInfo section Name')
+  const accent = design?.accentColor ?? '#dcc969'
+  const cornerRadius = design ? cornerStyleToRadius(design.cornerStyle) : '16px'
+  const coverSrc = homeMedia.bgMedia || DEFAULT_COVER
+  const profileSrc = homeMedia.profileMedia || DEFAULT_AVATAR
+  const { first: nameFirst, rest: nameRest } = splitDisplayName(
+    isVisible('MyInfo section Name') ? personal.fullName : ''
+  )
+  const professionLine =
+    (isVisible('MyInfo Designation') && personal.designation) ||
+    (isVisible('MyInfo Profession') && personal.profession) ||
+    (isVisible('MyInfo Company') && personal.company) ||
+    ''
+
+  const contactItems = useMemo(() => {
+    const base = buildProfileContactItems(personal, isVisible, field)
+    const extra = buildExtraFieldContactItems(extraFields)
+    return [...base, ...extra]
+  }, [personal, isVisible, field, extraFields])
+
+  const visibleSocials = V1_SOCIAL_GRID.filter((s) => isVisible(s.label) && Boolean(socialHref(s.label)))
+
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -259,6 +309,7 @@ export const HomeSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="group relative col-span-1 flex min-h-[450px] flex-col justify-end overflow-hidden rounded-4xl border border-black/5 bg-white p-5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] ring-1 ring-black/5 sm:min-h-[500px] sm:p-10 lg:col-span-8 lg:min-h-[580px] lg:rounded-[3rem] dark:border-white/5 dark:bg-gray-900 dark:shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] dark:ring-white/5"
+            style={pageColors.pageBanner ? { backgroundColor: pageColors.pageBanner } : undefined}
           >
             {/* Ambient Glow */}
             <div className="pointer-events-none absolute -inset-1 -z-10 bg-linear-to-br from-[#dcc969]/15 via-transparent to-[#dcc969]/5 opacity-0 blur-3xl transition-opacity duration-1000 group-hover:opacity-100" />
@@ -275,10 +326,7 @@ export const HomeSection = () => {
                 playsInline
                 className="absolute inset-0 h-full w-full scale-105 object-cover opacity-30 mix-blend-multiply transition-all duration-[10s] group-hover:scale-110 group-hover:saturate-125 dark:opacity-60 dark:mix-blend-screen"
               >
-                <source
-                  src="https://app.vbizme.com/storage/ecard/backgroundVideos/91/Untitled%20design-36.mp4"
-                  type="video/mp4"
-                />
+                <source src={coverSrc} type="video/mp4" />
               </video>
               <div className="absolute inset-0 bg-linear-to-t from-white via-white/40 to-transparent dark:from-gray-950 dark:via-gray-950/40" />
               <div className="absolute inset-0 bg-linear-to-r from-white/90 via-transparent to-transparent dark:from-gray-950/90" />
@@ -299,7 +347,7 @@ export const HomeSection = () => {
                   className="group/profile relative w-fit"
                 >
                   <CustomVideoPlayer
-                    src="https://app.vbizme.com/storage/ecard/profileimages/91/mc%20vbizme.mp4"
+                    src={profileSrc}
                     className="mb-4 h-20 w-20 rounded-2xl border border-black/5 bg-white object-cover shadow-2xl backdrop-blur-md sm:mb-6 sm:h-32 sm:w-32 lg:h-36 lg:w-36 dark:border-white/20 dark:bg-gray-500"
                   />
                   {/* Verified Badge */}
@@ -315,14 +363,41 @@ export const HomeSection = () => {
                     Verified Profile
                   </span>
                 </div>
-                <h1 className="font-heading mb-2 text-3xl leading-[1.05] font-bold tracking-tight text-gray-900 drop-shadow-xl sm:mb-3 sm:text-5xl lg:text-7xl dark:text-white">
-                  Michaelangelo
-                  <br />
-                  <span className="text-[#dcc969] drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">Casanova</span>
-                </h1>
-                <p className="flex w-fit items-center rounded-full border border-black/5 bg-gray-50 px-3 py-1.5 text-[9px] font-bold tracking-[0.25em] text-[#dcc969] uppercase drop-shadow-md backdrop-blur-xl sm:px-4 sm:py-2 sm:text-xs dark:border-white/10 dark:bg-white/5">
-                  <TypewriterText text="CEO & Founder" delay={500} speed={120} />
-                </p>
+                {isVisible('MyInfo section Name') && personal.fullName ? (
+                  <h1
+                    className="font-heading mb-2 text-3xl leading-[1.05] font-bold tracking-tight text-gray-900 drop-shadow-xl sm:mb-3 sm:text-5xl lg:text-7xl dark:text-white"
+                    style={nameStyle.textColor ? { color: nameStyle.textColor } : undefined}
+                  >
+                    {nameFirst}
+                    {nameRest ? (
+                      <>
+                        <br />
+                        <span
+                          className="text-[#dcc969] drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+                          style={nameStyle.textColor ? { color: nameStyle.textColor } : undefined}
+                        >
+                          {nameRest}
+                        </span>
+                      </>
+                    ) : null}
+                  </h1>
+                ) : (
+                  <h1 className="font-heading mb-2 text-3xl leading-[1.05] font-bold tracking-tight text-gray-900 drop-shadow-xl sm:mb-3 sm:text-5xl lg:text-7xl dark:text-white">
+                    Michaelangelo
+                    <br />
+                    <span className="text-[#dcc969] drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">Casanova</span>
+                  </h1>
+                )}
+                {professionLine ? (
+                  <p
+                    className="flex w-fit items-center rounded-full border border-black/5 bg-gray-50 px-3 py-1.5 text-[9px] font-bold tracking-[0.25em] text-[#dcc969] uppercase drop-shadow-md backdrop-blur-xl sm:px-4 sm:py-2 sm:text-xs dark:border-white/10 dark:bg-white/5"
+                    style={
+                      field('MyInfo Profession').textColor ? { color: field('MyInfo Profession').textColor } : undefined
+                    }
+                  >
+                    <TypewriterText text={professionLine} delay={500} speed={120} />
+                  </p>
+                ) : null}
               </div>
 
               {/* Action Floating Buttons */}
@@ -331,38 +406,38 @@ export const HomeSection = () => {
                   whileHover={{
                     scale: 1.15,
                     rotate: 15,
-                    backgroundColor: 'rgba(234, 179, 8, 1)',
+                    backgroundColor: accent,
                     color: 'rgba(0, 0, 0, 1)',
-                    boxShadow: '0 0 30px rgba(234, 179, 8, 0.4)',
+                    boxShadow: `0 0 30px color-mix(in srgb, ${accent} 40%, transparent)`,
                   }}
                   whileTap={{ scale: 0.9 }}
                   className="group/btn relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-black/5 bg-gray-50 text-gray-500 backdrop-blur-2xl transition-all duration-500 lg:h-14 lg:w-14 dark:border-white/20 dark:bg-white/5 dark:text-white/90"
                 >
                   <div className="absolute inset-0 bg-linear-to-tr from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover/btn:opacity-100 dark:from-white/20" />
                   <Eye size={22} className="relative z-10 transition-transform group-hover/btn:scale-110" />
-                  {/* Tooltip Indication */}
                   <div className="pointer-events-none absolute right-full mr-4 hidden translate-x-4 rounded-lg border border-white/10 bg-black/80 px-3 py-1.5 text-[10px] font-black tracking-widest whitespace-nowrap text-[#dcc969] uppercase opacity-0 backdrop-blur-md transition-all group-hover/btn:translate-x-0 group-hover/btn:opacity-100 lg:block dark:border-black/5 dark:bg-white/90">
                     Preview Card
                   </div>
                 </motion.button>
-                <motion.button
-                  whileHover={{
-                    scale: 1.15,
-                    rotate: -15,
-                    backgroundColor: 'rgba(234, 179, 8, 1)',
-                    color: 'rgba(0, 0, 0, 1)',
-                    boxShadow: '0 0 30px rgba(234, 179, 8, 0.4)',
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                  className="group/btn relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-black/5 bg-gray-50 text-gray-500 backdrop-blur-2xl transition-all duration-500 lg:h-14 lg:w-14 dark:border-white/20 dark:bg-white/5 dark:text-white/90"
-                >
-                  <div className="absolute inset-0 bg-linear-to-tr from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover/btn:opacity-100 dark:from-white/20" />
-                  <Share2 size={22} className="relative z-10 transition-transform group-hover/btn:scale-110" />
-                  {/* Tooltip Indication */}
-                  <div className="pointer-events-none absolute right-full mr-4 hidden translate-x-4 rounded-lg border border-white/10 bg-black/80 px-3 py-1.5 text-[10px] font-black tracking-widest whitespace-nowrap text-[#dcc969] uppercase opacity-0 backdrop-blur-md transition-all group-hover/btn:translate-x-0 group-hover/btn:opacity-100 lg:block dark:border-black/5 dark:bg-white/90">
-                    Share Business
-                  </div>
-                </motion.button>
+                {showShare && (
+                  <motion.button
+                    whileHover={{
+                      scale: 1.15,
+                      rotate: -15,
+                      backgroundColor: accent,
+                      color: 'rgba(0, 0, 0, 1)',
+                      boxShadow: `0 0 30px color-mix(in srgb, ${accent} 40%, transparent)`,
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                    className="group/btn relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-black/5 bg-gray-50 text-gray-500 backdrop-blur-2xl transition-all duration-500 lg:h-14 lg:w-14 dark:border-white/20 dark:bg-white/5 dark:text-white/90"
+                  >
+                    <div className="absolute inset-0 bg-linear-to-tr from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover/btn:opacity-100 dark:from-white/20" />
+                    <Share2 size={22} className="relative z-10 transition-transform group-hover/btn:scale-110" />
+                    <div className="pointer-events-none absolute right-full mr-4 hidden translate-x-4 rounded-lg border border-white/10 bg-black/80 px-3 py-1.5 text-[10px] font-black tracking-widest whitespace-nowrap text-[#dcc969] uppercase opacity-0 backdrop-blur-md transition-all group-hover/btn:translate-x-0 group-hover/btn:opacity-100 lg:block dark:border-black/5 dark:bg-white/90">
+                      Share Business
+                    </div>
+                  </motion.button>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -374,24 +449,30 @@ export const HomeSection = () => {
               <div className="absolute inset-0 bg-linear-to-tr from-[#dcc969]/10 via-transparent to-black/1 opacity-0 transition-opacity duration-700 group-hover:opacity-100 dark:to-white/2" />
 
               <div className="relative z-10 flex flex-col gap-4">
-                <motion.button
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent('open-save-contact-flow'))
-                  }}
-                  whileHover={{
-                    scale: 1.02,
-                    backgroundColor: 'rgba(234, 179, 8, 1)',
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  className="group/btn flex w-full items-center justify-between rounded-2xl bg-linear-to-r from-[#dcc969] to-[#c2b05c] px-6 py-4.5 text-[10px] font-black tracking-[0.2em] text-black uppercase shadow-[0_20px_40px_-10px_rgba(234,179,8,0.3)] transition-all hover:from-[#ebd675] hover:to-[#dcc969] hover:shadow-[0_25px_50px_-10px_rgba(234,179,8,0.6)] sm:text-xs dark:shadow-[0_20px_40px_-10px_rgba(234,179,8,0.4)]"
-                >
-                  <span className="flex items-center gap-3">
-                    <Download size={18} strokeWidth={2.5} /> Add to Contacts
-                  </span>
-                  <div className="rounded-lg bg-gray-50 p-1.5">
-                    <ArrowRight size={18} className="transition-transform group-hover/btn:translate-x-1" />
-                  </div>
-                </motion.button>
+                {showSaveContact && (
+                  <motion.button
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('open-save-contact-flow'))
+                    }}
+                    whileHover={{
+                      scale: 1.02,
+                      backgroundColor: accent,
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    className="group/btn flex w-full items-center justify-between rounded-2xl bg-linear-to-r from-[#dcc969] to-[#c2b05c] px-6 py-4.5 text-[10px] font-black tracking-[0.2em] text-black uppercase shadow-[0_20px_40px_-10px_rgba(234,179,8,0.3)] transition-all hover:from-[#ebd675] hover:to-[#dcc969] hover:shadow-[0_25px_50px_-10px_rgba(234,179,8,0.6)] sm:text-xs dark:shadow-[0_20px_40px_-10px_rgba(234,179,8,0.4)]"
+                    style={{
+                      borderRadius: cornerRadius,
+                      background: `linear-gradient(to right, ${accent}, color-mix(in srgb, ${accent} 80%, black))`,
+                    }}
+                  >
+                    <span className="flex items-center gap-3">
+                      <Download size={18} strokeWidth={2.5} /> Add to Contacts
+                    </span>
+                    <div className="rounded-lg bg-gray-50 p-1.5">
+                      <ArrowRight size={18} className="transition-transform group-hover/btn:translate-x-1" />
+                    </div>
+                  </motion.button>
+                )}
 
                 <div className="grid grid-cols-2 gap-3">
                   <motion.button
@@ -423,44 +504,40 @@ export const HomeSection = () => {
             </div>
 
             {/* Social Links Card */}
-            <div className="group relative flex flex-1 flex-col justify-center gap-6 overflow-hidden rounded-3xl border border-black/5 bg-white p-8 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/50">
-              <div className="absolute -inset-3 bg-linear-to-b from-[#dcc969]/5 to-transparent opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
-              <h3 className="text-xs font-semibold tracking-widest text-gray-500 uppercase dark:text-white/60">
-                Connect
-              </h3>
-              <div className="grid grid-cols-5 gap-3">
-                {[
-                  {
-                    icon: Twitter,
-                    brand: 'hover:bg-[#1da1f2] hover:border-[#1da1f2]',
-                  },
-                  {
-                    icon: Facebook,
-                    brand: 'hover:bg-[#1877f2] hover:border-[#1877f2]',
-                  },
-                  {
-                    icon: Instagram,
-                    brand: 'hover:bg-[#e1306c] hover:border-[#e1306c]',
-                  },
-                  {
-                    icon: Linkedin,
-                    brand: 'hover:bg-[#0a66c2] hover:border-[#0a66c2]',
-                  },
-                  {
-                    icon: PlaySquare,
-                    brand: 'hover:bg-[#ff0000] hover:border-[#ff0000]',
-                  },
-                ].map((item, idx) => (
-                  <a
-                    key={idx}
-                    href="#"
-                    className={`flex aspect-square items-center justify-center rounded-full border border-black/5 bg-gray-50 text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-white/80 ${item.brand} shadow-xl transition-all duration-300 hover:-translate-y-1 hover:text-gray-900 dark:text-white`}
-                  >
-                    <item.icon size={18} fill="currentColor" className="opacity-90 transition-none" />
-                  </a>
-                ))}
+            {visibleSocials.length > 0 && (
+              <div className="group relative flex flex-1 flex-col justify-center gap-6 overflow-hidden rounded-3xl border border-black/5 bg-white p-8 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-gray-900/50">
+                <div className="absolute -inset-3 bg-linear-to-b from-[#dcc969]/5 to-transparent opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
+                <h3 className="text-xs font-semibold tracking-widest text-gray-500 uppercase dark:text-white/60">
+                  Connect
+                </h3>
+                <div className="grid grid-cols-5 gap-3">
+                  {visibleSocials.map((item, idx) => {
+                    const socialStyle = field(item.label)
+                    const iconColor = socialStyle.iconColor ?? socialStyle.textColor
+                    const socialInlineStyle =
+                      iconColor || socialStyle.backgroundColor
+                        ? {
+                            ...(iconColor ? { color: iconColor } : {}),
+                            ...(socialStyle.backgroundColor ? { backgroundColor: socialStyle.backgroundColor } : {}),
+                          }
+                        : undefined
+                    const href = socialHref(item.label)
+                    return (
+                      <a
+                        key={idx}
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex aspect-square items-center justify-center rounded-full border border-black/5 bg-gray-50 text-gray-500 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:text-white"
+                        style={socialInlineStyle}
+                      >
+                        <item.icon size={18} fill="currentColor" className="opacity-90 transition-none" />
+                      </a>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Details Grid (Refined Bento Design) */}
@@ -483,49 +560,13 @@ export const HomeSection = () => {
             }}
             className="col-span-1 lg:col-span-12"
           >
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 lg:gap-5">
-              {[
-                {
-                  icon: Briefcase,
-                  label: 'Profession',
-                  value: 'CEO',
-                  detail: 'Growth',
-                },
-                {
-                  icon: Mail,
-                  label: 'Email',
-                  value: 'mcasanova',
-                  isLink: true,
-                  href: 'mailto:mcasanova@vbizme.com',
-                  detail: 'Contact',
-                },
-                {
-                  icon: Phone,
-                  label: 'Phone',
-                  value: '860-770',
-                  isLink: true,
-                  href: 'tel:8607709893',
-                  detail: 'Direct',
-                },
-                {
-                  icon: Building2,
-                  label: 'Company',
-                  value: 'vBiz Me',
-                  detail: 'Innovation',
-                },
-                {
-                  icon: Globe,
-                  label: 'Website',
-                  value: 'vbizme',
-                  isLink: true,
-                  href: 'https://www.vbizme.com',
-                  detail: 'Digital',
-                },
-                { icon: MapPin, label: 'Address', value: 'CT', detail: 'HQ' },
-              ].map((item, idx) => (
-                <ContactDetailItem key={idx} item={item} />
-              ))}
-            </div>
+            {contactItems.length > 0 && (
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 lg:gap-5">
+                {contactItems.map((item, idx) => (
+                  <ContactDetailItem key={idx} item={item} />
+                ))}
+              </div>
+            )}
           </motion.div>
         </div>
       </div>

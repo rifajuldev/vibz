@@ -1,5 +1,7 @@
+import { ALL_DISPLAY_FIELD_KEYS } from '@/lib/vcardDisplaySettings'
 import type { DesignSettingsState, ProfileTemplateId } from '@/redux/features/designSettings/designSettings.slice'
 import type { VCardAppearance, VCardData, VCardTheme } from '@/types/vcard'
+import { createDefaultDisplaySettings } from '@/types/vcardDisplaySettings'
 
 export function appearanceFromDesignSettings(design: DesignSettingsState): VCardAppearance {
   return {
@@ -20,10 +22,13 @@ export function themeFromDesignSettings(design: DesignSettingsState): VCardTheme
 }
 
 /** Snapshot account profile Template + Appearance for a new vCard draft. */
-export function designSettingsToVCardDefaults(design: DesignSettingsState): Pick<VCardData, 'theme' | 'appearance'> {
+export function designSettingsToVCardDefaults(
+  design: DesignSettingsState
+): Pick<VCardData, 'theme' | 'appearance' | 'displaySettings'> {
   return {
     theme: themeFromDesignSettings(design),
     appearance: appearanceFromDesignSettings(design),
+    displaySettings: createDefaultDisplaySettings([...ALL_DISPLAY_FIELD_KEYS]),
   }
 }
 

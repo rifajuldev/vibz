@@ -1,5 +1,6 @@
 'use client'
 
+import { useVCardDisplayEditor } from '@/lib/useVCardDisplayEditor'
 import {
   Check,
   CreditCard,
@@ -405,14 +406,33 @@ function CanvaIntegrationModal({
   )
 }
 
+const FIELD_INTRO = 'Intro vCard Video'
+const FIELD_INTRO_YT = 'Intro YouTube vCard Video Link'
+const FIELD_MUSIC = 'Background Music'
+const FIELD_MUSIC_YT = 'YouTube Background Music Link'
+const FIELD_BG = 'Background Video/Image'
+
+function mediaLabel(url: string, fallback: string) {
+  if (!url) return fallback
+  if (url.startsWith('blob:')) return 'Uploaded file'
+  try {
+    return new URL(url).pathname.split('/').pop() || fallback
+  } catch {
+    return fallback
+  }
+}
+
 export function Tab4HomeMedia() {
-  const [introVideo, setIntroVideo] = useState<{ name: string; url: string } | null>(null)
-  const [bgMusic, setBgMusic] = useState<{ name: string; url: string } | null>(null)
-  const [bgMedia, setBgMedia] = useState<{ name: string; url: string } | null>(null)
-  const [introYoutubeUrl, setIntroYoutubeUrl] = useState('')
+  const { getCustomValue, setCustomValue } = useVCardDisplayEditor()
+
+  const introVideoUrl = getCustomValue(FIELD_INTRO)
+  const bgMusicUrl = getCustomValue(FIELD_MUSIC)
+  const bgMediaUrl = getCustomValue(FIELD_BG)
+  const introYoutubeUrl = getCustomValue(FIELD_INTRO_YT)
+  const musicYoutubeUrl = getCustomValue(FIELD_MUSIC_YT)
+
   const [introStart, setIntroStart] = useState('0')
   const [introEnd, setIntroEnd] = useState('0')
-  const [musicYoutubeUrl, setMusicYoutubeUrl] = useState('')
   const [musicStart, setMusicStart] = useState('0')
   const [musicEnd, setMusicEnd] = useState('0')
 
@@ -424,18 +444,14 @@ export function Tab4HomeMedia() {
   const musicRef = useRef<HTMLInputElement>(null)
   const mediaRef = useRef<HTMLInputElement>(null)
 
-  const handleFile = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setter: React.Dispatch<React.SetStateAction<{ name: string; url: string } | null>>,
-    maxSizeMB?: number
-  ) => {
+  const handleFileToField = (e: React.ChangeEvent<HTMLInputElement>, fieldKey: string, maxSizeMB?: number) => {
     const file = e.target.files?.[0]
     if (file) {
       if (maxSizeMB && file.size > maxSizeMB * 1024 * 1024) {
         alert(`File size exceeds ${maxSizeMB}MB`)
         return
       }
-      setter({ name: file.name, url: URL.createObjectURL(file) })
+      setCustomValue(fieldKey, URL.createObjectURL(file))
     }
   }
 
@@ -469,7 +485,7 @@ export function Tab4HomeMedia() {
                     className="hidden"
                     ref={introRef}
                     accept="video/*"
-                    onChange={(e) => handleFile(e, setIntroVideo, 15)}
+                    onChange={(e) => handleFileToField(e, FIELD_INTRO, 15)}
                   />
                   <button
                     onClick={() => introRef.current?.click()}
@@ -478,7 +494,7 @@ export function Tab4HomeMedia() {
                     <Upload className="h-4 w-4" /> Upload
                   </button>
                   <span className="flex w-full items-center truncate px-5 py-4 text-[13px] font-medium text-slate-500 dark:text-slate-400">
-                    {introVideo ? introVideo.name : 'Select video'}
+                    {introVideoUrl ? mediaLabel(introVideoUrl, 'Select video') : 'Select video'}
                   </span>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-3 sm:flex-nowrap">
@@ -515,7 +531,7 @@ export function Tab4HomeMedia() {
                 <input
                   type="text"
                   value={introYoutubeUrl}
-                  onChange={(e) => setIntroYoutubeUrl(e.target.value)}
+                  onChange={(e) => setCustomValue(FIELD_INTRO_YT, e.target.value)}
                   placeholder="https://youtube.com/..."
                   className={inputClasses}
                 />
@@ -562,7 +578,7 @@ export function Tab4HomeMedia() {
                   className="hidden"
                   ref={musicRef}
                   accept="audio/*"
-                  onChange={(e) => handleFile(e, setBgMusic)}
+                  onChange={(e) => handleFileToField(e, FIELD_MUSIC)}
                 />
                 <button
                   onClick={() => musicRef.current?.click()}
@@ -571,7 +587,7 @@ export function Tab4HomeMedia() {
                   <Upload className="h-4 w-4" /> Browse
                 </button>
                 <span className="flex w-full items-center truncate px-5 py-4 text-[13px] font-medium text-slate-500 dark:text-slate-400">
-                  {bgMusic ? bgMusic.name : 'Select audio file'}
+                  {bgMusicUrl ? mediaLabel(bgMusicUrl, 'Select audio file') : 'Select audio file'}
                 </span>
               </div>
             </div>
@@ -587,7 +603,7 @@ export function Tab4HomeMedia() {
                 <input
                   type="text"
                   value={musicYoutubeUrl}
-                  onChange={(e) => setMusicYoutubeUrl(e.target.value)}
+                  onChange={(e) => setCustomValue(FIELD_MUSIC_YT, e.target.value)}
                   placeholder="https://youtube.com/..."
                   className={inputClasses}
                 />
@@ -634,7 +650,7 @@ export function Tab4HomeMedia() {
                   className="hidden"
                   ref={mediaRef}
                   accept="image/*,video/*"
-                  onChange={(e) => handleFile(e, setBgMedia)}
+                  onChange={(e) => handleFileToField(e, FIELD_BG)}
                 />
                 <button
                   onClick={() => mediaRef.current?.click()}
@@ -643,7 +659,7 @@ export function Tab4HomeMedia() {
                   <Upload className="h-4 w-4" /> Browse
                 </button>
                 <span className="flex w-full items-center truncate px-5 py-4 text-[13px] font-medium text-slate-500 dark:text-slate-400">
-                  {bgMedia ? bgMedia.name : 'Select media file'}
+                  {bgMediaUrl ? mediaLabel(bgMediaUrl, 'Select media file') : 'Select media file'}
                 </span>
               </div>
             </div>
@@ -655,7 +671,7 @@ export function Tab4HomeMedia() {
         <GalleryModal
           onClose={() => setShowGalleryModal(false)}
           onSelect={(v) => {
-            setIntroVideo({ name: v.title, url: v.img })
+            setCustomValue(FIELD_INTRO, v.img)
             setShowGalleryModal(false)
           }}
         />
@@ -664,7 +680,10 @@ export function Tab4HomeMedia() {
       {showCustomModal && <CustomOrderModal onClose={() => setShowCustomModal(false)} />}
 
       {showCanvaModal && (
-        <CanvaIntegrationModal onClose={() => setShowCanvaModal(false)} onSelectVideo={setIntroVideo} />
+        <CanvaIntegrationModal
+          onClose={() => setShowCanvaModal(false)}
+          onSelectVideo={(v) => setCustomValue(FIELD_INTRO, v.url)}
+        />
       )}
     </div>
   )

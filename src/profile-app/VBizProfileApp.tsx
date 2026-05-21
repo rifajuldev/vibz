@@ -12,15 +12,18 @@ import {
   designToCssVars,
   resolveProfileDesign,
 } from '@/lib/resolvedProfileDesign'
+import { getNavTabBackgroundColor, TAB_ID_TO_NAV_LABEL } from '@/lib/vcardDisplaySettings'
 import {
   Award,
   Bell,
+  Briefcase,
   Calendar,
   Camera,
   CheckCircle2,
   Download,
   FileEdit,
   Film,
+  GraduationCap,
   Home,
   Lightbulb,
   Moon,
@@ -35,11 +38,14 @@ import {
   Wrench,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AboutSection } from './components/AboutSection'
 import { CursorTrail } from './components/CursorTrail'
 import { DoneModal } from './components/DoneModal'
+import { EducationSection } from './components/EducationSection'
+import { ExperienceSection } from './components/ExperienceSection'
 import { FAQSection } from './components/FAQSection'
+import { GeneralPostsSection } from './components/GeneralPostsSection'
 import { HomeSectionV2 as HomeSection } from './components/HomeSectionV2'
 import { ImageGallerySection } from './components/ImageGallerySection'
 import { LiveAgent } from './components/LiveAgent'
@@ -53,7 +59,6 @@ import { SaveToWalletModal } from './components/SaveToWalletModal'
 import { ServicesSection } from './components/ServicesSection'
 import {
   AdditionalServicesSection,
-  BlogSection,
   CalendarSection,
   CertificatesSection,
   ExplainerSection,
@@ -63,6 +68,7 @@ import {
 import { VideoLinksSection } from './components/VideoLinksSection'
 import { useDragScroll } from './hooks/useDragScroll'
 import { hasNotificationChoice } from './lib/notificationPrefs'
+import { useProfileDisplay } from './lib/profileDisplayContext'
 import { shareProfile } from './lib/shareProfile'
 import type { VBizProfileAppProps } from './profilePublicProps'
 import { DEMO_PROFILE_PROPS } from './profilePublicProps'
@@ -98,6 +104,8 @@ const NAV_CATEGORIES = [
     items: [
       { id: 'reviews', icon: Star, label: 'Client Reviews' },
       { id: 'certificates', icon: Award, label: 'Certifications' },
+      { id: 'education', icon: GraduationCap, label: 'Education' },
+      { id: 'work', icon: Briefcase, label: 'Experience' },
     ],
   },
   {
@@ -111,6 +119,14 @@ const NAV_CATEGORIES = [
 ]
 
 const ALL_TABS = NAV_CATEGORIES.flatMap((c) => c.items)
+
+function filterTabsByDisplay<T extends { id: string }>(tabs: T[], isVisible: (key: string) => boolean): T[] {
+  return tabs.filter((tab) => {
+    const navLabel = TAB_ID_TO_NAV_LABEL[tab.id]
+    if (!navLabel) return true
+    return isVisible(navLabel)
+  })
+}
 
 export type { VBizProfileAppProps } from './profilePublicProps'
 
@@ -128,6 +144,13 @@ export function VBizProfileApp({
   previewTheme,
   onPreviewThemeChange,
 }: VBizProfileAppProps) {
+  const { isVisible, pageColors, field, settings: displaySettings } = useProfileDisplay()
+  const visibleTabs = useMemo(() => filterTabsByDisplay(ALL_TABS, isVisible), [isVisible])
+  const showSaveContact = isVisible('Save Contact')
+  const showShareBtn = isVisible('Share Btn')
+  const headerTextColor = field('vCard Header Color').textColor || field('MyInfo section Name').textColor || undefined
+  const navBgColor = pageColors.navBg
+
   const design: ResolvedProfileDesign =
     designProp ??
     resolveProfileDesign(
@@ -145,6 +168,12 @@ export function VBizProfileApp({
     )
 
   const [activeTab, setActiveTab] = useState('home')
+
+  const effectiveActiveTab = useMemo(() => {
+    if (visibleTabs.length === 0) return activeTab
+    return visibleTabs.some((t) => t.id === activeTab) ? activeTab : visibleTabs[0].id
+  }, [visibleTabs, activeTab])
+
   const [internalTheme, setInternalTheme] = useState<'light' | 'dark'>(() => {
     if (embedded) return design.darkMode ? 'dark' : 'light'
     return (localStorage.getItem('theme') as 'light' | 'dark') || 'dark'
@@ -240,7 +269,7 @@ export function VBizProfileApp({
   }, [])
 
   const renderContent = () => {
-    switch (activeTab) {
+    switch (effectiveActiveTab) {
       case 'home':
         return <HomeSection key="home" />
       case 'about':
@@ -257,6 +286,10 @@ export function VBizProfileApp({
         return <PublicCardsSection key="public-cards" />
       case 'certificates':
         return <CertificatesSection key="certificates" />
+      case 'education':
+        return <EducationSection key="education" />
+      case 'work':
+        return <ExperienceSection key="work" />
       case 'reviews':
         return <ReviewsSection key="reviews" />
       case 'calendar':
@@ -268,7 +301,7 @@ export function VBizProfileApp({
       case 'explainer':
         return <ExplainerSection key="explainer" />
       case 'blog':
-        return <BlogSection key="blog" />
+        return <GeneralPostsSection key="blog" />
       default:
         return <HomeSection key="home" />
     }
@@ -277,7 +310,10 @@ export function VBizProfileApp({
   const isHeroLayout = design.layoutStyle === 'hero'
   const cornerRadius = cornerStyleToRadius(design.cornerStyle)
   const ctaButtonClass = buttonStyleClasses(design.buttonStyle)
-  const rootStyle = designToCssVars(design)
+  const rootStyle = {
+    ...designToCssVars(design),
+    ...(pageColors.pageBg ? { backgroundColor: pageColors.pageBg } : {}),
+  }
 
   return (
     <div
@@ -401,56 +437,69 @@ export function VBizProfileApp({
             </span>
           </div>
 
-          <h1
-            className={`vbiz-header-title mb-3 font-bold tracking-tight text-zinc-900 dark:text-zinc-100 ${embedded ? 'px-1 text-2xl' : 'text-3xl sm:text-4xl'}`}
-          >
-            {ownerName}
-          </h1>
-          <p
-            className={`vbiz-header-tagline mb-8 max-w-md font-medium text-zinc-600 dark:text-zinc-400 ${embedded ? 'px-1 text-sm' : 'text-sm sm:text-base'}`}
-          >
-            {tagline}
-          </p>
-
-          <div
-            className={`vbiz-header-cta flex w-full min-w-0 items-center gap-3 ${embedded ? 'max-w-full justify-center' : `max-w-[280px] ${isHeroLayout ? 'justify-start md:justify-center' : 'justify-center'}`}`}
-          >
-            <button
-              onClick={() => setActiveModal('contact')}
-              className={`vbiz-cta-primary flex min-w-0 flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-all active:scale-95 ${ctaButtonClass}`}
-              style={{
-                borderRadius: cornerRadius,
-                ...(design.buttonStyle === 'solid' || design.buttonStyle === 'soft'
-                  ? {
-                      backgroundColor: design.buttonStyle === 'soft' ? `${design.primaryColor}22` : design.primaryColor,
-                      color: design.buttonStyle === 'soft' ? design.primaryColor : '#fff',
-                    }
-                  : design.buttonStyle === 'outline'
-                    ? { color: design.primaryColor, borderColor: design.primaryColor }
-                    : {}),
-              }}
+          {ownerName ? (
+            <h1
+              className={`vbiz-header-title mb-3 font-bold tracking-tight text-zinc-900 dark:text-zinc-100 ${embedded ? 'px-1 text-2xl' : 'text-3xl sm:text-4xl'}`}
+              style={headerTextColor ? { color: headerTextColor } : undefined}
             >
-              <Download size={16} className="shrink-0" /> <span className="truncate">Save Contact</span>
-            </button>
-            <div className="vbiz-cta-icon-row flex shrink-0 items-center gap-3">
-              <button
-                onClick={() => setActiveModal('settings')}
-                className="vbiz-cta-icon flex h-12 w-12 shrink-0 items-center justify-center border border-zinc-200 bg-white text-zinc-700 transition-all hover:bg-zinc-100 active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                style={{ borderRadius: cornerRadius }}
-              >
-                <Bell size={18} />
-              </button>
-              <button
-                type="button"
-                onClick={handleShare}
-                className="vbiz-cta-icon flex h-12 w-12 shrink-0 items-center justify-center border border-zinc-200 bg-white text-zinc-700 transition-all hover:bg-zinc-100 active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                style={{ borderRadius: cornerRadius }}
-                aria-label="Share profile"
-              >
-                <Share2 size={18} />
-              </button>
+              {ownerName}
+            </h1>
+          ) : null}
+          {tagline ? (
+            <p
+              className={`vbiz-header-tagline mb-8 max-w-md font-medium text-zinc-600 dark:text-zinc-400 ${embedded ? 'px-1 text-sm' : 'text-sm sm:text-base'}`}
+              style={headerTextColor ? { color: headerTextColor } : undefined}
+            >
+              {tagline}
+            </p>
+          ) : null}
+
+          {(showSaveContact || showShareBtn) && (
+            <div
+              className={`vbiz-header-cta flex w-full min-w-0 items-center gap-3 ${embedded ? 'max-w-full justify-center' : `max-w-[280px] ${isHeroLayout ? 'justify-start md:justify-center' : 'justify-center'}`}`}
+            >
+              {showSaveContact && (
+                <button
+                  onClick={() => setActiveModal('contact')}
+                  className={`vbiz-cta-primary flex min-w-0 flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-all active:scale-95 ${ctaButtonClass}`}
+                  style={{
+                    borderRadius: cornerRadius,
+                    ...(design.buttonStyle === 'solid' || design.buttonStyle === 'soft'
+                      ? {
+                          backgroundColor:
+                            design.buttonStyle === 'soft' ? `${design.primaryColor}22` : design.primaryColor,
+                          color: design.buttonStyle === 'soft' ? design.primaryColor : '#fff',
+                        }
+                      : design.buttonStyle === 'outline'
+                        ? { color: design.primaryColor, borderColor: design.primaryColor }
+                        : {}),
+                  }}
+                >
+                  <Download size={16} className="shrink-0" /> <span className="truncate">Save Contact</span>
+                </button>
+              )}
+              <div className="vbiz-cta-icon-row flex shrink-0 items-center gap-3">
+                <button
+                  onClick={() => setActiveModal('settings')}
+                  className="vbiz-cta-icon flex h-12 w-12 shrink-0 items-center justify-center border border-zinc-200 bg-white text-zinc-700 transition-all hover:bg-zinc-100 active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  style={{ borderRadius: cornerRadius }}
+                >
+                  <Bell size={18} />
+                </button>
+                {showShareBtn && (
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="vbiz-cta-icon flex h-12 w-12 shrink-0 items-center justify-center border border-zinc-200 bg-white text-zinc-700 transition-all hover:bg-zinc-100 active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                    style={{ borderRadius: cornerRadius }}
+                    aria-label="Share profile"
+                  >
+                    <Share2 size={18} />
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </header>
 
         {/* Floating Top Nav (Scrollable Pills) */}
@@ -460,6 +509,7 @@ export function VBizProfileApp({
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             className="vbiz-floating-nav-inner relative w-full max-w-full rounded-4xl border border-zinc-200/80 bg-white/80 p-2 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-3xl sm:rounded-full dark:border-zinc-700/50 dark:bg-zinc-900/80 dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
+            style={navBgColor ? { backgroundColor: navBgColor } : undefined}
           >
             <div
               ref={scrollRef}
@@ -468,8 +518,9 @@ export function VBizProfileApp({
               aria-orientation="horizontal"
               className="vbiz-floating-nav-scroll no-scrollbar mask-edges flex max-w-full cursor-grab items-center gap-1.5 overflow-x-auto px-1 active:cursor-grabbing sm:gap-2 sm:px-2"
             >
-              {ALL_TABS.map((tab, index) => {
-                const isActive = activeTab === tab.id
+              {visibleTabs.map((tab, index) => {
+                const isActive = effectiveActiveTab === tab.id
+                const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
                 return (
                   <motion.button
                     key={tab.id}
@@ -485,18 +536,18 @@ export function VBizProfileApp({
                     onKeyDown={(e) => {
                       let nextIndex = index
                       if (e.key === 'ArrowRight') {
-                        nextIndex = (index + 1) % ALL_TABS.length
+                        nextIndex = (index + 1) % visibleTabs.length
                       } else if (e.key === 'ArrowLeft') {
-                        nextIndex = (index - 1 + ALL_TABS.length) % ALL_TABS.length
+                        nextIndex = (index - 1 + visibleTabs.length) % visibleTabs.length
                       } else if (e.key === 'Home') {
                         nextIndex = 0
                       } else if (e.key === 'End') {
-                        nextIndex = ALL_TABS.length - 1
+                        nextIndex = visibleTabs.length - 1
                       }
                       if (nextIndex !== index) {
                         e.preventDefault()
-                        setActiveTab(ALL_TABS[nextIndex].id)
-                        document.getElementById(`tab-${ALL_TABS[nextIndex].id}`)?.focus()
+                        setActiveTab(visibleTabs[nextIndex].id)
+                        document.getElementById(`tab-${visibleTabs[nextIndex].id}`)?.focus()
                       }
                     }}
                     title={tab.label}
@@ -510,7 +561,8 @@ export function VBizProfileApp({
                       <motion.div
                         layoutId="active-tab-indicator"
                         initial={false}
-                        className="absolute inset-0 rounded-full bg-zinc-900 dark:bg-white"
+                        className={`absolute inset-0 rounded-full ${tabBg ? '' : 'bg-zinc-900 dark:bg-white'}`}
+                        style={tabBg ? { backgroundColor: tabBg } : undefined}
                         transition={{ type: 'spring', stiffness: 500, damping: 25, mass: 1.5 }}
                       />
                     )}
@@ -531,12 +583,12 @@ export function VBizProfileApp({
         <main
           className="relative w-full"
           role="tabpanel"
-          id={`panel-${activeTab}`}
-          aria-labelledby={`tab-${activeTab}`}
+          id={`panel-${effectiveActiveTab}`}
+          aria-labelledby={`tab-${effectiveActiveTab}`}
         >
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeTab}
+              key={effectiveActiveTab}
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.98 }}
