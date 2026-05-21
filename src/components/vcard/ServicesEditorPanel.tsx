@@ -64,17 +64,11 @@ const accentStyles: Record<
 export function ServicesEditorPanel({
   services: rawServices,
   onServicesChange,
-  sectionVisible,
-  onToggleSectionVisibility,
   accent = 'indigo',
-  showVisibilityToggle = true,
 }: {
   services?: VCardServiceEntry[] | null
   onServicesChange: (next: VCardServiceEntry[]) => void
-  sectionVisible?: boolean
-  onToggleSectionVisibility?: () => void
   accent?: Accent
-  showVisibilityToggle?: boolean
 }) {
   const services = normalizeServiceList(rawServices)
   const a = accentStyles[accent]
@@ -110,22 +104,6 @@ export function ServicesEditorPanel({
             <h3 className={`text-lg font-black ${a.titleText}`}>Service Information</h3>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {showVisibilityToggle && onToggleSectionVisibility ? (
-              <label className="flex shrink-0 cursor-pointer items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 shadow-sm dark:border-white/10 dark:bg-[#0b0f19]">
-                <span className="text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-                  Show in app
-                </span>
-                <div className="relative flex items-center justify-center">
-                  <input
-                    type="checkbox"
-                    checked={sectionVisible !== false}
-                    onChange={onToggleSectionVisibility}
-                    className="peer sr-only"
-                  />
-                  <div className="peer h-6 w-10 rounded-full bg-slate-200 shadow-sm peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700" />
-                </div>
-              </label>
-            ) : null}
             <button
               type="button"
               onClick={addService}
@@ -266,10 +244,18 @@ export function ServicesEditorPanel({
                       type="checkbox"
                       checked={service.active}
                       onChange={(e) => updateService(service.id, 'active', e.target.checked)}
-                      className="peer sr-only"
+                      className="sr-only"
                     />
-                    <div className="relative h-[22px] w-[38px] rounded-[12px] bg-slate-200 shadow-inner transition-colors peer-checked:bg-green-500 dark:bg-white/10">
-                      <div className="absolute top-[3px] left-[3px] h-4 w-4 rounded-[10px] bg-white shadow transition-transform peer-checked:translate-x-4" />
+                    <div
+                      className={`relative h-[22px] w-[38px] rounded-[12px] shadow-inner transition-colors ${
+                        service.active ? 'bg-green-500' : 'bg-slate-200 dark:bg-white/10'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-[3px] left-[3px] h-4 w-4 rounded-[10px] bg-white shadow transition-transform ${
+                          service.active ? 'translate-x-4' : 'translate-x-0'
+                        }`}
+                      />
                     </div>
                   </div>
                   <span className="text-[13px] font-bold text-slate-500 dark:text-slate-400">Active Status</span>

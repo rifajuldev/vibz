@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'motion/react'
 
 type LiveAgentPanelV1Props = LiveAgentController & {
   accentColor?: string
+  embedded?: boolean
 }
 
 /** Classic template UI — gold concierge panel from profile v1. */
@@ -22,15 +23,20 @@ export function LiveAgentPanelV1({
   startConnection,
   disconnect,
   accentColor = '#ebd675',
+  embedded = false,
 }: LiveAgentPanelV1Props) {
   const ownerFirst = cardData.ownerName.split(' ')[0] || cardData.ownerName
 
+  const shellClass = embedded
+    ? 'vbiz-live-agent pointer-events-none relative flex flex-col items-end gap-3'
+    : 'vbiz-live-agent pointer-events-none fixed right-6 bottom-6 z-100 flex flex-col items-end gap-4 lg:right-10 lg:bottom-10'
+
   return (
     <motion.div
-      drag
+      drag={!embedded}
       dragMomentum={false}
-      dragConstraints={{ left: -1000, right: 50, top: -1000, bottom: 50 }}
-      className="pointer-events-none fixed right-6 bottom-6 z-100 flex flex-col items-end gap-4 lg:right-10 lg:bottom-10"
+      dragConstraints={embedded ? undefined : { left: -1000, right: 50, top: -1000, bottom: 50 }}
+      className={shellClass}
     >
       {!isOpen && (
         <motion.button
@@ -40,12 +46,12 @@ export function LiveAgentPanelV1({
           whileHover={{ scale: 1.1, rotate: 5 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsOpen(true)}
-          className="pointer-events-auto relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full text-black shadow-[0_10px_40px_rgba(250,204,21,0.4)]"
+          className={`pointer-events-auto relative flex items-center justify-center overflow-hidden rounded-full text-black shadow-[0_10px_40px_rgba(250,204,21,0.4)] ${embedded ? 'h-12 w-12' : 'h-16 w-16'}`}
           style={{ backgroundColor: accentColor }}
           aria-label="Open vBiz Concierge"
         >
           <div className="absolute inset-0 translate-x-full skew-x-12 bg-black/20 transition-transform duration-500 group-hover:translate-x-0 dark:bg-white/20" />
-          <Bot size={28} className="relative z-10" />
+          <Bot size={embedded ? 22 : 28} className="relative z-10" />
           {isConnected && (
             <span className="absolute -top-1 -right-1 h-4 w-4 animate-pulse rounded-full border-2 border-white bg-red-500" />
           )}
@@ -59,7 +65,7 @@ export function LiveAgentPanelV1({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
-            className="pointer-events-auto relative flex w-72 flex-col gap-4 overflow-hidden rounded-3xl border border-black/5 bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] ring-1 ring-black/5 backdrop-blur-3xl dark:border-white/10 dark:bg-[#111]/90 dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] dark:ring-white/5"
+            className={`pointer-events-auto relative flex max-w-[min(18rem,calc(100cqi-1rem))] flex-col gap-4 overflow-hidden rounded-3xl border border-black/5 bg-white p-5 shadow-[0_20px_50px_rgba(0,0,0,0.1)] ring-1 ring-black/5 backdrop-blur-3xl dark:border-white/10 dark:bg-[#111]/90 dark:shadow-[0_20px_50px_rgba(0,0,0,0.8)] dark:ring-white/5 ${embedded ? 'w-[min(17rem,100%)] p-4' : 'w-72'}`}
           >
             {isSpeaking && (
               <div

@@ -1,10 +1,6 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 'use client'
 
+import { isVideoUrl } from '@/lib/mediaUrl'
 import type { ResolvedProfileDesign } from '@/lib/resolvedProfileDesign'
 import {
   buttonStyleClasses,
@@ -67,11 +63,10 @@ import {
 } from './components/SimpleSections'
 import { VideoLinksSection } from './components/VideoLinksSection'
 import { useDragScroll } from './hooks/useDragScroll'
-import { hasNotificationChoice } from './lib/notificationPrefs'
 import { useProfileDisplay } from './lib/profileDisplayContext'
 import { shareProfile } from './lib/shareProfile'
 import type { VBizProfileAppProps } from './profilePublicProps'
-import { DEMO_PROFILE_PROPS } from './profilePublicProps'
+import { DEMO_PROFILE_PROPS, resolveProfileAvatarSrc } from './profilePublicProps'
 import { ProfileThemeStyles } from './ProfileThemeStyles'
 
 const NAV_CATEGORIES = [
@@ -136,7 +131,7 @@ export function VBizProfileApp({
   ownerName = DEMO_PROFILE_PROPS.ownerName,
   tagline = DEMO_PROFILE_PROPS.tagline,
   coverVideoUrl = DEMO_PROFILE_PROPS.coverVideoUrl,
-  avatarVideoUrl = DEMO_PROFILE_PROPS.avatarVideoUrl,
+  avatarVideoUrl,
   liveAgentCardData = DEMO_PROFILE_PROPS.liveAgentCardData,
   design: designProp,
   shareSlug,
@@ -187,11 +182,7 @@ export function VBizProfileApp({
   const coverVideoRef = useRef<HTMLVideoElement>(null)
   const avatarVideoRef = useRef<HTMLVideoElement>(null)
   const [showPreloader, setShowPreloader] = useState(!embedded)
-  const [introAllowed, setIntroAllowed] = useState(false)
-  const [notificationFlowDone, setNotificationFlowDone] = useState(false)
-
-  const ownerId = cardOwnerId ?? '91'
-  const experienceReady = introAllowed && (hasNotificationChoice(ownerId) || notificationFlowDone)
+  const [introAllowed, setIntroAllowed] = useState(embedded)
 
   const endPreloader = useCallback(() => {
     setShowPreloader(false)
@@ -199,20 +190,17 @@ export function VBizProfileApp({
   }, [])
 
   useEffect(() => {
-    if (!explainerVideoUrl?.trim()) {
-      const t = window.setTimeout(() => endPreloader(), 900)
-      return () => window.clearTimeout(t)
-    }
-    return undefined
-  }, [explainerVideoUrl, endPreloader])
+    if (embedded || explainerVideoUrl?.trim()) return
+    const t = window.setTimeout(() => endPreloader(), 900)
+    return () => window.clearTimeout(t)
+  }, [embedded, explainerVideoUrl, endPreloader])
 
-  useEffect(() => {
-    if (!introAllowed || hasNotificationChoice(ownerId)) return
-
-    const onSettled = () => setNotificationFlowDone(true)
-    window.addEventListener('vbiz_profile_experience_settled', onSettled)
-    return () => window.removeEventListener('vbiz_profile_experience_settled', onSettled)
-  }, [introAllowed, ownerId])
+  const avatarDisplaySrc = useMemo(
+    () => resolveProfileAvatarSrc(avatarVideoUrl, explainerVideoUrl),
+    [avatarVideoUrl, explainerVideoUrl]
+  )
+  const avatarIsVideo = Boolean(avatarDisplaySrc && isVideoUrl(avatarDisplaySrc))
+  const coverIsVideo = Boolean(coverVideoUrl?.trim() && isVideoUrl(coverVideoUrl))
 
   useEffect(() => {
     if (!introAllowed) return
@@ -225,9 +213,9 @@ export function VBizProfileApp({
         /* autoplay blocked — user gesture may be required */
       }
     }
-    void play(coverVideoRef.current)
-    void play(avatarVideoRef.current)
-  }, [introAllowed])
+    if (coverIsVideo) void play(coverVideoRef.current)
+    if (avatarIsVideo) void play(avatarVideoRef.current)
+  }, [introAllowed, coverIsVideo, avatarIsVideo])
 
   useEffect(() => {
     if (embedded) return
@@ -318,7 +306,7 @@ export function VBizProfileApp({
   return (
     <div
       data-embedded={embedded ? '' : undefined}
-      className={`vbiz-profile-root min-h-screen w-full ${embedded ? 'flex h-full min-h-0 w-full max-w-full flex-col' : 'flex w-screen justify-center'} ${theme === 'dark' ? 'dark bg-[#09090b] text-zinc-200' : 'bg-zinc-50 text-zinc-900'} relative overflow-x-clip pb-24 transition-colors duration-300 selection:bg-yellow-500/30 selection:text-white`}
+      className={`vbiz-profile-root w-full ${embedded ? 'relative isolate flex h-full min-h-0 max-w-full flex-col overflow-x-clip pb-0' : 'flex min-h-screen w-screen justify-center overflow-x-clip pb-24'} ${theme === 'dark' ? 'dark bg-[#09090b] text-zinc-200' : 'bg-zinc-50 text-zinc-900'} relative transition-colors duration-300 selection:bg-yellow-500/30 selection:text-white`}
       style={rootStyle}
     >
       <ProfileThemeStyles design={design} />
@@ -388,39 +376,55 @@ export function VBizProfileApp({
       <div
         className={`vbiz-cover-video absolute top-0 left-0 z-0 mt-0 w-full overflow-hidden ${isHeroLayout ? 'h-[70vh]' : 'h-[60vh]'}`}
       >
-        <video
-          ref={coverVideoRef}
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className="h-full w-full object-cover object-center opacity-100 brightness-105 filter"
-          src={coverVideoUrl}
-        />
+        {coverIsVideo ? (
+          <video
+            ref={coverVideoRef}
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-cover object-center opacity-100 brightness-105 filter"
+            src={coverVideoUrl}
+          />
+        ) : coverVideoUrl ? (
+          <img
+            src={coverVideoUrl}
+            alt=""
+            className="h-full w-full object-cover object-center opacity-100 brightness-105 filter"
+          />
+        ) : null}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-48 bg-linear-to-t from-zinc-50 via-zinc-50/40 to-transparent dark:from-[#09090b] dark:via-[#09090b]/40" />
       </div>
 
       {/* Main Container */}
       <div
-        className={`vbiz-profile-main relative z-20 mx-auto flex min-h-screen w-full max-w-[1032px] flex-col ${embedded ? 'max-w-full px-4 pt-28' : 'px-5 sm:px-8'} ${!embedded && (isHeroLayout ? 'pt-48 sm:pt-56' : 'pt-32 sm:pt-44')}`}
+        className={`vbiz-profile-main relative z-20 mx-auto flex w-full max-w-[1032px] flex-col ${embedded ? 'min-h-0 max-w-full px-3.5 pt-24' : 'min-h-screen px-5 sm:px-8'} ${!embedded && (isHeroLayout ? 'pt-48 sm:pt-56' : 'pt-32 sm:pt-44')}`}
       >
         {/* Profile Header */}
         <header
-          className={`relative mb-10 flex w-full flex-col ${embedded || !isHeroLayout ? 'items-center text-center' : 'max-w-xl items-start text-left md:mx-auto md:items-center md:text-center'}`}
+          className={`relative flex w-full flex-col ${embedded ? 'mt-1 mb-8' : 'mb-10'} ${embedded || !isHeroLayout ? 'items-center text-center' : 'max-w-xl items-start text-left md:mx-auto md:items-center md:text-center'}`}
         >
           <div className={`group relative mb-6 ${!embedded && isHeroLayout ? 'self-start md:self-center' : ''}`}>
             <div
               className={`vbiz-profile-avatar relative z-10 overflow-hidden rounded-full border border-zinc-700 bg-zinc-900 transition-transform duration-500 group-hover:scale-[1.02] ${embedded ? 'h-24 w-24' : 'h-28 w-28 sm:h-36 sm:w-36'}`}
             >
-              <video
-                ref={avatarVideoRef}
-                src={avatarVideoUrl}
-                loop
-                muted
-                playsInline
-                preload="metadata"
-                className="h-full w-full scale-105 object-cover"
-              />
+              {avatarIsVideo ? (
+                <video
+                  ref={avatarVideoRef}
+                  src={avatarDisplaySrc}
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  className="h-full w-full scale-105 object-cover"
+                />
+              ) : avatarDisplaySrc ? (
+                <img
+                  src={avatarDisplaySrc}
+                  alt={ownerName ? `${ownerName} profile` : 'Profile'}
+                  className="h-full w-full scale-105 object-cover"
+                />
+              ) : null}
             </div>
             {/* Soft shadow underlying the avatar */}
             <div className="absolute right-1 bottom-1 z-20 rounded-full bg-green-500 p-1.5 text-zinc-950 shadow-sm ring-4 ring-zinc-50 dark:ring-[#09090b]">
@@ -508,7 +512,7 @@ export function VBizProfileApp({
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="vbiz-floating-nav-inner relative w-full max-w-full rounded-4xl border border-zinc-200/80 bg-white/80 p-2 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-3xl sm:rounded-full dark:border-zinc-700/50 dark:bg-zinc-900/80 dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)]"
+            className={`vbiz-floating-nav-inner relative rounded-4xl border border-zinc-200/80 bg-white/80 p-2 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-3xl sm:rounded-full dark:border-zinc-700/50 dark:bg-zinc-900/80 dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] ${embedded ? 'w-full max-w-[calc(100%-0.5rem)] min-w-0 overflow-hidden' : 'w-full max-w-full'}`}
             style={navBgColor ? { backgroundColor: navBgColor } : undefined}
           >
             <div
@@ -516,7 +520,7 @@ export function VBizProfileApp({
               role="tablist"
               aria-label="Profile navigation"
               aria-orientation="horizontal"
-              className="vbiz-floating-nav-scroll no-scrollbar mask-edges flex max-w-full cursor-grab items-center gap-1.5 overflow-x-auto px-1 active:cursor-grabbing sm:gap-2 sm:px-2"
+              className={`vbiz-floating-nav-scroll no-scrollbar mask-edges flex cursor-grab items-center gap-1.5 overflow-x-auto px-1 active:cursor-grabbing sm:gap-2 sm:px-2 ${embedded ? 'min-w-0 flex-1' : 'max-w-full'}`}
             >
               {visibleTabs.map((tab, index) => {
                 const isActive = effectiveActiveTab === tab.id
@@ -613,9 +617,10 @@ export function VBizProfileApp({
         )}
       </AnimatePresence>
 
+      <LiveAgent variant="v2" embedded={embedded} cardData={liveAgentCardData} readyToConnect={introAllowed} />
+
       {!embedded && (
         <>
-          <LiveAgent variant="v2" cardData={liveAgentCardData} readyToConnect={experienceReady} />
           <NotificationModal
             cardOwnerId={cardOwnerId ?? '91'}
             ownerName={liveAgentCardData?.ownerName ?? ownerName ?? 'Guest'}

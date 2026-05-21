@@ -25,11 +25,11 @@ import { auth, db, isFirebaseAvailable } from '../lib/firebase'
 import { handleFirestoreError, OperationType } from '../lib/firebaseUtils'
 import { useProfileDisplay } from '../lib/profileDisplayContext'
 import { buildExtraFieldContactItems, buildProfileContactItems, splitDisplayName } from '../lib/profileHomeData'
+import { resolveProfileAvatarSrc } from '../profilePublicProps'
 import { CustomVideoPlayer } from './CustomVideoPlayer'
 import { SectionContainer } from './SectionContainer'
 
 const DEFAULT_COVER = 'https://app.vbizme.com/storage/ecard/backgroundVideos/91/Untitled%20design-36.mp4'
-const DEFAULT_AVATAR = 'https://app.vbizme.com/storage/ecard/profileimages/91/mc%20vbizme.mp4'
 
 const V1_SOCIAL_GRID = [
   { label: 'Twitter', icon: Twitter },
@@ -215,7 +215,11 @@ export const HomeSection = () => {
   const accent = design?.accentColor ?? '#dcc969'
   const cornerRadius = design ? cornerStyleToRadius(design.cornerStyle) : '16px'
   const coverSrc = homeMedia.bgMedia || DEFAULT_COVER
-  const profileSrc = homeMedia.profileMedia || DEFAULT_AVATAR
+  const introSrc = homeMedia.introVideo || personal.explainerVideoUrl || undefined
+  const profileSrc = useMemo(
+    () => resolveProfileAvatarSrc(homeMedia.profileMedia, introSrc),
+    [homeMedia.profileMedia, introSrc]
+  )
   const { first: nameFirst, rest: nameRest } = splitDisplayName(
     isVisible('MyInfo section Name') ? personal.fullName : ''
   )
@@ -348,6 +352,7 @@ export const HomeSection = () => {
                 >
                   <CustomVideoPlayer
                     src={profileSrc}
+                    imageAlt={personal.fullName ? `${personal.fullName} profile` : 'Profile'}
                     className="mb-4 h-20 w-20 rounded-2xl border border-black/5 bg-white object-cover shadow-2xl backdrop-blur-md sm:mb-6 sm:h-32 sm:w-32 lg:h-36 lg:w-36 dark:border-white/20 dark:bg-gray-500"
                   />
                   {/* Verified Badge */}

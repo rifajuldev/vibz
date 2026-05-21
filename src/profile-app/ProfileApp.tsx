@@ -21,6 +21,8 @@ export function ProfileApp(props: VBizProfileAppProps) {
       services={props.services}
       generalPosts={props.generalPosts}
       design={props.design ?? null}
+      avatarMediaUrl={props.avatarVideoUrl}
+      embedded={props.embedded}
     >
       {shell}
     </ProfileDisplayProvider>

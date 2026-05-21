@@ -18,10 +18,10 @@ import {
   type SetStateAction,
 } from 'react'
 
-/** @see @google/genai Live.connect docs — older model ids close the socket immediately. */
+/** Primary model matches working Vite reference; fallbacks if Google renames endpoints. */
 const LIVE_MODEL_CANDIDATES = [
-  'gemini-live-2.5-flash-preview',
   'gemini-3.1-flash-live-preview',
+  'gemini-live-2.5-flash-preview',
   'gemini-2.0-flash-live-preview-04-09',
 ] as const
 
@@ -50,6 +50,30 @@ function sendRealtimeInputSafe(session: Session, payload: Parameters<Session['se
     session.sendRealtimeInput(payload)
   } catch {
     /* socket already closed */
+  }
+}
+
+/** Text must use sendClientContent — sendRealtimeInput only accepts audio/media blobs. */
+function sendInitialGreetingSafe(session: Session) {
+  try {
+    session.sendClientContent({ turns: INITIAL_GREETING_PROMPT })
+  } catch (e) {
+    console.error('Could not send initial greeting:', e)
+  }
+}
+
+function setupMicProcessor(
+  audioContext: AudioContext,
+  micSource: MediaStreamAudioSourceNode,
+  processorRef: RefObject<ScriptProcessorNode | null>,
+  onPcmChunk: (inputData: Float32Array) => void
+) {
+  const processor = audioContext.createScriptProcessor(512, 1, 1)
+  processorRef.current = processor
+  micSource.connect(processor)
+  processor.connect(audioContext.destination)
+  processor.onaudioprocess = (e) => {
+    onPcmChunk(e.inputBuffer.getChannelData(0))
   }
 }
 
@@ -216,11 +240,13 @@ export function useLiveAgent({ cardData = DEFAULT_LIVE_AGENT_CARD, readyToConnec
     setError(null)
     initAudioOutput()
 
-    const connectEpoch = ++connectionGenRef.current
+    const attemptGen = ++connectionGenRef.current
 
     try {
       const ai = new GoogleGenAI({ apiKey: key })
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      if (attemptGen !== connectionGenRef.current) return
+
       mediaStreamRef.current = stream
 
       const audioContext = new AudioContext({ sampleRate: 16000, latencyHint: 'interactive' })
@@ -234,10 +260,8 @@ export function useLiveAgent({ cardData = DEFAULT_LIVE_AGENT_CARD, readyToConnec
       }
 
       const micSource = audioContext.createMediaStreamSource(stream)
-      const silentGain = audioContext.createGain()
-      silentGain.gain.value = 0
 
-      const connectWithModel = (model: string, attemptGen: number) => {
+      const connectWithModel = (model: string, gen: number) => {
         const sessionPromise = ai.live.connect({
           model,
           config: {
@@ -249,7 +273,7 @@ export function useLiveAgent({ cardData = DEFAULT_LIVE_AGENT_CARD, readyToConnec
           },
           callbacks: {
             onopen: () => {
-              if (attemptGen !== connectionGenRef.current) return
+              if (gen !== connectionGenRef.current) return
 
               setIsConnected(true)
               setIsConnecting(false)
@@ -258,22 +282,16 @@ export function useLiveAgent({ cardData = DEFAULT_LIVE_AGENT_CARD, readyToConnec
 
               void sessionPromise
                 .then((session: Session) => {
-                  if (attemptGen !== connectionGenRef.current || !canStreamAudioRef.current) return
-                  sendRealtimeInputSafe(session, { text: INITIAL_GREETING_PROMPT })
+                  if (gen !== connectionGenRef.current || !canStreamAudioRef.current) return
+                  sessionRef.current = session
+                  sendInitialGreetingSafe(session)
                 })
                 .catch((e: unknown) => console.error('Could not get session:', e))
 
               stopInputCapture()
-              const processor = audioContext.createScriptProcessor(512, 1, 1)
-              processorRef.current = processor
-              micSource.connect(processor)
-              processor.connect(silentGain)
-              silentGain.connect(audioContext.destination)
-
-              processor.onaudioprocess = (e) => {
+              setupMicProcessor(audioContext, micSource, processorRef, (inputData) => {
                 if (!canStreamAudioRef.current || isMutedRef.current) return
 
-                const inputData = e.inputBuffer.getChannelData(0)
                 const pcm16 = new Int16Array(inputData.length)
                 let hasAudio = false
                 for (let i = 0; i < inputData.length; i++) {
@@ -309,10 +327,10 @@ export function useLiveAgent({ cardData = DEFAULT_LIVE_AGENT_CARD, readyToConnec
                       /* connection closed */
                     })
                 }
-              }
+              })
             },
             onmessage: (message: LiveServerMessage) => {
-              if (attemptGen !== connectionGenRef.current) return
+              if (gen !== connectionGenRef.current) return
 
               const base64Audio = message.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data
               if (base64Audio && pcmContextRef.current) {
@@ -352,14 +370,23 @@ export function useLiveAgent({ cardData = DEFAULT_LIVE_AGENT_CARD, readyToConnec
               }
             },
             onerror: (err: ErrorEvent) => {
-              if (attemptGen !== connectionGenRef.current) return
+              if (gen !== connectionGenRef.current) return
               const errDetails = err.message || 'unknown'
               console.error('Live API Error:', err, 'Details:', errDetails)
               setError(`Connection error: ${errDetails}`)
               disconnect()
             },
-            onclose: () => {
-              endLiveSession(attemptGen)
+            onclose: (event: CloseEvent) => {
+              if (gen !== connectionGenRef.current) return
+              if (isConnectedRef.current) {
+                const reason = event.reason?.trim()
+                setError(
+                  reason
+                    ? `Live session ended (${reason}). Tap the mic to reconnect.`
+                    : 'Live session ended. Tap the mic to reconnect.'
+                )
+              }
+              endLiveSession(gen)
             },
           },
         })
@@ -369,13 +396,19 @@ export function useLiveAgent({ cardData = DEFAULT_LIVE_AGENT_CARD, readyToConnec
 
       let lastError: unknown
       for (const model of LIVE_MODEL_CANDIDATES) {
-        if (connectEpoch !== connectionGenRef.current) return
-
-        const attemptGen = ++connectionGenRef.current
+        if (attemptGen !== connectionGenRef.current) return
 
         try {
-          const sessionPromise = connectWithModel(model, attemptGen)
-          sessionRef.current = await sessionPromise
+          const session = await connectWithModel(model, attemptGen)
+          if (attemptGen !== connectionGenRef.current) {
+            try {
+              session.close()
+            } catch {
+              /* stale attempt */
+            }
+            return
+          }
+          sessionRef.current = session
           return
         } catch (modelErr) {
           lastError = modelErr

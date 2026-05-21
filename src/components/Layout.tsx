@@ -71,7 +71,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="bg-primary-500/20 dark:bg-primary-600/10 pointer-events-none fixed top-0 left-1/2 -z-10 h-[40vh] w-full max-w-4xl -translate-x-1/2 rounded-full blur-[120px]" />
 
       {/* Floating Top Navigation */}
-      <header className="sticky top-4 z-50 mx-4 rounded-2xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-xl transition-all md:mx-8 lg:mx-auto lg:max-w-7xl dark:border-white/10 dark:bg-[#0b0f19]/70">
+      <header className="sticky top-4 z-50 mx-4 rounded-2xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-xl md:mx-8 lg:mx-auto lg:max-w-7xl dark:border-white/10 dark:bg-[#0b0f19]/70">
         <div className="flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-8">
             <Link href="/" className="group flex items-center gap-2">
@@ -92,14 +92,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     key={item.name}
                     href={item.path}
                     className={cn(
-                      'flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-all duration-200',
+                      'group relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold',
                       isActive
-                        ? 'dark:bg-primary-500/15 dark:text-primary-400 bg-slate-900 text-white'
-                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'
+                        ? 'dark:text-primary-400 text-white'
+                        : 'text-slate-600 group-hover:text-slate-900 dark:text-slate-400 dark:group-hover:text-slate-200'
                     )}
                   >
-                    <item.icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.5 : 2} />
-                    <span>{item.name}</span>
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'absolute inset-0 rounded-xl',
+                        isActive
+                          ? 'dark:bg-primary-500/15 bg-slate-900'
+                          : 'bg-transparent group-hover:bg-slate-100 dark:group-hover:bg-white/5'
+                      )}
+                    />
+                    <item.icon className="relative z-10 h-[18px] w-[18px] shrink-0" strokeWidth={2} />
+                    <span className="relative z-10">{item.name}</span>
                   </Link>
                 )
               })}
@@ -192,14 +201,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     href={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200',
+                      'group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold',
                       isActive
-                        ? 'dark:bg-primary-500/15 dark:text-primary-400 bg-slate-900 text-white'
-                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200'
+                        ? 'dark:text-primary-400 text-white'
+                        : 'text-slate-600 group-hover:text-slate-900 dark:text-slate-400 dark:group-hover:text-slate-200'
                     )}
                   >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'absolute inset-0 rounded-xl',
+                        isActive
+                          ? 'dark:bg-primary-500/15 bg-slate-900'
+                          : 'bg-transparent group-hover:bg-slate-100 dark:group-hover:bg-white/5'
+                      )}
+                    />
+                    <item.icon className="relative z-10 h-5 w-5 shrink-0" strokeWidth={2} />
+                    <span className="relative z-10">{item.name}</span>
                   </Link>
                 )
               })}

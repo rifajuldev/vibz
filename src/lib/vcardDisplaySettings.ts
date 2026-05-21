@@ -256,9 +256,21 @@ export function getFieldConfig(settings: VCardDisplaySettings, key: string): Dis
   return settings.fields[key] ?? createDefaultFieldConfig()
 }
 
+/** Content sections that always appear on mobile; desktop may still respect Card Settings visibility. */
+export const MOBILE_ALWAYS_VISIBLE_NAV_FIELDS = new Set(['Resume', 'Work Experience', 'Services', 'Blog'])
+
 export function isFieldVisible(settings: VCardDisplaySettings, key: string): boolean {
   if (!settings.globalEnabled) return false
   return getFieldConfig(settings, key).visible
+}
+
+export function isFieldVisibleInProfile(
+  settings: VCardDisplaySettings,
+  key: string,
+  options?: { isMobileViewport?: boolean }
+): boolean {
+  if (options?.isMobileViewport && MOBILE_ALWAYS_VISIBLE_NAV_FIELDS.has(key)) return true
+  return isFieldVisible(settings, key)
 }
 
 export function getDisplaySettingsFromVCard(data: VCardData): VCardDisplaySettings {

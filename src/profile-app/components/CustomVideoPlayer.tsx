@@ -1,12 +1,26 @@
+import { isVideoUrl } from '@/lib/mediaUrl'
 import { Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 
 interface CustomVideoPlayerProps {
   src: string
   className?: string
+  imageAlt?: string
 }
 
-export const CustomVideoPlayer = ({ src, className = '' }: CustomVideoPlayerProps) => {
+function ProfileMediaImage({ src, className = '', imageAlt = 'Profile' }: CustomVideoPlayerProps) {
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <img
+        src={src}
+        alt={imageAlt}
+        className="h-full w-full object-cover opacity-90 transition-all duration-700 group-hover/profile:scale-105 group-hover/profile:opacity-100"
+      />
+    </div>
+  )
+}
+
+function ProfileVideoPlayer({ src, className = '' }: CustomVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(true)
   const [progress, setProgress] = useState(0)
@@ -32,7 +46,7 @@ export const CustomVideoPlayer = ({ src, className = '' }: CustomVideoPlayerProp
       video.removeEventListener('timeupdate', updateProgress)
       video.removeEventListener('ended', handleEnded)
     }
-  }, [])
+  }, [src])
 
   const togglePlay = (e: MouseEvent) => {
     e.preventDefault()
@@ -92,12 +106,10 @@ export const CustomVideoPlayer = ({ src, className = '' }: CustomVideoPlayerProp
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
       <div className="pointer-events-none absolute inset-0 shadow-[inset_0_0_30px_rgba(0,0,0,0.8)]" />
 
-      {/* Player Controls (Glassmorphism) */}
       <div
         className={`absolute right-3 bottom-3 left-3 z-20 flex flex-col gap-2 rounded-xl border border-white/20 bg-white/10 p-2.5 shadow-xl backdrop-blur-md transition-all duration-300 ${isHovering ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Progress Bar */}
         <div
           className="group/bar relative h-1.5 w-full cursor-pointer overflow-hidden rounded-full bg-white/20"
           onClick={handleSeek}
@@ -108,7 +120,6 @@ export const CustomVideoPlayer = ({ src, className = '' }: CustomVideoPlayerProp
           />
         </div>
 
-        {/* Controls */}
         <div className="pointer-events-auto flex items-center justify-between">
           <button
             type="button"
@@ -133,4 +144,12 @@ export const CustomVideoPlayer = ({ src, className = '' }: CustomVideoPlayerProp
       </div>
     </div>
   )
+}
+
+/** Profile tile: image when src is a still, video player when src is video. */
+export const CustomVideoPlayer = (props: CustomVideoPlayerProps) => {
+  if (!isVideoUrl(props.src)) {
+    return <ProfileMediaImage {...props} />
+  }
+  return <ProfileVideoPlayer {...props} />
 }

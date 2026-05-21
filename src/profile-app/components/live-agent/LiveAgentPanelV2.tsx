@@ -4,6 +4,10 @@ import type { LiveAgentController } from '@/profile-app/components/live-agent/us
 import { AlertCircle, Bot, Loader2, Mic, MicOff, Square, Volume2 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 
+type LiveAgentPanelV2Props = LiveAgentController & {
+  embedded?: boolean
+}
+
 /** Link-in-bio template UI — zinc floating panel from profile v2. */
 export function LiveAgentPanelV2({
   isOpen,
@@ -15,13 +19,14 @@ export function LiveAgentPanelV2({
   setIsMuted,
   displayError,
   toggleConnection,
-}: LiveAgentController) {
+  embedded = false,
+}: LiveAgentPanelV2Props) {
+  const shellClass = embedded
+    ? 'vbiz-live-agent pointer-events-none relative flex flex-col items-end gap-3'
+    : 'vbiz-live-agent pointer-events-none fixed right-6 bottom-6 z-100 flex flex-col items-end gap-4 lg:right-10 lg:bottom-10'
+
   return (
-    <motion.div
-      drag
-      dragMomentum={false}
-      className="pointer-events-none fixed right-6 bottom-6 z-100 flex flex-col items-end gap-4 lg:right-10 lg:bottom-10"
-    >
+    <motion.div drag={!embedded} dragMomentum={false} className={shellClass}>
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -29,7 +34,7 @@ export function LiveAgentPanelV2({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-            className="pointer-events-auto relative flex w-72 flex-col gap-4 overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950/90 p-5 shadow-sm backdrop-blur-xl"
+            className={`pointer-events-auto relative flex flex-col gap-4 overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950/90 p-5 shadow-sm backdrop-blur-xl ${embedded ? 'w-[min(17rem,100%)]' : 'w-72'}`}
           >
             {isSpeaking && (
               <div className="pointer-events-none absolute inset-0 animate-pulse bg-linear-to-t from-zinc-800/30 via-transparent to-transparent opacity-50" />
@@ -101,7 +106,9 @@ export function LiveAgentPanelV2({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`pointer-events-auto relative flex h-14 w-14 items-center justify-center rounded-full border transition-all duration-300 ${
+        className={`pointer-events-auto relative flex items-center justify-center rounded-full border transition-all duration-300 ${
+          embedded ? 'h-12 w-12' : 'h-14 w-14'
+        } ${
           isOpen
             ? 'border-zinc-800 bg-zinc-900 text-zinc-400 shadow-sm hover:bg-zinc-800 hover:text-zinc-200'
             : 'border-white bg-zinc-100 text-zinc-950 shadow-sm hover:scale-105 active:scale-95'

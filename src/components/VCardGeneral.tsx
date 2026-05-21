@@ -2,7 +2,6 @@
 
 import { ServicesEditorPanel } from '@/components/vcard/ServicesEditorPanel'
 import { useVCard } from '@/lib/VCardContext'
-import { getDisplaySettingsFromVCard, patchDisplayField } from '@/lib/vcardDisplaySettings'
 import { createDefaultGeneralPost, normalizeGeneralPostList } from '@/lib/vcardGeneralPosts'
 import type { VCardGeneralPost } from '@/types/vcard'
 import {
@@ -22,15 +21,9 @@ const inputClasses =
 const selectClasses =
   'appearance-none bg-white dark:bg-[#0b0f19] border border-slate-200/80 dark:border-white/10 rounded-[16px] px-5 py-4 w-full text-[13px] font-medium text-slate-900 dark:text-white outline-none cursor-pointer focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all shadow-sm'
 
-const SERVICES_NAV_FIELD = 'Services'
-const BLOG_NAV_FIELD = 'Blog'
-
 export function TabGeneral() {
   const { vCardData, updateData } = useVCard()
   const posts = normalizeGeneralPostList(vCardData.generalPosts)
-  const display = getDisplaySettingsFromVCard(vCardData)
-  const blogVisible = display.fields[BLOG_NAV_FIELD]?.visible !== false
-  const servicesVisible = display.fields[SERVICES_NAV_FIELD]?.visible !== false
 
   const setPosts = (next: VCardGeneralPost[]) => {
     updateData('generalPosts', next)
@@ -48,21 +41,11 @@ export function TabGeneral() {
     setPosts(posts.map((p) => (p.id === id ? { ...p, [field]: value } : p)))
   }
 
-  const toggleBlogVisibility = () => {
-    updateData('displaySettings', patchDisplayField(display, BLOG_NAV_FIELD, { visible: !blogVisible }))
-  }
-
-  const toggleServicesVisibility = () => {
-    updateData('displaySettings', patchDisplayField(display, SERVICES_NAV_FIELD, { visible: !servicesVisible }))
-  }
-
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
       <ServicesEditorPanel
         services={vCardData.services}
         onServicesChange={(next) => updateData('services', next)}
-        sectionVisible={servicesVisible}
-        onToggleSectionVisibility={toggleServicesVisibility}
         accent="amber"
       />
 
@@ -74,24 +57,13 @@ export function TabGeneral() {
             </div>
             <h3 className="text-lg font-black text-amber-600 dark:text-amber-400">General Posts</h3>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex shrink-0 cursor-pointer items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 shadow-sm dark:border-white/10 dark:bg-[#0b0f19]">
-              <span className="text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-                Show in app
-              </span>
-              <div className="relative flex items-center justify-center">
-                <input type="checkbox" checked={blogVisible} onChange={toggleBlogVisibility} className="peer sr-only" />
-                <div className="peer h-6 w-10 rounded-full bg-slate-200 shadow-sm peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700" />
-              </div>
-            </label>
-            <button
-              type="button"
-              onClick={addPost}
-              className="hidden items-center justify-center gap-2 rounded-[12px] bg-amber-600 px-5 py-2.5 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-all hover:bg-amber-700 active:scale-95 sm:flex"
-            >
-              <Plus className="h-4 w-4" /> Add Post
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={addPost}
+            className="hidden items-center justify-center gap-2 rounded-[12px] bg-amber-600 px-5 py-2.5 text-sm font-bold whitespace-nowrap text-white shadow-sm transition-all hover:bg-amber-700 active:scale-95 sm:flex"
+          >
+            <Plus className="h-4 w-4" /> Add Post
+          </button>
         </div>
         <p className="mb-0 text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
           General information and updates shown in the Blog / Insights section. Changes appear instantly in the live
@@ -237,10 +209,18 @@ export function TabGeneral() {
                             type="checkbox"
                             checked={post.active}
                             onChange={(e) => updatePost(post.id, 'active', e.target.checked)}
-                            className="peer sr-only"
+                            className="sr-only"
                           />
-                          <div className="relative h-[22px] w-[38px] rounded-[12px] bg-slate-200 shadow-inner transition-colors peer-checked:bg-green-500 dark:bg-white/10">
-                            <div className="absolute top-[3px] left-[3px] h-4 w-4 rounded-[10px] bg-white shadow transition-transform peer-checked:translate-x-4" />
+                          <div
+                            className={`relative h-[22px] w-[38px] rounded-[12px] shadow-inner transition-colors ${
+                              post.active ? 'bg-green-500' : 'bg-slate-200 dark:bg-white/10'
+                            }`}
+                          >
+                            <div
+                              className={`absolute top-[3px] left-[3px] h-4 w-4 rounded-[10px] bg-white shadow transition-transform ${
+                                post.active ? 'translate-x-4' : 'translate-x-0'
+                              }`}
+                            />
                           </div>
                         </div>
                         <span className="text-[13px] font-bold text-slate-500 dark:text-slate-400">Active Status</span>

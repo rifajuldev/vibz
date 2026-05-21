@@ -1,6 +1,7 @@
 'use client'
 
 import { useVCard } from '@/lib/VCardContext'
+import { isVideoUrl } from '@/lib/mediaUrl'
 import { useVCardDisplayEditor } from '@/lib/useVCardDisplayEditor'
 import { Film, Image as ImageIcon, Link as LinkIcon, Upload, User, X } from 'lucide-react'
 import { useRef } from 'react'
@@ -18,10 +19,6 @@ function fileLabelFromUrl(url: string) {
   } catch {
     return 'Media file'
   }
-}
-
-function isVideoUrl(url: string) {
-  return /\.(mp4|webm|ogg)(\?|$)/i.test(url) || url.startsWith('blob:')
 }
 
 export function Tab1MediaProfile() {

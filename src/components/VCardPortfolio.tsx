@@ -52,7 +52,7 @@ export function TabPortfolio() {
   }
 
   const updatePortfolio = (id: number, field: keyof PortfolioItem, value: PortfolioItem[keyof PortfolioItem]) => {
-    setPortfolios(portfolios.map((p) => (p.id === id ? { ...p, [field]: value } : p)))
+    setPortfolios((prev) => prev.map((p) => (p.id === id ? { ...p, [field]: value } : p)))
   }
 
   const FeatureImageInput = ({ portfolio }: { portfolio: PortfolioItem }) => {
@@ -249,10 +249,18 @@ export function TabPortfolio() {
                           type="checkbox"
                           checked={portfolio.active}
                           onChange={(e) => updatePortfolio(portfolio.id, 'active', e.target.checked)}
-                          className="peer sr-only"
+                          className="sr-only"
                         />
-                        <div className="relative h-[22px] w-[38px] rounded-[12px] bg-slate-200 shadow-inner transition-colors peer-checked:bg-green-500 dark:bg-white/10">
-                          <div className="absolute top-[3px] left-[3px] h-4 w-4 rounded-[10px] bg-white shadow transition-transform peer-checked:translate-x-4"></div>
+                        <div
+                          className={`relative h-[22px] w-[38px] rounded-[12px] shadow-inner transition-colors ${
+                            portfolio.active ? 'bg-green-500' : 'bg-slate-200 dark:bg-white/10'
+                          }`}
+                        >
+                          <div
+                            className={`absolute top-[3px] left-[3px] h-4 w-4 rounded-[10px] bg-white shadow transition-transform ${
+                              portfolio.active ? 'translate-x-4' : 'translate-x-0'
+                            }`}
+                          />
                         </div>
                       </div>
                       <span className="text-[13px] font-bold text-slate-500 transition-colors group-hover:text-slate-700 dark:text-slate-400">

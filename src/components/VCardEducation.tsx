@@ -1,9 +1,9 @@
 'use client'
 
+import { VCardDateInput } from '@/components/vcard/VCardDateInput'
 import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
 import { useVCard } from '@/lib/VCardContext'
 import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
-import { getDisplaySettingsFromVCard, patchDisplayField } from '@/lib/vcardDisplaySettings'
 import { createDefaultEducationEntry, normalizeEducationList } from '@/lib/vcardEducation'
 import type { VCardEducationEntry } from '@/types/vcard'
 import { cn } from '@/utils/cn'
@@ -12,13 +12,9 @@ import { GraduationCap, Plus, Trash2 } from 'lucide-react'
 const inputClasses =
   'w-full bg-white dark:bg-[#0b0f19] border border-slate-200/80 dark:border-white/10 rounded-[16px] px-5 py-4 text-[13px] font-medium text-slate-900 dark:text-white transition-all outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm'
 
-const EDUCATION_NAV_FIELD = 'Resume'
-
 export function TabEducation() {
   const { vCardData, updateData } = useVCard()
   const educations = normalizeEducationList(vCardData.education)
-  const display = getDisplaySettingsFromVCard(vCardData)
-  const sectionVisible = display.fields[EDUCATION_NAV_FIELD]?.visible !== false
 
   const setEducations = (next: VCardEducationEntry[]) => {
     updateData('education', next)
@@ -53,48 +49,28 @@ export function TabEducation() {
     )
   }
 
-  const toggleSectionVisibility = () => {
-    updateData('displaySettings', patchDisplayField(display, EDUCATION_NAV_FIELD, { visible: !sectionVisible }))
-  }
-
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col duration-500">
       <VCardDocumentUpload section="education" onAutoFill={handleAutoFill} />
 
-      <div className="mb-8 flex flex-wrap items-start justify-between gap-4 rounded-[24px] border border-cyan-100 bg-cyan-50/50 p-6 dark:border-cyan-500/10 dark:bg-cyan-500/2">
-        <div>
-          <div className="mb-2 flex items-center gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-cyan-100 bg-cyan-50 dark:border-cyan-500/20 dark:bg-cyan-500/10">
-              <GraduationCap className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
-            </div>
-            <h3 className="text-lg font-black text-cyan-600 dark:text-cyan-400">Education History</h3>
+      <div className="mb-8 rounded-[24px] border border-cyan-100 bg-cyan-50/50 p-6 dark:border-cyan-500/10 dark:bg-cyan-500/2">
+        <div className="mb-2 flex items-center gap-4">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-cyan-100 bg-cyan-50 dark:border-cyan-500/20 dark:bg-cyan-500/10">
+            <GraduationCap className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
           </div>
-          <p className="mb-0 text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
-            Highlight your academic background and achievements. Changes appear instantly in the live preview (v1 and v2
-            layouts).
-          </p>
+          <h3 className="text-lg font-black text-cyan-600 dark:text-cyan-400">Education History</h3>
         </div>
-        <label className="flex shrink-0 cursor-pointer items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 shadow-sm dark:border-white/10 dark:bg-[#0b0f19]">
-          <span className="text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-            Show in app
-          </span>
-          <div className="relative flex items-center justify-center">
-            <input
-              type="checkbox"
-              checked={sectionVisible}
-              onChange={toggleSectionVisibility}
-              className="peer sr-only"
-            />
-            <div className="peer h-6 w-10 rounded-full bg-slate-200 shadow-sm peer-checked:bg-emerald-500 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-slate-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700" />
-          </div>
-        </label>
+        <p className="mb-0 text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
+          Highlight your academic background and achievements. Changes appear instantly in the live preview (v1 and v2
+          layouts).
+        </p>
       </div>
 
       <div className="space-y-8">
         {educations.map((edu, index) => (
           <section
             key={edu.id}
-            className="group/card overflow-hidden rounded-[32px] border border-transparent bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
+            className="group/card overflow-visible rounded-[32px] border border-transparent bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
           >
             <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
               <div className="flex items-center gap-4">
@@ -146,24 +122,22 @@ export function TabEducation() {
                 <label className="pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors group-focus-within:text-slate-500 dark:text-slate-400">
                   Start Date
                 </label>
-                <input
-                  type="date"
+                <VCardDateInput
                   value={edu.fromDate}
                   onChange={(e) => updateEducation(edu.id, 'fromDate', e.target.value)}
-                  className={`${inputClasses} [&::-webkit-calendar-picker-indicator]:invert`}
+                  className={inputClasses}
                 />
               </div>
               <div className="group flex flex-col space-y-1.5">
                 <label className="pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors group-focus-within:text-slate-500 dark:text-slate-400">
                   End Date
                 </label>
-                <input
-                  type="date"
+                <VCardDateInput
                   value={edu.toDate}
                   onChange={(e) => updateEducation(edu.id, 'toDate', e.target.value)}
                   disabled={edu.tillNow}
                   className={cn(
-                    `${inputClasses} [&::-webkit-calendar-picker-indicator]:invert`,
+                    inputClasses,
                     edu.tillNow ? 'cursor-not-allowed border-transparent bg-black/5 opacity-50' : ''
                   )}
                 />

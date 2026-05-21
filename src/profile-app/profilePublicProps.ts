@@ -20,7 +20,19 @@ import type {
 import type { VCardDisplaySettings } from '@/types/vcardDisplaySettings'
 
 const DEFAULT_COVER = 'https://app.vbizme.com/storage/ecard/backgroundVideos/91/Untitled%20design-36.mp4'
-const DEFAULT_AVATAR = 'https://app.vbizme.com/storage/ecard/profileimages/91/mc%20vbizme.mp4'
+/** Demo / fallback intro played in the avatar circle when no profile image is set. */
+export const DEFAULT_INTRO_VIDEO = 'https://app.vbizme.com/storage/ecard/profileimages/91/mc%20vbizme.mp4'
+
+/** Avatar circle: profile image/video first, otherwise intro video. */
+export function resolveProfileAvatarSrc(
+  avatarUrl?: string,
+  introUrl?: string | null,
+  fallbackIntro = DEFAULT_INTRO_VIDEO
+): string {
+  const avatar = avatarUrl?.trim()
+  if (avatar) return avatar
+  return introUrl?.trim() || fallbackIntro
+}
 
 export type VBizProfileAppProps = {
   explainerVideoUrl?: string | null
@@ -67,10 +79,7 @@ export function vCardDataToProfileProps(
   const homeMedia = getHomeMediaUrls(display, data.personal)
   const introUrl = homeMedia.introVideo || data.personal.explainerVideoUrl?.trim() || undefined
   const coverUrl = homeMedia.bgMedia || DEFAULT_COVER
-  const avatarUrl =
-    homeMedia.profileMedia ||
-    (meta?.avatarImageUrl?.includes('.mp4') ? meta.avatarImageUrl : undefined) ||
-    DEFAULT_AVATAR
+  const avatarOnly = homeMedia.profileMedia || meta?.avatarImageUrl?.trim() || undefined
 
   const showName = isFieldVisible(display, 'MyInfo section Name')
   const showTagline =
@@ -102,7 +111,7 @@ export function vCardDataToProfileProps(
     ownerName,
     tagline,
     coverVideoUrl: coverUrl,
-    avatarVideoUrl: avatarUrl,
+    avatarVideoUrl: avatarOnly,
     design: resolveProfileDesignFromData(data, designSettings),
     personal: data.personal,
     social: data.social ?? createDefaultVCardSocial(),
@@ -139,7 +148,7 @@ export const DEMO_PROFILE_PROPS: VBizProfileAppProps = {
   cardOwnerId: '91',
   ownerName: 'Michaelangelo C.',
   tagline: 'Visionary founder and growth strategist scaling vBiz ecosystem globally.',
+  explainerVideoUrl: DEFAULT_INTRO_VIDEO,
   coverVideoUrl: DEFAULT_COVER,
-  avatarVideoUrl: DEFAULT_AVATAR,
   liveAgentCardData: DEFAULT_LIVE_AGENT_CARD,
 }

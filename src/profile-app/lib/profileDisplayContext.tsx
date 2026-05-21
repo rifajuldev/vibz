@@ -6,10 +6,11 @@ import {
   getHomeMediaUrls,
   getPageColors,
   getPersonalValueForField,
-  isFieldVisible,
+  isFieldVisibleInProfile,
   resolveDisplaySettings,
 } from '@/lib/vcardDisplaySettings'
 import { createDefaultVCardSocial, getSocialHrefForDisplayLabel } from '@/lib/vcardSocial'
+import { useIsMobileViewport } from '@/profile-app/lib/useIsMobileViewport'
 import type {
   VCardEducationEntry,
   VCardExperienceEntry,
@@ -87,6 +88,10 @@ export function ProfileDisplayProvider({
   services,
   generalPosts,
   design,
+  /** Explicit avatar from card meta (merged into homeMedia.profileMedia). */
+  avatarMediaUrl,
+  /** Editor phone preview: show all sections regardless of Card Settings visibility. */
+  embedded = false,
 }: {
   children: React.ReactNode
   personal?: VCardPersonal
@@ -98,7 +103,11 @@ export function ProfileDisplayProvider({
   services?: VCardServiceEntry[]
   generalPosts?: VCardGeneralPost[]
   design?: ResolvedProfileDesign | null
+  avatarMediaUrl?: string
+  embedded?: boolean
 }) {
+  const isMobileViewport = useIsMobileViewport()
+
   const value = useMemo<ProfileDisplayContextValue>(() => {
     const settings = resolveDisplaySettings(displaySettings)
     const p = personal ?? FALLBACK_PERSONAL
@@ -118,14 +127,31 @@ export function ProfileDisplayProvider({
       services: svc,
       generalPosts: posts,
       design: design ?? null,
-      isVisible: (key: string) => isFieldVisible(settings, key),
+      isVisible: (key: string) => (embedded ? true : isFieldVisibleInProfile(settings, key, { isMobileViewport })),
       field: (key: string) => getFieldConfig(settings, key),
       personalValue: (fieldKey: string) => getPersonalValueForField(p, fieldKey),
       socialHref: (label: string) => getSocialHrefForDisplayLabel(label, soc, p.website),
       pageColors: getPageColors(settings),
-      homeMedia: getHomeMediaUrls(settings, p),
+      homeMedia: (() => {
+        const media = getHomeMediaUrls(settings, p)
+        const avatar = media.profileMedia || avatarMediaUrl?.trim() || ''
+        return avatar === media.profileMedia ? media : { ...media, profileMedia: avatar }
+      })(),
     }
-  }, [personal, displaySettings, social, extraFields, education, experience, services, generalPosts, design])
+  }, [
+    personal,
+    displaySettings,
+    social,
+    extraFields,
+    education,
+    experience,
+    services,
+    generalPosts,
+    design,
+    avatarMediaUrl,
+    embedded,
+    isMobileViewport,
+  ])
 
   return <ProfileDisplayContext.Provider value={value}>{children}</ProfileDisplayContext.Provider>
 }

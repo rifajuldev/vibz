@@ -53,7 +53,6 @@ import {
 } from './components/SimpleSections'
 import { SiteGeometricGrid } from './components/SiteGeometricGrid'
 import { VideoLinksSection } from './components/VideoLinksSection'
-import { hasNotificationChoice } from './lib/notificationPrefs'
 import { useProfileDisplay } from './lib/profileDisplayContext'
 import type { VBizProfileAppProps } from './profilePublicProps'
 import { DEMO_PROFILE_PROPS } from './profilePublicProps'
@@ -131,11 +130,7 @@ export function VBizProfileAppV1({
   const theme = embedded && previewTheme !== undefined ? previewTheme : internalTheme
   const [activeModal, setActiveModal] = useState<ModalState>('none')
   const [showPreloader, setShowPreloader] = useState(!embedded)
-  const [introAllowed, setIntroAllowed] = useState(false)
-  const [notificationFlowDone, setNotificationFlowDone] = useState(false)
-
-  const ownerId = cardOwnerId ?? '91'
-  const experienceReady = introAllowed && (hasNotificationChoice(ownerId) || notificationFlowDone)
+  const [introAllowed, setIntroAllowed] = useState(embedded)
 
   const endPreloader = useCallback(() => {
     setShowPreloader(false)
@@ -143,19 +138,10 @@ export function VBizProfileAppV1({
   }, [])
 
   useEffect(() => {
-    if (!explainerVideoUrl?.trim()) {
-      const t = window.setTimeout(() => endPreloader(), 900)
-      return () => window.clearTimeout(t)
-    }
-    return undefined
-  }, [explainerVideoUrl, endPreloader])
-
-  useEffect(() => {
-    if (!introAllowed || hasNotificationChoice(ownerId)) return
-    const onSettled = () => setNotificationFlowDone(true)
-    window.addEventListener('vbiz_profile_experience_settled', onSettled)
-    return () => window.removeEventListener('vbiz_profile_experience_settled', onSettled)
-  }, [introAllowed, ownerId])
+    if (embedded || explainerVideoUrl?.trim()) return
+    const t = window.setTimeout(() => endPreloader(), 900)
+    return () => window.clearTimeout(t)
+  }, [embedded, explainerVideoUrl, endPreloader])
 
   useEffect(() => {
     const handleOpenModal = () => setActiveModal('contact')
@@ -232,8 +218,24 @@ export function VBizProfileAppV1({
   }
 
   const shellClass = embedded
-    ? 'vbiz-profile-root vbiz-profile-v1 flex h-full min-h-0 w-full max-w-full flex-col overflow-hidden'
+    ? 'vbiz-profile-root vbiz-profile-v1 relative isolate flex min-h-0 w-full max-w-full flex-col overflow-x-clip overflow-y-visible'
     : 'vbiz-profile-root vbiz-profile-v1 flex h-screen w-screen flex-col overflow-hidden'
+
+  const v1NavClass = embedded
+    ? 'vbiz-v1-nav pointer-events-none fixed inset-x-0 top-9 z-50 flex justify-center px-2 sm:top-10'
+    : 'vbiz-v1-nav pointer-events-none fixed right-0 bottom-6 left-0 z-50 flex w-full justify-center px-4 lg:top-6 lg:bottom-auto'
+
+  const v1NavInnerClass = embedded
+    ? 'pointer-events-auto relative flex w-full min-w-0 max-w-[calc(100%-0.5rem)] items-center overflow-hidden rounded-full border border-black/5 bg-white p-1 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]'
+    : 'pointer-events-auto relative flex w-full max-w-[95vw] items-center overflow-hidden rounded-full border border-black/5 bg-white p-1.5 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] md:max-w-fit md:p-2 dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]'
+
+  const v1MainClass = embedded
+    ? 'vbiz-v1-main relative z-10 flex w-full flex-1 flex-col bg-white pt-16 pb-4 transition-colors duration-700 dark:bg-[#050505]'
+    : 'relative flex h-full w-full flex-1 flex-col overflow-y-auto bg-white pt-6 pb-28 transition-colors duration-700 lg:pt-28 lg:pb-6 dark:bg-[#050505]'
+
+  const v1MainInnerClass = embedded
+    ? 'vbiz-v1-main-inner relative z-10 flex h-full w-full max-w-full min-w-0 flex-1 flex-col px-0 py-0'
+    : 'relative z-10 mx-auto flex h-full w-full max-w-[1500px] flex-1 flex-col px-4 py-2 sm:px-6 lg:px-8'
 
   return (
     <div
@@ -303,64 +305,107 @@ export function VBizProfileAppV1({
         </motion.button>
       )}
 
-      <header className="pointer-events-none fixed right-0 bottom-6 left-0 z-50 flex w-full justify-center px-4 lg:top-6 lg:bottom-auto">
-        <div
-          className="pointer-events-auto relative flex w-full max-w-[95vw] items-center overflow-hidden rounded-full border border-black/5 bg-white p-1.5 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] md:max-w-fit md:p-2 dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]"
-          style={pageColors.navBg ? { backgroundColor: pageColors.navBg } : undefined}
-        >
-          <div className="no-scrollbar flex w-full cursor-grab items-center gap-2 overflow-x-auto scroll-smooth px-3 py-1 active:cursor-grabbing sm:gap-2.5 md:justify-center">
-            {visibleV1Tabs.map((tab) => {
-              const isActive = effectiveActiveTab === tab.id
-              const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
-              return (
-                <motion.button
-                  key={tab.id}
-                  animate={{ scale: isActive ? 1.05 : 1 }}
-                  whileHover={{ scale: 1.1, y: -1 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-500 sm:h-11 lg:h-12 lg:w-12 ${
-                    isActive
-                      ? 'text-black'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-white/40 dark:hover:bg-white/5 dark:hover:text-white'
-                  }`}
-                  title={tab.label}
-                  aria-label={tab.label}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="v1-activeTabIndicator"
-                      className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(234,179,8,0.5)]"
-                      style={{ backgroundColor: tabBg || accent }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
+      {embedded ? (
+        <header className={v1NavClass}>
+          <div className={v1NavInnerClass} style={pageColors.navBg ? { backgroundColor: pageColors.navBg } : undefined}>
+            <div className="vbiz-v1-nav-scroll mask-edges no-scrollbar flex min-w-0 flex-1 cursor-grab items-center gap-1.5 overflow-x-auto scroll-smooth px-2 py-0.5 active:cursor-grabbing">
+              {visibleV1Tabs.map((tab) => {
+                const isActive = effectiveActiveTab === tab.id
+                const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
+                return (
+                  <motion.button
+                    key={tab.id}
+                    animate={{ scale: isActive ? 1.05 : 1 }}
+                    whileHover={{ scale: 1.08, y: -1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-500 ${
+                      isActive
+                        ? 'text-black'
+                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-white/40 dark:hover:bg-white/5 dark:hover:text-white'
+                    }`}
+                    title={tab.label}
+                    aria-label={tab.label}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="v1-activeTabIndicator"
+                        className="absolute inset-0 rounded-full shadow-[0_0_16px_rgba(234,179,8,0.45)]"
+                        style={{ backgroundColor: tabBg || accent }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
+                      />
+                    )}
+                    <tab.icon
+                      size={isActive ? 18 : 16}
+                      className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-sm' : ''}`}
                     />
-                  )}
-                  <tab.icon
-                    size={isActive ? 22 : 20}
-                    className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-sm' : ''}`}
-                  />
-                </motion.button>
-              )
-            })}
+                  </motion.button>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      ) : null}
 
-      <main className="relative flex h-full w-full flex-1 flex-col overflow-y-auto bg-white pt-6 pb-28 transition-colors duration-700 lg:pt-28 lg:pb-6 dark:bg-[#050505]">
+      <main className={v1MainClass}>
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(234,179,8,0.05),transparent_50%)]" />
-        <div className="relative z-10 mx-auto flex h-full w-full max-w-[1500px] flex-1 flex-col px-4 py-2 sm:px-6 lg:px-8">
+        <div className={v1MainInnerClass}>
           <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
         </div>
       </main>
 
+      {!embedded ? (
+        <header className={v1NavClass}>
+          <div className={v1NavInnerClass} style={pageColors.navBg ? { backgroundColor: pageColors.navBg } : undefined}>
+            <div className="no-scrollbar flex w-full cursor-grab items-center gap-2 overflow-x-auto scroll-smooth px-3 py-1 active:cursor-grabbing sm:gap-2.5 md:justify-center">
+              {visibleV1Tabs.map((tab) => {
+                const isActive = effectiveActiveTab === tab.id
+                const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
+                return (
+                  <motion.button
+                    key={tab.id}
+                    animate={{ scale: isActive ? 1.05 : 1 }}
+                    whileHover={{ scale: 1.1, y: -1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-all duration-500 sm:h-11 lg:h-12 lg:w-12 ${
+                      isActive
+                        ? 'text-black'
+                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-white/40 dark:hover:bg-white/5 dark:hover:text-white'
+                    }`}
+                    title={tab.label}
+                    aria-label={tab.label}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="v1-activeTabIndicator"
+                        className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(234,179,8,0.5)]"
+                        style={{ backgroundColor: tabBg || accent }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
+                      />
+                    )}
+                    <tab.icon
+                      size={isActive ? 22 : 20}
+                      className={`relative z-10 transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-sm' : ''}`}
+                    />
+                  </motion.button>
+                )
+              })}
+            </div>
+          </div>
+        </header>
+      ) : null}
+
+      <LiveAgent
+        variant="v1"
+        embedded={embedded}
+        accentColor={design.accentColor}
+        cardData={liveAgentCardData}
+        readyToConnect={introAllowed}
+      />
+
       {!embedded && (
         <>
-          <LiveAgent
-            variant="v1"
-            accentColor={design.accentColor}
-            cardData={liveAgentCardData}
-            readyToConnect={experienceReady}
-          />
           <NotificationModal
             cardOwnerId={cardOwnerId ?? '91'}
             ownerName={liveAgentCardData?.ownerName ?? ownerName ?? 'Guest'}

@@ -34,6 +34,10 @@
   --primary-950: #1e1b4b;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   @apply bg-slate-50 font-sans text-slate-900 antialiased dark:bg-[#070a13] dark:text-slate-100;
 }

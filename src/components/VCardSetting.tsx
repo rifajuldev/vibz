@@ -923,7 +923,7 @@ export function TabSetting() {
 
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
-      <div className="relative flex min-h-[850px] w-full flex-col overflow-hidden rounded-[40px] border border-black/10 bg-slate-100/80 shadow-2xl backdrop-blur-3xl md:flex-row dark:border-white/10 dark:bg-[#0b0f19]/80">
+      <div className="relative flex min-h-[850px] w-full flex-col overflow-hidden rounded-[40px] border border-black/10 bg-slate-100/80 shadow-xl backdrop-blur-2xl md:flex-row dark:border-white/10 dark:bg-[#0b0f19]/80">
         {/* Subtle inner top highlight */}
         <div className="absolute inset-x-0 top-0 z-20 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent" />
 

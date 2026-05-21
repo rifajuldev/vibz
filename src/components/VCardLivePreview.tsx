@@ -54,7 +54,7 @@ export function VCardLivePreview({ isOpen, onClose }: { isOpen: boolean; onClose
 
       <div
         className={cn(
-          'pointer-events-auto relative z-100 flex w-full min-w-0 flex-col overflow-hidden',
+          'vbiz-preview-phone pointer-events-auto relative z-100 flex w-full min-w-0 flex-col overflow-hidden',
           'h-[min(92dvh,820px)] max-h-[92dvh] w-[min(100%,420px)]',
           'rounded-[32px] border-6 border-slate-200/80 bg-white shadow-[0_30px_60px_-12px_rgba(0,0,0,0.25)]',
           'animate-in slide-in-from-bottom-10 duration-500 ease-[0.23,1,0.32,1]',
@@ -69,7 +69,7 @@ export function VCardLivePreview({ isOpen, onClose }: { isOpen: boolean; onClose
           type="button"
           onClick={() => setPreviewTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
           aria-label={previewTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          className="absolute top-4 right-14 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/60 bg-white/90 text-slate-700 shadow-md backdrop-blur-md transition-colors hover:bg-white sm:top-6 sm:right-6 dark:border-white/15 dark:bg-zinc-900/90 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="absolute top-4 right-14 z-40 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200/60 bg-white/90 text-slate-700 shadow-md backdrop-blur-md transition-colors hover:bg-white sm:top-2 sm:right-4 dark:border-white/15 dark:bg-zinc-900/90 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
           {previewTheme === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}
         </button>
@@ -94,7 +94,7 @@ export function VCardLivePreview({ isOpen, onClose }: { isOpen: boolean; onClose
           </div>
         </div>
 
-        <div className="vbiz-preview-frame min-h-0 flex-1 scrollbar-gutter-stable overflow-x-hidden overflow-y-auto overscroll-contain">
+        <div className="vbiz-preview-frame vbiz-preview-scrollbar isolate min-h-0 flex-1 transform-[translateZ(0)] overflow-x-hidden overflow-y-auto overscroll-contain">
           <ProfileApp {...profileProps} embedded previewTheme={previewTheme} onPreviewThemeChange={setPreviewTheme} />
         </div>
       </div>

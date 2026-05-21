@@ -224,7 +224,7 @@ export default function VCardEdit() {
           {activeNav === 'Setting' ? (
             <TabSetting />
           ) : (
-            <div className="relative flex min-h-[700px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#0b0f19]">
+            <div className="relative flex min-h-[700px] flex-col overflow-visible rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#0b0f19]">
               {/* Subtle inner top highlight */}
               <div className="via-primary-500/10 absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent" />
 
