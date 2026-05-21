@@ -1,7 +1,5 @@
 'use client'
 
-import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
-import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
 import {
   ArrowRight,
   BarChart3,
@@ -73,10 +71,6 @@ export function TabLinkShortener() {
     setLinks(links.filter((l) => l.id !== id))
   }
 
-  const handleAutoFill = (fields: VCardAutoFillResult) => {
-    if (fields.urls) setInputText(fields.urls)
-  }
-
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -92,12 +86,12 @@ export function TabLinkShortener() {
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
       {/* Header & Main Input */}
       <div className="flex flex-col items-center justify-center pt-8 pb-4 text-center">
-        <div className="mb-6 flex h-16 w-16 rotate-12 transform items-center justify-center rounded-[20px] bg-gradient-to-tr from-slate-900 to-slate-700 shadow-xl shadow-black/10 dark:from-white dark:to-slate-300 dark:shadow-white/10">
+        <div className="mb-6 flex h-16 w-16 rotate-12 transform items-center justify-center rounded-[20px] bg-linear-to-tr from-slate-900 to-slate-700 shadow-xl shadow-black/10 dark:from-white dark:to-slate-300 dark:shadow-white/10">
           <Link2 className="h-8 w-8 -rotate-12 text-white dark:text-slate-900" />
         </div>
         <h2 className="mb-4 text-3xl font-black tracking-tight text-slate-900 md:text-5xl dark:text-white">
           Link{' '}
-          <span className="from-primary-500 to-primary-400 bg-gradient-to-r bg-clip-text text-transparent">
+          <span className="from-primary-500 to-primary-400 bg-linear-to-r bg-clip-text text-transparent">
             Shortener
           </span>
         </h2>
@@ -107,8 +101,6 @@ export function TabLinkShortener() {
       </div>
 
       <div className="mx-auto w-full max-w-3xl">
-        <VCardDocumentUpload section="link-shortener" onAutoFill={handleAutoFill} className="mb-6" />
-
         {/* Main Card */}
         <div className="relative overflow-hidden rounded-[32px] border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-2xl md:p-8 dark:border-white/10 dark:bg-slate-900/80 dark:shadow-none">
           {/* Background decorative glow */}
@@ -243,7 +235,7 @@ export function TabLinkShortener() {
 
       {/* QR Code Modal */}
       {showQRModal && (
-        <div className="animate-in fade-in fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm duration-200 dark:bg-black/60">
+        <div className="animate-in fade-in fixed inset-0 z-100 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm duration-200 dark:bg-black/60">
           <div className="animate-in zoom-in-95 hidden-scrollbar relative max-h-[90vh] w-full max-w-[400px] overflow-hidden overflow-y-auto rounded-[32px] border border-black/10 bg-white p-8 shadow-2xl duration-300 dark:border-white/10 dark:bg-[#0b0f19]">
             <button
               onClick={() => setShowQRModal(null)}

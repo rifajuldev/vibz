@@ -1,7 +1,5 @@
 'use client'
 
-import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
-import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
 import { BellRing, Image as ImageIcon, LayoutGrid, Link as LinkIcon, Plus, Trash2, Type, Wrench } from 'lucide-react'
 import { useState } from 'react'
 
@@ -46,26 +44,9 @@ export function TabServices() {
     setServices(services.map((s) => (s.id === id ? { ...s, [field]: value } : s)))
   }
 
-  const handleAutoFill = (fields: VCardAutoFillResult) => {
-    const seed: ServiceItem = {
-      id: Date.now(),
-      type: fields.type || '',
-      title: fields.title || '',
-      description: fields.description || '',
-      url: fields.url || '',
-      featuredImage: fields.featuredImage || '',
-      active: true,
-    }
-    setServices((prev) =>
-      prev.length === 0 ? [seed] : prev.map((s, i) => (i === 0 ? { ...s, ...seed, id: s.id } : s))
-    )
-  }
-
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
-      <VCardDocumentUpload section="services" onAutoFill={handleAutoFill} />
-
-      <div className="mb-8 rounded-[24px] border border-indigo-100 bg-indigo-50/50 p-6 dark:border-indigo-500/10 dark:bg-indigo-500/[0.02]">
+      <div className="mb-8 rounded-[24px] border border-indigo-100 bg-indigo-50/50 p-6 dark:border-indigo-500/10 dark:bg-indigo-500/2">
         <div className="mb-2 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-indigo-100 bg-indigo-50 dark:border-indigo-500/20 dark:bg-indigo-500/10">
@@ -93,7 +74,7 @@ export function TabServices() {
 
       <div className="flex flex-1 flex-col">
         {services.length === 0 ? (
-          <div className="rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-12 text-center shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
+          <div className="rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-12 text-center shadow-sm dark:border-white/5 dark:bg-white/2">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] border border-slate-200 bg-slate-100 dark:border-white/5 dark:bg-white/5">
               <BellRing className="h-8 w-8 text-slate-400" />
             </div>
@@ -105,7 +86,7 @@ export function TabServices() {
             {services.map((service, index) => (
               <section
                 key={service.id}
-                className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 border-transparent bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/[0.02]"
+                className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
               >
                 <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
                   <div className="flex items-center gap-4">
@@ -172,7 +153,7 @@ export function TabServices() {
                       Service Description
                     </label>
                     <div className="overflow-hidden rounded-[16px] border border-slate-200/80 bg-white shadow-sm transition-all focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 dark:border-white/10 dark:bg-[#0b0f19]">
-                      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/50 bg-slate-50/50 px-4 py-3 dark:border-white/5 dark:bg-white/[0.02]">
+                      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/50 bg-slate-50/50 px-4 py-3 dark:border-white/5 dark:bg-white/2">
                         {/* Fake toolbar for visual resemblance to rich text editor */}
                         <span className="mr-2 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                           Format
@@ -220,7 +201,7 @@ export function TabServices() {
                       <ImageIcon className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" /> Featured Image
                     </label>
                     <div className="group flex overflow-hidden rounded-[16px] border border-slate-200/80 shadow-sm transition-colors focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 dark:border-white/10">
-                      <span className="cursor-pointer border-r border-slate-200/50 bg-slate-50 px-5 py-4 text-[13px] font-bold whitespace-nowrap text-slate-700 transition-colors group-hover:text-indigo-600 hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-200 dark:group-hover:text-indigo-400 dark:hover:bg-white/[0.05]">
+                      <span className="cursor-pointer border-r border-slate-200/50 bg-slate-50 px-5 py-4 text-[13px] font-bold whitespace-nowrap text-slate-700 transition-colors group-hover:text-indigo-600 hover:bg-slate-100 dark:border-white/5 dark:bg-white/2 dark:text-slate-200 dark:group-hover:text-indigo-400 dark:hover:bg-white/5">
                         Choose File
                       </span>
                       <span className="flex w-full items-center truncate bg-white px-5 py-4 text-[13px] font-medium text-slate-500 dark:bg-[#0b0f19] dark:text-slate-400">

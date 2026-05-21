@@ -1,7 +1,5 @@
 'use client'
 
-import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
-import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
 import {
   FileText,
   FolderOpen,
@@ -57,22 +55,6 @@ export function TabPortfolio() {
     setPortfolios(portfolios.map((p) => (p.id === id ? { ...p, [field]: value } : p)))
   }
 
-  const handleAutoFill = (fields: VCardAutoFillResult) => {
-    const seed: PortfolioItem = {
-      id: Date.now(),
-      type: fields.type || 'Web App',
-      title: fields.title || '',
-      featuredImage: null,
-      attachments: null,
-      youtubeUrl: fields.youtubeUrl || '',
-      active: true,
-      description: fields.description || '',
-    }
-    setPortfolios((prev) =>
-      prev.length === 0 ? [seed] : prev.map((p, i) => (i === 0 ? { ...p, ...seed, id: p.id } : p))
-    )
-  }
-
   const FeatureImageInput = ({ portfolio }: { portfolio: PortfolioItem }) => {
     const fileRef = useRef<HTMLInputElement>(null)
     return (
@@ -95,7 +77,7 @@ export function TabPortfolio() {
           />
           <button
             onClick={() => fileRef.current?.click()}
-            className="cursor-pointer border-r border-slate-200/50 bg-slate-50 px-5 py-4 text-[13px] font-bold whitespace-nowrap text-slate-700 transition-colors group-hover/input:text-teal-600 hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-200 dark:group-hover/input:text-teal-400 dark:hover:bg-white/[0.05]"
+            className="cursor-pointer border-r border-slate-200/50 bg-slate-50 px-5 py-4 text-[13px] font-bold whitespace-nowrap text-slate-700 transition-colors group-hover/input:text-teal-600 hover:bg-slate-100 dark:border-white/5 dark:bg-white/2 dark:text-slate-200 dark:group-hover/input:text-teal-400 dark:hover:bg-white/5"
           >
             Choose File
           </button>
@@ -129,7 +111,7 @@ export function TabPortfolio() {
           />
           <button
             onClick={() => fileRef.current?.click()}
-            className="cursor-pointer border-r border-slate-200/50 bg-slate-50 px-5 py-4 text-[13px] font-bold whitespace-nowrap text-slate-700 transition-colors group-hover/input:text-teal-600 hover:bg-slate-100 dark:border-white/5 dark:bg-white/[0.02] dark:text-slate-200 dark:group-hover/input:text-teal-400 dark:hover:bg-white/[0.05]"
+            className="cursor-pointer border-r border-slate-200/50 bg-slate-50 px-5 py-4 text-[13px] font-bold whitespace-nowrap text-slate-700 transition-colors group-hover/input:text-teal-600 hover:bg-slate-100 dark:border-white/5 dark:bg-white/2 dark:text-slate-200 dark:group-hover/input:text-teal-400 dark:hover:bg-white/5"
           >
             Choose Files
           </button>
@@ -143,9 +125,7 @@ export function TabPortfolio() {
 
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
-      <VCardDocumentUpload section="portfolio" onAutoFill={handleAutoFill} />
-
-      <div className="mb-8 rounded-[24px] border border-teal-100 bg-teal-50/50 p-6 dark:border-teal-500/10 dark:bg-teal-500/[0.02]">
+      <div className="mb-8 rounded-[24px] border border-teal-100 bg-teal-50/50 p-6 dark:border-teal-500/10 dark:bg-teal-500/2">
         <div className="mb-2 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-teal-100 bg-teal-50 dark:border-teal-500/20 dark:bg-teal-500/10">
@@ -173,7 +153,7 @@ export function TabPortfolio() {
 
       <div className="flex flex-1 flex-col">
         {portfolios.length === 0 ? (
-          <div className="rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-12 text-center shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
+          <div className="rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-12 text-center shadow-sm dark:border-white/5 dark:bg-white/2">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] border border-slate-200 bg-slate-100 dark:border-white/5 dark:bg-white/5">
               <FolderOpen className="h-8 w-8 text-slate-400" />
             </div>
@@ -185,7 +165,7 @@ export function TabPortfolio() {
             {portfolios.map((portfolio, index) => (
               <section
                 key={portfolio.id}
-                className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 border-transparent bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/[0.02]"
+                className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
               >
                 <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
                   <div className="flex items-center gap-4">

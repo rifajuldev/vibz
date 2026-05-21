@@ -2,7 +2,7 @@
 
 import { useAppSelector } from '@/hooks/redux'
 import { CardScopeProvider } from '@/lib/card-scope'
-import { VBizProfileApp } from '@/profile-app/VBizProfileApp'
+import { ProfileApp } from '@/profile-app/ProfileApp'
 import '@/profile-app/profile-app.css'
 import { vCardRecordToProfileProps } from '@/profile-app/profilePublicProps'
 import { selectVCardById, selectVCardIdBySlug } from '@/redux/features/vcards/vcards.slice'
@@ -28,7 +28,7 @@ export default function VCardPublicProfilePreview({ slug }: { slug: string }) {
 
   return (
     <CardScopeProvider cardId={cardId}>
-      <VBizProfileApp {...profileProps} />
+      <ProfileApp {...profileProps} />
     </CardScopeProvider>
   )
 }

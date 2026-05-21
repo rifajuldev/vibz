@@ -2,13 +2,13 @@
 
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useCardScopeId, useCardScopeMode } from '@/lib/card-scope'
-import { setFontFamily, setVcardBranding } from '@/redux/features/designSettings/designSettings.slice'
+import { designSettingsToVCardDefaults } from '@/lib/vcardDesignDefaults'
 import { addVCard, replaceVCardData, selectVCardById } from '@/redux/features/vcards/vcards.slice'
 import type { RootState } from '@/redux/store'
 import type { VCardData, VCardRecord } from '@/types/vcard'
 import { createDefaultVCardData } from '@/types/vcard'
 import { useRouter } from 'next/navigation'
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react'
 
 interface VCardContextType {
   cardId: string | null
@@ -56,14 +56,16 @@ function newCardId() {
 }
 
 function buildCreateDraft(design: RootState['designSettings']): VCardData {
+  const defaults = designSettingsToVCardDefaults(design)
   return createDefaultVCardData({
-    theme: {
-      primaryColor: design.vcardPrimaryColor,
-      accentColor: design.vcardAccentColor,
-      darkMode: true,
-      fontFamily: design.fontFamily,
-    },
+    theme: defaults.theme,
+    appearance: defaults.appearance,
   })
+}
+
+function designDefaultsSignature(design: RootState['designSettings']): string {
+  const d = designSettingsToVCardDefaults(design)
+  return JSON.stringify(d)
 }
 
 export function VCardProvider({ children }: { children: React.ReactNode }) {
@@ -75,57 +77,20 @@ export function VCardProvider({ children }: { children: React.ReactNode }) {
   const design = useAppSelector((s) => s.designSettings)
   const record = useAppSelector((s: RootState) => selectVCardById(s, cardId))
 
-  const syncedDesignTheme = {
-    primaryColor: design.vcardPrimaryColor,
-    accentColor: design.vcardAccentColor,
-    fontFamily: design.fontFamily,
-  }
+  const accountDefaultsSig = designDefaultsSignature(design)
 
   const [createDraft, setCreateDraft] = useState<VCardData>(() => buildCreateDraft(design))
-  const [appliedDesignTheme, setAppliedDesignTheme] = useState(syncedDesignTheme)
+  const [appliedDefaultsSig, setAppliedDefaultsSig] = useState(accountDefaultsSig)
 
-  if (
-    isCreateMode &&
-    (appliedDesignTheme.primaryColor !== syncedDesignTheme.primaryColor ||
-      appliedDesignTheme.accentColor !== syncedDesignTheme.accentColor ||
-      appliedDesignTheme.fontFamily !== syncedDesignTheme.fontFamily)
-  ) {
-    setAppliedDesignTheme(syncedDesignTheme)
+  if (isCreateMode && accountDefaultsSig !== appliedDefaultsSig) {
+    setAppliedDefaultsSig(accountDefaultsSig)
+    const defaults = designSettingsToVCardDefaults(design)
     setCreateDraft((prev) => ({
       ...prev,
-      theme: {
-        ...prev.theme,
-        ...syncedDesignTheme,
-      },
+      theme: { ...prev.theme, ...defaults.theme },
+      appearance: defaults.appearance,
     }))
   }
-
-  useEffect(() => {
-    if (isCreateMode || !cardId || !record) return
-    const dataOnly = toVCardData(record)
-    const theme = dataOnly.theme
-    if (
-      theme.primaryColor === design.vcardPrimaryColor &&
-      theme.accentColor === design.vcardAccentColor &&
-      (theme.fontFamily ?? 'inter') === design.fontFamily
-    ) {
-      return
-    }
-    dispatch(
-      replaceVCardData({
-        id: cardId,
-        data: {
-          ...dataOnly,
-          theme: {
-            ...theme,
-            primaryColor: design.vcardPrimaryColor,
-            accentColor: design.vcardAccentColor,
-            fontFamily: design.fontFamily,
-          },
-        },
-      })
-    )
-  }, [isCreateMode, cardId, record, design.vcardPrimaryColor, design.vcardAccentColor, design.fontFamily, dispatch])
 
   const vCardData: VCardData = useMemo(() => {
     if (isCreateMode) return createDraft
@@ -135,16 +100,6 @@ export function VCardProvider({ children }: { children: React.ReactNode }) {
 
   const updateData = useCallback(
     (path: string, value: unknown) => {
-      if (path === 'theme.primaryColor' && typeof value === 'string') {
-        dispatch(setVcardBranding({ primary: value }))
-      }
-      if (path === 'theme.accentColor' && typeof value === 'string') {
-        dispatch(setVcardBranding({ accent: value }))
-      }
-      if (path === 'theme.fontFamily' && typeof value === 'string') {
-        dispatch(setFontFamily(value))
-      }
-
       if (isCreateMode) {
         setCreateDraft(
           (prev) => setByPath(prev as unknown as Record<string, unknown>, path, value) as unknown as VCardData
@@ -170,12 +125,15 @@ export function VCardProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Please set a public URL slug before creating the vCard.')
       }
       const id = newCardId()
+      const defaults = designSettingsToVCardDefaults(design)
       dispatch(
         addVCard({
           id,
           seed: {
             ...createDraft,
             slug,
+            theme: { ...defaults.theme, ...createDraft.theme },
+            appearance: createDraft.appearance ?? defaults.appearance,
           },
         })
       )
@@ -188,7 +146,7 @@ export function VCardProvider({ children }: { children: React.ReactNode }) {
     }
     dispatch(replaceVCardData({ id: cardId, data: toVCardData(record) }))
     alert('Profile saved locally. It will sync to the server when the API is connected.')
-  }, [isCreateMode, createDraft, cardId, dispatch, record, router])
+  }, [isCreateMode, createDraft, design, cardId, dispatch, record, router])
 
   const value = useMemo(
     () => ({

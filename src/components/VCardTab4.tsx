@@ -1,7 +1,5 @@
 'use client'
 
-import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
-import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
 import {
   Check,
   CreditCard,
@@ -18,6 +16,7 @@ import {
   Wand2,
   X,
 } from 'lucide-react'
+import Image from 'next/image'
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
 
 function FieldGroup({ label, children, icon }: { label: string; children: ReactNode; icon?: ReactNode }) {
@@ -87,19 +86,21 @@ function GalleryModal({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="no-scrollbar grid max-h-[60vh] grid-cols-1 gap-5 overflow-y-auto bg-slate-50/50 p-8 sm:grid-cols-2 md:grid-cols-4 dark:bg-white/[0.02]">
+        <div className="no-scrollbar grid max-h-[60vh] grid-cols-1 gap-5 overflow-y-auto bg-slate-50/50 p-8 sm:grid-cols-2 md:grid-cols-4 dark:bg-white/2">
           {videos.map((v) => (
             <div
               key={v.id}
               onClick={() => onSelect(v)}
               className="hover:border-primary-500 group relative aspect-video cursor-pointer overflow-hidden rounded-[20px] border-2 border-transparent bg-slate-200 shadow-sm dark:bg-slate-800"
             >
-              <img
+              <Image
                 src={v.img}
                 alt={v.title}
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                width={100}
+                height={100}
               />
-              <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
+              <div className="absolute inset-0 flex items-end bg-linear-to-t from-black/80 via-black/20 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
                 <span className="truncate text-[12px] font-bold text-white">{v.title}</span>
               </div>
             </div>
@@ -203,10 +204,12 @@ function CustomOrderModal({ onClose }: { onClose: () => void }) {
           <div className="space-y-8 bg-white p-6 sm:p-8 md:w-1/2 dark:bg-[#0b0f19]">
             <div className="flex gap-5">
               <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[20px] border border-black/5 bg-slate-50 sm:h-28 sm:w-28 dark:border-white/5 dark:bg-[#0b0f19]">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&q=80&w=200&h=200"
                   alt="Custom Video"
                   className="h-full w-full object-cover"
+                  width={100}
+                  height={100}
                 />
               </div>
               <div className="space-y-1">
@@ -335,10 +338,10 @@ function CanvaIntegrationModal({
       }, 2500)
       return () => clearTimeout(timer)
     }
-  }, [step])
+  }, [onClose, onSelectVideo, step])
 
   return (
-    <div className="animate-in fade-in fixed inset-0 z-[100] flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm duration-200 dark:bg-white/20">
+    <div className="animate-in fade-in fixed inset-0 z-100 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm duration-200 dark:bg-white/20">
       <div className="animate-in zoom-in-95 relative w-full max-w-[400px] overflow-hidden rounded-[28px] border border-black/10 bg-white p-8 shadow-2xl duration-300 dark:border-white/10 dark:bg-[#0b0f19]">
         <button
           onClick={onClose}
@@ -348,7 +351,7 @@ function CanvaIntegrationModal({
         </button>
 
         <div className="text-center">
-          <div className="mx-auto mb-6 h-20 w-20 rounded-[24px] bg-gradient-to-tr from-[#00C4CC] to-[#7D2AE8] p-[2px] shadow-[0_0_30px_rgba(125,42,232,0.3)]">
+          <div className="mx-auto mb-6 h-20 w-20 rounded-[24px] bg-linear-to-tr from-[#00C4CC] to-[#7D2AE8] p-[2px] shadow-[0_0_30px_rgba(125,42,232,0.3)]">
             <div className="flex h-full w-full items-center justify-center rounded-[22px] bg-white dark:bg-[#0b0f19]">
               <Palette className="h-10 w-10 text-[#00C4CC]" />
             </div>
@@ -367,7 +370,7 @@ function CanvaIntegrationModal({
           {step === 'connect' && (
             <button
               onClick={handleConnect}
-              className="w-full rounded-[16px] border border-black/10 bg-white py-4 text-[15px] font-bold text-slate-900 transition-all hover:bg-slate-50 hover:bg-slate-200 active:scale-95 dark:border-white/10 dark:bg-[#0b0f19] dark:text-white"
+              className="w-full rounded-[16px] border border-black/10 bg-white py-4 text-[15px] font-bold text-slate-900 transition-all hover:bg-slate-50 active:scale-95 dark:border-white/10 dark:bg-[#0b0f19] dark:text-white"
             >
               Connect Canva
             </button>
@@ -382,7 +385,7 @@ function CanvaIntegrationModal({
           {step === 'connected' && (
             <button
               onClick={handleOpenEditor}
-              className="w-full rounded-[16px] bg-gradient-to-r from-[#00C4CC] to-[#7D2AE8] py-4 text-[15px] font-bold text-white shadow-[0_0_20px_rgba(0,196,204,0.3)] transition-all hover:opacity-90 active:scale-95"
+              className="w-full rounded-[16px] bg-linear-to-r from-[#00C4CC] to-[#7D2AE8] py-4 text-[15px] font-bold text-white shadow-[0_0_20px_rgba(0,196,204,0.3)] transition-all hover:opacity-90 active:scale-95"
             >
               Create Video with Canva
             </button>
@@ -392,7 +395,7 @@ function CanvaIntegrationModal({
             <div className="flex flex-col items-center py-4">
               <Loader2 className="mb-4 h-10 w-10 animate-spin text-[#7D2AE8]" />
               <div className="h-2 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
-                <div className="h-full w-full animate-pulse bg-gradient-to-r from-[#00C4CC] to-[#7D2AE8]"></div>
+                <div className="h-full w-full animate-pulse bg-linear-to-r from-[#00C4CC] to-[#7D2AE8]"></div>
               </div>
             </div>
           )}
@@ -412,15 +415,6 @@ export function Tab4HomeMedia() {
   const [musicYoutubeUrl, setMusicYoutubeUrl] = useState('')
   const [musicStart, setMusicStart] = useState('0')
   const [musicEnd, setMusicEnd] = useState('0')
-
-  const handleAutoFill = (fields: VCardAutoFillResult) => {
-    if (fields.introYoutubeUrl) setIntroYoutubeUrl(fields.introYoutubeUrl)
-    if (fields.introStart) setIntroStart(fields.introStart)
-    if (fields.introEnd) setIntroEnd(fields.introEnd)
-    if (fields.musicYoutubeUrl) setMusicYoutubeUrl(fields.musicYoutubeUrl)
-    if (fields.musicStart) setMusicStart(fields.musicStart)
-    if (fields.musicEnd) setMusicEnd(fields.musicEnd)
-  }
 
   const [showGalleryModal, setShowGalleryModal] = useState(false)
   const [showCustomModal, setShowCustomModal] = useState(false)
@@ -447,9 +441,7 @@ export function Tab4HomeMedia() {
 
   return (
     <div className="animate-in fade-in mx-auto w-full max-w-7xl pb-12 duration-500">
-      <VCardDocumentUpload section="home-media" onAutoFill={handleAutoFill} />
-
-      <div className="bg-primary-50/50 dark:bg-primary-500/[0.02] border-primary-100 dark:border-primary-500/10 mb-8 rounded-[24px] border p-6">
+      <div className="bg-primary-50/50 dark:bg-primary-500/2 border-primary-100 dark:border-primary-500/10 mb-8 rounded-[24px] border p-6">
         <h3 className="text-primary-600 dark:text-primary-400 mb-2 text-lg font-black">Home Page Media</h3>
         <p className="mb-0 text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
           Set the background, intro video and background music for your vCard homepage. All fields are optional.
@@ -458,7 +450,7 @@ export function Tab4HomeMedia() {
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Intro Video */}
-        <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
+        <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
           <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <Video className="text-primary-600 dark:text-primary-400 h-5 w-5" />
@@ -552,7 +544,7 @@ export function Tab4HomeMedia() {
         </section>
 
         {/* Background Music */}
-        <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
+        <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
           <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-emerald-100 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/10">
               <Music className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -624,7 +616,7 @@ export function Tab4HomeMedia() {
         </section>
 
         {/* Background Video / Image */}
-        <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm lg:col-span-2 dark:border-white/5 dark:bg-white/[0.02]">
+        <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm lg:col-span-2 dark:border-white/5 dark:bg-white/2">
           <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <ImageIcon className="text-primary-600 dark:text-primary-400 h-5 w-5" />

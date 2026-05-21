@@ -2,7 +2,7 @@
 
 import { useAppSelector } from '@/hooks/redux'
 import { useVCard } from '@/lib/VCardContext'
-import { VBizProfileApp } from '@/profile-app/VBizProfileApp'
+import { ProfileApp } from '@/profile-app/ProfileApp'
 import '@/profile-app/profile-app.css'
 import { vCardDataToProfileProps } from '@/profile-app/profilePublicProps'
 import { selectVCardById } from '@/redux/features/vcards/vcards.slice'
@@ -95,12 +95,7 @@ export function VCardLivePreview({ isOpen, onClose }: { isOpen: boolean; onClose
         </div>
 
         <div className="vbiz-preview-frame min-h-0 flex-1 scrollbar-gutter-stable overflow-x-hidden overflow-y-auto overscroll-contain">
-          <VBizProfileApp
-            {...profileProps}
-            embedded
-            previewTheme={previewTheme}
-            onPreviewThemeChange={setPreviewTheme}
-          />
+          <ProfileApp {...profileProps} embedded previewTheme={previewTheme} onPreviewThemeChange={setPreviewTheme} />
         </div>
       </div>
     </div>

@@ -286,3 +286,19 @@
     gap: 0.5rem;
   }
 }
+
+/* Template v1 — embedded preview */
+.vbiz-profile-v1[data-embedded] {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.vbiz-profile-v1[data-embedded] header {
+  bottom: 0.75rem;
+  top: auto;
+}
+
+.vbiz-profile-v1[data-embedded] main {
+  padding-top: 1rem;
+  padding-bottom: 5.5rem;
+}

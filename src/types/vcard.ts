@@ -1,9 +1,19 @@
+import type { ProfileTemplateId } from '@/redux/features/designSettings/designSettings.slice'
+
 export type VCardTheme = {
   primaryColor: string
   accentColor: string
   darkMode: boolean
   /** Matches Settings → Appearance typography id when synced */
   fontFamily?: string
+}
+
+/** Per-vCard template & layout snapshot (defaults copied from account profile settings on create). */
+export type VCardAppearance = {
+  profileTemplate: ProfileTemplateId
+  layoutStyle: string
+  buttonStyle: string
+  cornerStyle: string
 }
 
 export type VCardPersonal = {
@@ -28,6 +38,8 @@ export type VCardData = {
   isPublic: boolean
   personal: VCardPersonal
   theme: VCardTheme
+  /** Template, layout, and button styles for this card (from account defaults on create). */
+  appearance?: VCardAppearance
   services: unknown[]
   portfolio: unknown[]
   socials: unknown[]
@@ -73,6 +85,7 @@ export function createDefaultVCardData(overrides?: Partial<VCardData>): VCardDat
       darkMode: true,
       fontFamily: 'inter',
     },
+    appearance: { ...DEFAULT_VCARD_APPEARANCE },
     services: [],
     portfolio: [],
     socials: [],
@@ -83,5 +96,13 @@ export function createDefaultVCardData(overrides?: Partial<VCardData>): VCardDat
     ...overrides,
     personal: { ...base.personal, ...overrides.personal },
     theme: { ...base.theme, ...overrides.theme },
+    appearance: overrides.appearance ? { ...DEFAULT_VCARD_APPEARANCE, ...overrides.appearance } : base.appearance,
   }
+}
+
+export const DEFAULT_VCARD_APPEARANCE: VCardAppearance = {
+  profileTemplate: 'v2',
+  layoutStyle: 'classic',
+  buttonStyle: 'solid',
+  cornerStyle: 'round',
 }

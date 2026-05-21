@@ -1,8 +1,10 @@
 'use client'
 
-import { useAppDispatch, useAppSelector } from '@/hooks/redux'
+import { ProfileTemplateLayoutSettings } from '@/components/ProfileTemplateLayoutSettings'
+import { useAppSelector } from '@/hooks/redux'
 import { useVCard } from '@/lib/VCardContext'
-import { setButtonStyle, setCornerStyle, setLayoutStyle } from '@/redux/features/designSettings/designSettings.slice'
+import { appearanceFromDesignSettings } from '@/lib/vcardDesignDefaults'
+import type { VCardAppearance } from '@/types/vcard'
 import { cn } from '@/utils/cn'
 import {
   ChevronDown,
@@ -263,31 +265,24 @@ function Toggle({ isPro = false, defaultChecked = false }: { isPro?: boolean; de
 
 function TemplateDesigner() {
   const { vCardData, updateData } = useVCard()
-  const dispatch = useAppDispatch()
-  const layoutStyle = useAppSelector((s) => s.designSettings.layoutStyle)
-  const buttonStyle = useAppSelector((s) => s.designSettings.buttonStyle)
-  const cornerStyle = useAppSelector((s) => s.designSettings.cornerStyle)
+  const accountDesign = useAppSelector((s) => s.designSettings)
 
-  const layoutFromStyle = layoutStyle === 'hero' ? 'Hero' : 'Classic'
+  const cardAppearance: VCardAppearance = vCardData.appearance ?? appearanceFromDesignSettings(accountDesign)
 
-  const [layoutPick, setLayoutPick] = useState(layoutFromStyle)
-  const [prevLayoutStyle, setPrevLayoutStyle] = useState(layoutStyle)
-
-  if (layoutStyle !== prevLayoutStyle) {
-    setPrevLayoutStyle(layoutStyle)
-    setLayoutPick(layoutFromStyle)
+  const patchAppearance = (patch: Partial<VCardAppearance>) => {
+    updateData('appearance', { ...cardAppearance, ...patch })
   }
 
-  const setLayout = (value: string) => {
-    setLayoutPick(value)
-    dispatch(setLayoutStyle(value === 'Hero' ? 'hero' : 'classic'))
-  }
+  const layoutStyle = cardAppearance.layoutStyle
+  const buttonStyle = cardAppearance.buttonStyle
+  const cornerStyle = cardAppearance.cornerStyle
+
   const setBtnStyle = (value: string) => {
-    dispatch(setButtonStyle(value.toLowerCase()))
+    patchAppearance({ buttonStyle: value.toLowerCase() })
   }
   const setBtnRadius = (value: string) => {
     const mapped = value === 'Square' ? 'square' : value === 'Rounder' ? 'soft' : value === 'Full' ? 'pill' : 'round'
-    dispatch(setCornerStyle(mapped))
+    patchAppearance({ cornerStyle: mapped })
   }
 
   const btnStyle = buttonStyle.charAt(0).toUpperCase() + buttonStyle.slice(1)
@@ -450,33 +445,16 @@ function TemplateDesigner() {
         </div>
       )}
 
-      {/* Layout */}
+      {/* Template & layout (synced with Profile Settings) */}
       <div className="mt-6 border-t border-black/10 pt-4 dark:border-white/10">
-        <SettingSection title="Layout">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <OptionCard label="Classic" selected={layoutPick === 'Classic'} onClick={() => setLayout('Classic')}>
-              <div className="mt-2 mb-auto h-8 w-8 rounded-full bg-red-500" />
-            </OptionCard>
-            <OptionCard label="Hero" selected={layoutPick === 'Hero'} onClick={() => setLayout('Hero')} isPro>
-              <div className="flex h-full w-full items-center justify-center rounded-xl bg-linear-to-b from-red-500 to-transparent">
-                <div className="h-8 w-8 rounded-full bg-red-600" />
-              </div>
-            </OptionCard>
-            <OptionCard label="Bento" selected={layoutPick === 'Bento'} onClick={() => setLayout('Bento')} isPro>
-              <div className="grid h-8 w-8 grid-cols-2 grid-rows-2 gap-1">
-                <div className="rounded-sm bg-slate-400" />
-                <div className="rounded-sm bg-slate-400" />
-                <div className="col-span-2 rounded-sm bg-slate-400" />
-              </div>
-            </OptionCard>
-            <OptionCard label="Minimal" selected={layoutPick === 'Minimal'} onClick={() => setLayout('Minimal')}>
-              <div className="h-8 w-8 rounded-sm border-2 border-slate-400" />
-            </OptionCard>
-          </div>
-        </SettingSection>
+        <ProfileTemplateLayoutSettings
+          variant="compact"
+          scope="vcard"
+          appearance={cardAppearance}
+          onAppearanceChange={patchAppearance}
+        />
 
-        {/* Hero Background - only show if layout === "Hero" */}
-        {layoutPick === 'Hero' && (
+        {layoutStyle === 'hero' && (
           <SettingSection title="Hero Background">
             <div className="flex flex-col gap-4">
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 transition-colors hover:bg-slate-100 dark:border-white/10 dark:bg-white/2 dark:hover:bg-white/5">
@@ -850,7 +828,7 @@ function TemplateDesigner() {
                       key={i}
                       className={cn(
                         'h-12 w-12 shrink-0 rounded-full transition-transform hover:scale-110',
-                        g.startsWith('bg-') ? g : `bg-gradient-to-tr ${g}`,
+                        g.startsWith('bg-') ? g : `bg-linear-to-tr ${g}`,
                         'border-2 border-transparent shadow-lg focus:border-white'
                       )}
                     />
@@ -962,12 +940,12 @@ export function TabSetting() {
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
       <div className="relative flex min-h-[850px] w-full flex-col overflow-hidden rounded-[40px] border border-black/10 bg-slate-100/80 shadow-2xl backdrop-blur-3xl md:flex-row dark:border-white/10 dark:bg-[#0b0f19]/80">
         {/* Subtle inner top highlight */}
-        <div className="absolute inset-x-0 top-0 z-20 h-[2px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute inset-x-0 top-0 z-20 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent" />
 
         {/* Left Sidebar for Settings */}
         <div
           className={cn(
-            'hidden-scrollbar z-10 flex flex-shrink-0 flex-col gap-2 overflow-y-auto border-b border-black/5 bg-transparent transition-all duration-300 md:border-r md:border-b-0 dark:border-white/5',
+            'hidden-scrollbar z-10 flex shrink-0 flex-col gap-2 overflow-y-auto border-b border-black/5 bg-transparent transition-all duration-300 md:border-r md:border-b-0 dark:border-white/5',
             isSidebarCollapsed ? 'w-full p-2 md:w-[90px] md:p-4' : 'w-full p-8 md:w-[300px]'
           )}
         >
@@ -1074,9 +1052,6 @@ export function TabSetting() {
               {renderContent()}
             </div>
           </div>
-
-          {/* Bottom gradient fade for smooth scroll mask */}
-          <div className="pointer-events-none absolute right-0 bottom-0 left-0 z-20 h-24 bg-gradient-to-t from-[#09090b] to-transparent" />
         </div>
       </div>
     </div>

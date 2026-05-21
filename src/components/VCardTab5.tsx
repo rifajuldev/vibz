@@ -1,7 +1,5 @@
 'use client'
 
-import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
-import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
 import { ListPlus, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -25,26 +23,9 @@ export function Tab5ExtraFields() {
     setFields(fields.map((field) => (field.id === id ? { ...field, [key]: value } : field)))
   }
 
-  const handleAutoFill = (data: VCardAutoFillResult) => {
-    setFields((prev) =>
-      prev.map((field, i) =>
-        i === 0
-          ? {
-              ...field,
-              name: data['field.0.name'] || field.name,
-              value: data['field.0.value'] || field.value,
-              icon: data['field.0.icon'] || field.icon,
-            }
-          : field
-      )
-    )
-  }
-
   return (
     <div className="animate-in fade-in mx-auto w-full max-w-7xl pb-12 duration-500">
-      <VCardDocumentUpload section="extra-fields" onAutoFill={handleAutoFill} />
-
-      <div className="bg-primary-50/50 dark:bg-primary-500/[0.02] border-primary-100 dark:border-primary-500/10 mb-8 rounded-[24px] border p-6">
+      <div className="bg-primary-50/50 dark:bg-primary-500/2 border-primary-100 dark:border-primary-500/10 mb-8 rounded-[24px] border p-6">
         <h3 className="text-primary-600 dark:text-primary-400 mb-2 text-lg font-black">Additional Custom Fields</h3>
         <p className="mb-0 text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
           Add any custom fields that appear in your My Info section — custom links, alternative phone numbers, or
@@ -53,7 +34,7 @@ export function Tab5ExtraFields() {
       </div>
 
       <div className="space-y-8">
-        <section className="space-y-6 overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-8 shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
+        <section className="space-y-6 overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-8 shadow-sm dark:border-white/5 dark:bg-white/2">
           <div className="mb-2 flex items-center gap-4">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <ListPlus className="text-primary-600 dark:text-primary-400 h-5 w-5" />
@@ -115,7 +96,7 @@ export function Tab5ExtraFields() {
                     />
                     <button
                       onClick={() => removeField(field.id)}
-                      className="flex-shrink-0 rounded-[16px] border border-red-500/20 bg-red-50/50 p-4 text-red-500 shadow-sm transition-all hover:bg-red-500 hover:text-white active:scale-95 dark:bg-red-500/10"
+                      className="shrink-0 rounded-[16px] border border-red-500/20 bg-red-50/50 p-4 text-red-500 shadow-sm transition-all hover:bg-red-500 hover:text-white active:scale-95 dark:bg-red-500/10"
                       aria-label="Remove field"
                     >
                       <Trash2 className="h-5 w-5" />

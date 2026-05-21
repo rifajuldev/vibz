@@ -1,13 +1,13 @@
 'use client'
 
 import { logout, useAuth } from '@/components/Auth'
+import { ProfileTemplateLayoutSettings } from '@/components/ProfileTemplateLayoutSettings'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useTheme } from '@/lib/ThemeProvider'
 import {
   setButtonStyle,
   setCornerStyle,
   setFontFamily,
-  setLayoutStyle,
   setVcardBranding,
 } from '@/redux/features/designSettings/designSettings.slice'
 import { cn } from '@/utils/cn'
@@ -310,7 +310,6 @@ export default function SettingsDialog() {
   const router = useRouter()
   const { accentColor, setAccentColor } = useTheme()
   const dispatch = useAppDispatch()
-  const layoutStyle = useAppSelector((s) => s.designSettings.layoutStyle)
   const buttonStyle = useAppSelector((s) => s.designSettings.buttonStyle)
   const cornerStyle = useAppSelector((s) => s.designSettings.cornerStyle)
   const fontFamily = useAppSelector((s) => s.designSettings.fontFamily)
@@ -550,62 +549,11 @@ export default function SettingsDialog() {
 
             <Section id="template" active={activeTab === 'template'} title="Template">
               <div className="space-y-12">
-                <div>
-                  <h4 className="mb-4 text-[15px] font-black text-slate-900 dark:text-white">Layout Strategy</h4>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <button
-                      onClick={() => dispatch(setLayoutStyle('classic'))}
-                      className={cn(
-                        'group relative overflow-hidden rounded-[24px] border p-6 text-left transition-all',
-                        layoutStyle === 'classic'
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10 shadow-[0_4px_20px_-4px_rgba(99,102,241,0.2)]'
-                          : 'hover:border-primary-500/30 border-slate-200/80 bg-slate-50/50 dark:border-white/10 dark:bg-white/2'
-                      )}
-                    >
-                      {layoutStyle === 'classic' && (
-                        <div className="bg-primary-500 absolute top-4 right-4 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-                          <div className="h-2 w-2 rounded-full bg-white"></div>
-                        </div>
-                      )}
-                      <div className="relative mb-4 flex h-24 w-full flex-col gap-2 rounded-[12px] border border-slate-100 bg-white p-3 shadow-sm dark:border-white/5 dark:bg-slate-800">
-                        <div className="mx-auto h-8 w-8 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                        <div className="mx-auto mt-1 h-2 w-16 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                        <div className="mt-2 h-3 w-full rounded bg-slate-100 dark:bg-slate-700"></div>
-                      </div>
-                      <p className="mb-1 text-[15px] font-bold text-slate-900 dark:text-white">Classic Stack</p>
-                      <p className="text-[13px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
-                        Traditional profile header and vertical list of structured links.
-                      </p>
-                    </button>
-                    <button
-                      onClick={() => dispatch(setLayoutStyle('hero'))}
-                      className={cn(
-                        'group relative overflow-hidden rounded-[24px] border p-6 text-left transition-all',
-                        layoutStyle === 'hero'
-                          ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10 shadow-[0_4px_20px_-4px_rgba(99,102,241,0.2)]'
-                          : 'hover:border-primary-500/30 border-slate-200/80 bg-slate-50/50 dark:border-white/10 dark:bg-white/2'
-                      )}
-                    >
-                      {layoutStyle === 'hero' && (
-                        <div className="bg-primary-500 absolute top-4 right-4 z-10 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
-                          <div className="h-2 w-2 rounded-full bg-white"></div>
-                        </div>
-                      )}
-                      <div className="relative mb-4 flex h-24 w-full flex-col overflow-hidden rounded-[12px] border border-slate-100 bg-white shadow-sm dark:border-white/5 dark:bg-slate-800">
-                        <div className="h-10 w-full bg-slate-300 dark:bg-slate-600"></div>
-                        <div className="absolute top-5 left-3 h-8 w-8 rounded-full border-2 border-white bg-slate-200 dark:border-slate-800 dark:bg-slate-700"></div>
-                        <div className="pt-1 pl-14">
-                          <div className="mb-1 h-2 w-16 rounded-full bg-slate-200 dark:bg-slate-700"></div>
-                          <div className="h-1.5 w-10 rounded-full bg-slate-100 dark:bg-slate-700"></div>
-                        </div>
-                      </div>
-                      <p className="mb-1 text-[15px] font-bold text-slate-900 dark:text-white">Hero Cover</p>
-                      <p className="text-[13px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
-                        Large background image layout for a more visual impact.
-                      </p>
-                    </button>
-                  </div>
-                </div>
+                <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">
+                  These choices are the default template and layout for every new vCard you create. Each card can be
+                  customized separately in the vCard editor.
+                </p>
+                <ProfileTemplateLayoutSettings scope="account" />
 
                 <div className="h-px w-full bg-slate-200/50 dark:bg-white/5"></div>
 

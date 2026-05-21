@@ -1,7 +1,5 @@
 'use client'
 
-import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
-import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
 import { Plus, Star, Trash2, X } from 'lucide-react'
 import React, { useState } from 'react'
 
@@ -77,31 +75,9 @@ export function TabSkill() {
     )
   }
 
-  const handleAutoFill = (fields: VCardAutoFillResult) => {
-    const skills = fields.skills
-      ? fields.skills
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : []
-    setSkillGroups((prev) =>
-      prev.map((grp, i) =>
-        i === 0
-          ? {
-              ...grp,
-              type: fields.type || grp.type,
-              skills: skills.length ? skills : grp.skills,
-            }
-          : grp
-      )
-    )
-  }
-
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
-      <VCardDocumentUpload section="skill" onAutoFill={handleAutoFill} />
-
-      <div className="mb-8 rounded-[24px] border border-purple-100 bg-purple-50/50 p-6 dark:border-purple-500/10 dark:bg-purple-500/[0.02]">
+      <div className="mb-8 rounded-[24px] border border-purple-100 bg-purple-50/50 p-6 dark:border-purple-500/10 dark:bg-purple-500/2">
         <div className="mb-2 flex items-center gap-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-purple-100 bg-purple-50 dark:border-purple-500/20 dark:bg-purple-500/10">
             <Star className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -117,7 +93,7 @@ export function TabSkill() {
         {skillGroups.map((group, index) => (
           <section
             key={group.id}
-            className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 border-transparent bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/[0.02]"
+            className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
           >
             <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
               <div className="flex items-center gap-4">

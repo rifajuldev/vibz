@@ -136,6 +136,7 @@ export function VBizProfileApp({
         vcardAccentColor: '#eab308',
         dashboardAccent: 'amber',
         fontFamily: 'inter',
+        profileTemplate: 'v2',
         layoutStyle: 'classic',
         buttonStyle: 'solid',
         cornerStyle: 'round',
@@ -287,7 +288,6 @@ export function VBizProfileApp({
       <ProfileThemeStyles design={design} />
       {showPreloader && explainerVideoUrl?.trim() && (
         <div className="fixed inset-0 z-200 flex flex-col items-center justify-center bg-black/95 px-4 text-center text-white">
-          <p className="mb-4 text-xs font-bold tracking-[0.25em] text-zinc-400 uppercase">Loading experience</p>
           <video
             key={explainerVideoUrl}
             src={explainerVideoUrl.trim()}
@@ -370,9 +370,9 @@ export function VBizProfileApp({
       >
         {/* Profile Header */}
         <header
-          className={`relative mb-10 flex w-full flex-col ${embedded || !isHeroLayout ? 'items-center text-center' : 'max-w-xl items-start text-left'}`}
+          className={`relative mb-10 flex w-full flex-col ${embedded || !isHeroLayout ? 'items-center text-center' : 'max-w-xl items-start text-left md:mx-auto md:items-center md:text-center'}`}
         >
-          <div className={`group relative mb-6 ${!embedded && isHeroLayout ? 'self-start' : ''}`}>
+          <div className={`group relative mb-6 ${!embedded && isHeroLayout ? 'self-start md:self-center' : ''}`}>
             <div
               className={`vbiz-profile-avatar relative z-10 overflow-hidden rounded-full border border-zinc-700 bg-zinc-900 transition-transform duration-500 group-hover:scale-[1.02] ${embedded ? 'h-24 w-24' : 'h-28 w-28 sm:h-36 sm:w-36'}`}
             >
@@ -413,7 +413,7 @@ export function VBizProfileApp({
           </p>
 
           <div
-            className={`vbiz-header-cta flex w-full min-w-0 items-center gap-3 ${embedded ? 'max-w-full justify-center' : `max-w-[280px] ${isHeroLayout ? 'justify-start' : 'justify-center'}`}`}
+            className={`vbiz-header-cta flex w-full min-w-0 items-center gap-3 ${embedded ? 'max-w-full justify-center' : `max-w-[280px] ${isHeroLayout ? 'justify-start md:justify-center' : 'justify-center'}`}`}
           >
             <button
               onClick={() => setActiveModal('contact')}
@@ -554,7 +554,7 @@ export function VBizProfileApp({
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
-            className="fixed bottom-24 left-1/2 z-[250] -translate-x-1/2 rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
+            className="fixed bottom-24 left-1/2 z-250 -translate-x-1/2 rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900"
           >
             {shareFeedback}
           </motion.div>
@@ -563,7 +563,7 @@ export function VBizProfileApp({
 
       {!embedded && (
         <>
-          <LiveAgent cardData={liveAgentCardData} readyToConnect={experienceReady} />
+          <LiveAgent variant="v2" cardData={liveAgentCardData} readyToConnect={experienceReady} />
           <NotificationModal
             cardOwnerId={cardOwnerId ?? '91'}
             ownerName={liveAgentCardData?.ownerName ?? ownerName ?? 'Guest'}

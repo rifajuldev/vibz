@@ -1,7 +1,5 @@
 'use client'
 
-import { VCardDocumentUpload } from '@/components/vcard/VCardDocumentUpload'
-import type { VCardAutoFillResult } from '@/lib/vcardAutoFillDemo'
 import {
   Calendar,
   FileBox,
@@ -59,20 +57,6 @@ export function TabGeneral() {
     setPosts(posts.map((p) => (p.id === id ? { ...p, [field]: value } : p)))
   }
 
-  const handleAutoFill = (fields: VCardAutoFillResult) => {
-    const seed: PostItem = {
-      id: Date.now(),
-      category: fields.category || '',
-      title: fields.title || '',
-      description: fields.description || '',
-      customUrl: fields.customUrl || '',
-      featuredImage: null,
-      date: fields.date || '',
-      active: true,
-    }
-    setPosts((prev) => (prev.length === 0 ? [seed] : prev.map((p, i) => (i === 0 ? { ...p, ...seed, id: p.id } : p))))
-  }
-
   const FeatureImageInput = ({ post }: { post: PostItem }) => {
     const fileRef = useRef<HTMLInputElement>(null)
     return (
@@ -109,9 +93,7 @@ export function TabGeneral() {
 
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
-      <VCardDocumentUpload section="general" onAutoFill={handleAutoFill} />
-
-      <div className="mb-8 rounded-[24px] border border-amber-100 bg-amber-50/50 p-6 dark:border-amber-500/10 dark:bg-amber-500/[0.02]">
+      <div className="mb-8 rounded-[24px] border border-amber-100 bg-amber-50/50 p-6 dark:border-amber-500/10 dark:bg-amber-500/2">
         <div className="mb-2 flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-amber-100 bg-amber-50 dark:border-amber-500/20 dark:bg-amber-500/10">
@@ -139,7 +121,7 @@ export function TabGeneral() {
 
       <div className="flex flex-1 flex-col">
         {posts.length === 0 ? (
-          <div className="rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-12 text-center shadow-sm dark:border-white/5 dark:bg-white/[0.02]">
+          <div className="rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-12 text-center shadow-sm dark:border-white/5 dark:bg-white/2">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] border border-slate-200 bg-slate-100 dark:border-white/5 dark:bg-white/5">
               <FileBox className="h-8 w-8 text-slate-400" />
             </div>
@@ -151,7 +133,7 @@ export function TabGeneral() {
             {posts.map((post, index) => (
               <section
                 key={post.id}
-                className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 border-transparent bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/[0.02]"
+                className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
               >
                 <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
                   <div className="flex items-center gap-4">
@@ -218,7 +200,7 @@ export function TabGeneral() {
                       Post Description
                     </label>
                     <div className="overflow-hidden rounded-[16px] border border-slate-200/80 bg-white shadow-sm transition-all focus-within:border-amber-500 focus-within:ring-1 focus-within:ring-amber-500 dark:border-white/10 dark:bg-[#0b0f19]">
-                      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/50 bg-slate-50/50 px-4 py-3 dark:border-white/5 dark:bg-white/[0.02]">
+                      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200/50 bg-slate-50/50 px-4 py-3 dark:border-white/5 dark:bg-white/2">
                         {/* Fake toolbar for visual resemblance to rich text editor */}
                         <span className="mr-2 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                           Format

@@ -78,6 +78,22 @@ export function ProfileThemeStyles({ design }: { design: ResolvedProfileDesign }
     .vbiz-profile-root .vbiz-accent-text {
       color: ${accentColor} !important;
     }
+    .vbiz-profile-v1 .bg-\\[\\#dcc969\\],
+    .vbiz-profile-root .bg-\\[\\#dcc969\\] {
+      background-color: ${accentColor} !important;
+    }
+    .vbiz-profile-v1 .text-\\[\\#dcc969\\],
+    .vbiz-profile-root .text-\\[\\#dcc969\\] {
+      color: ${accentColor} !important;
+    }
+    .vbiz-profile-v1 .border-\\[\\#dcc969\\],
+    .vbiz-profile-root .border-\\[\\#dcc969\\] {
+      border-color: ${accentColor} !important;
+    }
+    .vbiz-profile-v1 .selection\\:bg-\\[\\#dcc969\\]\\/30::selection,
+    .vbiz-profile-root .selection\\:bg-\\[\\#dcc969\\]\\/30::selection {
+      background-color: color-mix(in srgb, ${accentColor} 30%, transparent) !important;
+    }
   `
 
   return <style dangerouslySetInnerHTML={{ __html: css }} />

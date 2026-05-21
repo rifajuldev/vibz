@@ -1,11 +1,13 @@
-import type { DesignSettingsState } from '@/redux/features/designSettings/designSettings.slice'
-import type { VCardData, VCardRecord, VCardTheme } from '@/types/vcard'
+import { resolveVCardAppearance } from '@/lib/vcardDesignDefaults'
+import type { DesignSettingsState, ProfileTemplateId } from '@/redux/features/designSettings/designSettings.slice'
+import type { VCardAppearance, VCardData, VCardRecord, VCardTheme } from '@/types/vcard'
 import type { CSSProperties } from 'react'
 
 export type ResolvedProfileDesign = {
   primaryColor: string
   accentColor: string
   fontFamily: string
+  profileTemplate: ProfileTemplateId
   layoutStyle: string
   buttonStyle: string
   cornerStyle: string
@@ -52,18 +54,21 @@ export function buttonStyleClasses(buttonStyle: string): string {
   }
 }
 
-/** Merge account design settings with per-card theme (account colors win per API contract). */
+/** Merge account defaults with per-card theme + appearance (card wins when set). */
 export function resolveProfileDesign(
   designSettings: DesignSettingsState,
-  cardTheme?: Partial<VCardTheme> | null
+  cardTheme?: Partial<VCardTheme> | null,
+  cardAppearance?: Partial<VCardAppearance> | null
 ): ResolvedProfileDesign {
+  const appearance = resolveVCardAppearance(designSettings, cardAppearance)
   return {
-    primaryColor: designSettings.vcardPrimaryColor || cardTheme?.primaryColor || '#6366f1',
-    accentColor: designSettings.vcardAccentColor || cardTheme?.accentColor || '#f43f5e',
-    fontFamily: designSettings.fontFamily || cardTheme?.fontFamily || 'inter',
-    layoutStyle: designSettings.layoutStyle || 'classic',
-    buttonStyle: designSettings.buttonStyle || 'solid',
-    cornerStyle: designSettings.cornerStyle || 'round',
+    primaryColor: cardTheme?.primaryColor || designSettings.vcardPrimaryColor || '#6366f1',
+    accentColor: cardTheme?.accentColor || designSettings.vcardAccentColor || '#f43f5e',
+    fontFamily: cardTheme?.fontFamily || designSettings.fontFamily || 'inter',
+    profileTemplate: appearance.profileTemplate,
+    layoutStyle: appearance.layoutStyle,
+    buttonStyle: appearance.buttonStyle,
+    cornerStyle: appearance.cornerStyle,
     darkMode: cardTheme?.darkMode ?? true,
   }
 }
@@ -72,14 +77,14 @@ export function resolveProfileDesignFromRecord(
   record: VCardRecord,
   designSettings: DesignSettingsState
 ): ResolvedProfileDesign {
-  return resolveProfileDesign(designSettings, record.theme)
+  return resolveProfileDesign(designSettings, record.theme, record.appearance)
 }
 
 export function resolveProfileDesignFromData(
   data: VCardData,
   designSettings: DesignSettingsState
 ): ResolvedProfileDesign {
-  return resolveProfileDesign(designSettings, data.theme)
+  return resolveProfileDesign(designSettings, data.theme, data.appearance)
 }
 
 export function designToCssVars(design: ResolvedProfileDesign): CSSProperties {
