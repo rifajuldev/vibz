@@ -1,8 +1,8 @@
 'use client'
 
+import { TabBlog } from '@/components/VCardBlog'
 import { TabEducation } from '@/components/VCardEducation'
 import { TabExperience } from '@/components/VCardExperience'
-import { TabGeneral } from '@/components/VCardGeneral'
 import { TabLinkShortener } from '@/components/VCardLinkShortener'
 import { VCardLivePreview } from '@/components/VCardLivePreview'
 import { TabPortfolio } from '@/components/VCardPortfolio'
@@ -22,6 +22,7 @@ import {
   CheckCircle,
   ChevronRight,
   Eye,
+  FileEdit,
   FileText,
   GraduationCap,
   Image as ImageIcon,
@@ -41,7 +42,7 @@ const navItems = [
   { name: 'Skill', icon: Star },
   { name: 'Services', icon: Settings },
   { name: 'Portfolio', icon: ImageIcon },
-  { name: 'General', icon: FileText },
+  { name: 'Blog', icon: FileEdit },
   { name: 'Link shortener', icon: LinkIcon },
 ]
 
@@ -299,8 +300,8 @@ export default function VCardEdit() {
                     <TabServices />
                   ) : activeNav === 'Portfolio' ? (
                     <TabPortfolio />
-                  ) : activeNav === 'General' ? (
-                    <TabGeneral />
+                  ) : activeNav === 'Blog' ? (
+                    <TabBlog />
                   ) : activeNav === 'Link shortener' ? (
                     <TabLinkShortener />
                   ) : null}

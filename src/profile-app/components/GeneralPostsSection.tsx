@@ -10,18 +10,52 @@ export const GeneralPostsSection = () => {
   const { generalPosts, isVisible } = useProfileDisplay()
   const entries = getPublishedGeneralPosts(generalPosts)
 
-  if (!isVisible('Blog') || entries.length === 0) {
+  if (!isVisible('Blog')) {
     return null
+  }
+
+  if (entries.length === 0) {
+    return (
+      <div className="w-full pb-20">
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-200 bg-white/40 p-10 text-center dark:border-zinc-800/80 dark:bg-zinc-900/30">
+          <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-[#eab308] dark:border-zinc-700 dark:bg-zinc-800/80">
+            <FileEdit size={24} />
+          </div>
+          <h2 className="mb-3 text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Blog</h2>
+          <p className="max-w-md text-sm leading-relaxed font-medium text-zinc-600 dark:text-zinc-400">
+            Add posts from the vCard editor → Blog tab. Published posts with a title or description appear here on v1
+            and v2 profiles.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   const [featured, ...rest] = entries
 
   return (
     <div className="w-full pb-20">
+      <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <div className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200 bg-white/50 p-8 backdrop-blur-xl lg:col-span-4 lg:p-10 dark:border-zinc-800/80 dark:bg-zinc-900/50">
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-zinc-100/50 to-transparent dark:from-zinc-800/20" />
+          <div className="relative z-10">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-lg border border-zinc-200 bg-white/80 px-3 py-1.5 text-[10px] font-bold tracking-wider text-zinc-700 uppercase shadow-sm dark:border-zinc-700/50 dark:bg-zinc-800/80 dark:text-zinc-300">
+              <FileEdit size={12} className="text-[#eab308]" /> Blog
+            </div>
+            <h2 className="mb-4 max-w-2xl text-3xl leading-[1.1] font-bold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl dark:text-zinc-100">
+              News & <span className="font-medium text-[#eab308] italic">Updates</span>
+            </h2>
+            <p className="max-w-xl text-base leading-relaxed font-medium text-zinc-600 lg:text-lg dark:text-zinc-400">
+              Articles and announcements from your vCard back office.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {featured ? (
         <div className="vbiz-bento-grid mb-4 grid w-full grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
           <FeaturedPostCard post={featured} />
-          <div className="group relative flex min-h-[300px] flex-col items-center justify-center overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white/50 p-6 backdrop-blur-xl transition-all duration-500 hover:border-zinc-300 md:col-span-3 lg:col-span-1 lg:p-8 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:hover:border-zinc-700">
+          <div className="group relative flex min-h-[300px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-zinc-200 bg-white/50 p-6 backdrop-blur-xl transition-all duration-500 hover:border-zinc-300 md:col-span-3 lg:col-span-1 lg:p-8 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:hover:border-zinc-700">
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-center text-zinc-900 shadow-sm dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-100">
               <BookOpen size={24} className="text-[#eab308]" />
             </div>
@@ -61,7 +95,7 @@ function FeaturedPostCard({ post }: { post: VCardGeneralPost }) {
       ) : (
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1555529733-0e67056058e1?q=80&w=1200&fit=crop')] bg-cover bg-center opacity-30 mix-blend-multiply grayscale transition-transform duration-1000 group-hover:scale-105 dark:opacity-40 dark:mix-blend-overlay" />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-zinc-50 via-zinc-100/90 to-transparent dark:from-zinc-950 dark:via-zinc-900/80" />
+      <div className="absolute inset-0 bg-linear-to-t from-zinc-50 via-zinc-100/90 to-transparent dark:from-zinc-950 dark:via-zinc-900/80" />
       <div className="relative z-10 flex min-h-[400px] w-full flex-col justify-end p-8 lg:p-10">
         <div className="mb-6 flex flex-wrap items-center gap-4">
           {post.category.trim() ? (
@@ -99,7 +133,7 @@ function FeaturedPostCard({ post }: { post: VCardGeneralPost }) {
   )
 
   const className =
-    'group relative flex min-h-[400px] cursor-pointer flex-col justify-end overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-zinc-100 md:col-span-3 lg:col-span-3 dark:border-zinc-800/80 dark:bg-zinc-900'
+    'group relative flex min-h-[400px] cursor-pointer flex-col justify-end overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-100 md:col-span-3 lg:col-span-3 dark:border-zinc-800/80 dark:bg-zinc-900'
 
   if (href) {
     return (
@@ -130,7 +164,7 @@ function PostCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className={`group relative flex flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white/50 p-6 shadow-sm backdrop-blur-xl transition-colors hover:bg-white/80 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:hover:bg-zinc-900/80 ${compact ? 'min-h-[200px]' : 'min-h-[260px]'}`}
+      className={`group relative flex flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white/50 p-6 shadow-sm backdrop-blur-xl transition-colors hover:bg-white/80 dark:border-zinc-800/80 dark:bg-zinc-900/50 dark:hover:bg-zinc-900/80 ${compact ? 'min-h-[200px]' : 'min-h-[260px]'}`}
     >
       {imageUrl ? (
         <div className="mb-4 h-28 w-full overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800/80">

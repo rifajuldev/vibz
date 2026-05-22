@@ -140,6 +140,29 @@ const vcardsSlice = createSlice({
             active: true,
           },
         ],
+        generalPosts: [
+          {
+            id: 'post_demo_1',
+            category: 'News',
+            title: 'Impressions That Last — Connections That Matter',
+            description:
+              'Explore actionable insights into building a magnetic digital presence and turning passive networking into active business relationships.',
+            customUrl: '',
+            featuredImage: 'https://images.unsplash.com/photo-1555529733-0e67056058e1?q=80&w=1200&fit=crop',
+            date: '2026-09-22',
+            active: true,
+          },
+          {
+            id: 'post_demo_2',
+            category: 'Announcement',
+            title: 'New vBiz profile features',
+            description: 'Share updates, articles, and announcements directly from your vCard back office Blog tab.',
+            customUrl: '',
+            featuredImage: '',
+            date: '2026-05-01',
+            active: true,
+          },
+        ],
       })
       state.byId[id] = {
         ...data,

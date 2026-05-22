@@ -89,7 +89,7 @@ export type VCardServiceEntry = {
   active: boolean
 }
 
-/** Back office → General tab posts (shown on profile Blog / Insights section). */
+/** Back office → Blog tab posts (shown on profile Blog section, v1 and v2). */
 export type VCardGeneralPost = {
   id: string
   category: string
@@ -164,6 +164,7 @@ export function createDefaultVCardData(overrides?: Partial<VCardData>): VCardDat
     },
     appearance: { ...DEFAULT_VCARD_APPEARANCE },
     services: [],
+    generalPosts: [],
     portfolio: [],
     socials: [],
     social: { handles: {}, customLinks: [], games: {} },

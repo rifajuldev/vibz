@@ -34,6 +34,7 @@ import {
   Wrench,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AboutSection } from './components/AboutSection'
 import { CursorTrail } from './components/CursorTrail'
@@ -83,7 +84,7 @@ const NAV_CATEGORIES = [
     items: [
       { id: 'services', icon: Wrench, label: 'Core Services' },
       { id: 'additional', icon: Settings, label: 'Add-ons' },
-      { id: 'blog', icon: FileEdit, label: 'Insights' },
+      { id: 'blog', icon: FileEdit, label: 'Blog' },
     ],
   },
   {
@@ -387,9 +388,11 @@ export function VBizProfileApp({
             src={coverVideoUrl}
           />
         ) : coverVideoUrl ? (
-          <img
+          <Image
+            width={1000}
+            height={1000}
             src={coverVideoUrl}
-            alt=""
+            alt={ownerName ? `${ownerName} cover video` : 'Cover video'}
             className="h-full w-full object-cover object-center opacity-100 brightness-105 filter"
           />
         ) : null}
@@ -419,9 +422,11 @@ export function VBizProfileApp({
                   className="h-full w-full scale-105 object-cover"
                 />
               ) : avatarDisplaySrc ? (
-                <img
+                <Image
+                  width={1000}
+                  height={1000}
                   src={avatarDisplaySrc}
-                  alt={ownerName ? `${ownerName} profile` : 'Profile'}
+                  alt={ownerName ? `${ownerName} avatar` : 'Avatar'}
                   className="h-full w-full scale-105 object-cover"
                 />
               ) : null}
