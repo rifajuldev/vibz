@@ -85,13 +85,13 @@ export function Tab2PersonalInfo() {
       <div className="space-y-8">
         {/* Public URL */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-sky-100 bg-sky-50 dark:border-sky-500/20 dark:bg-sky-500/10">
               <Link2 className="h-5 w-5 text-sky-600 dark:text-sky-400" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Public URL</h4>
           </div>
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             <FieldGroup label="URL slug" required icon={<Link2 className="h-4 w-4" />}>
               <input
                 type="text"
@@ -111,13 +111,13 @@ export function Tab2PersonalInfo() {
 
         {/* My Information Section */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <User className="text-primary-600 dark:text-primary-400 h-5 w-5" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">My Information</h4>
           </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-8 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-4 sm:grid-cols-2 sm:p-8">
             <FieldGroup label="Name" required icon={<User className="h-4 w-4" />}>
               <input
                 type="text"
@@ -252,13 +252,13 @@ export function Tab2PersonalInfo() {
 
         {/* Address Details Section */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-emerald-100 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/10">
               <MapPin className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Address Details</h4>
           </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-8 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-4 sm:grid-cols-2 sm:p-8 md:grid-cols-3">
             <FieldGroup label="State">
               <div className="relative w-full">
                 <select value={state} onChange={(e) => setState(e.target.value)} className={`${selectClasses}`}>
@@ -313,13 +313,13 @@ export function Tab2PersonalInfo() {
 
         {/* Explainer video (preloader on public profile) */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-amber-100 bg-amber-50 dark:border-amber-500/20 dark:bg-amber-500/10">
               <PlaySquare className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Explainer Video</h4>
           </div>
-          <div className="space-y-4 p-8">
+          <div className="space-y-4 p-4 sm:p-8">
             <FieldGroup label="Video URL" icon={<PlaySquare className="h-4 w-4" />}>
               <input
                 type="url"
@@ -338,13 +338,13 @@ export function Tab2PersonalInfo() {
 
         {/* About Me Section */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-purple-100 bg-purple-50 dark:border-purple-500/20 dark:bg-purple-500/10">
               <AlignLeft className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">About Me</h4>
           </div>
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             <textarea
               value={vCardData.personal.about}
               onChange={(e) => updateData('personal.about', e.target.value)}

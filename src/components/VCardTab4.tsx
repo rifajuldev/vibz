@@ -467,19 +467,19 @@ export function Tab4HomeMedia() {
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Intro Video */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <Video className="text-primary-600 dark:text-primary-400 h-5 w-5" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Intro Video</h4>
           </div>
-          <div className="space-y-8 p-8">
+          <div className="space-y-8 p-4 sm:p-8">
             <div className="space-y-4">
               <p className="text-[12px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                 Plays before your vCard loads &bull; Max 15MB
               </p>
-              <div className="flex flex-col flex-wrap gap-4 sm:flex-row">
-                <div className="focus-within:border-primary-500/50 group relative flex min-w-[200px] flex-1 overflow-hidden rounded-[16px] border border-slate-200/80 bg-white shadow-sm transition-all dark:border-white/10 dark:bg-[#0b0f19]">
+              <div className="space-y-4">
+                <div className="focus-within:border-primary-500/50 group relative flex w-full overflow-hidden rounded-[16px] border border-slate-200/80 bg-white shadow-sm transition-all dark:border-white/10 dark:bg-[#0b0f19]">
                   <input
                     type="file"
                     className="hidden"
@@ -489,32 +489,33 @@ export function Tab4HomeMedia() {
                   />
                   <button
                     onClick={() => introRef.current?.click()}
-                    className="flex shrink-0 cursor-pointer items-center gap-2 border-r border-slate-200/80 bg-slate-50 px-5 py-4 text-[13px] font-bold whitespace-nowrap text-slate-900 transition-colors hover:bg-slate-100 dark:border-white/10 dark:bg-[#0b0f19] dark:text-white dark:hover:bg-slate-800"
+                    className="flex shrink-0 cursor-pointer items-center gap-2 border-r border-slate-200/80 bg-slate-50 px-4 py-3.5 text-[13px] font-bold whitespace-nowrap text-slate-900 transition-colors hover:bg-slate-100 sm:px-5 sm:py-4 dark:border-white/10 dark:bg-[#0b0f19] dark:text-white dark:hover:bg-slate-800"
                   >
-                    <Upload className="h-4 w-4" /> Upload
+                    <Upload className="h-4 w-4 shrink-0" /> Upload
                   </button>
-                  <span className="flex w-full items-center truncate px-5 py-4 text-[13px] font-medium text-slate-500 dark:text-slate-400">
+                  <span className="flex min-w-0 flex-1 items-center truncate px-4 py-3.5 text-[13px] font-medium text-slate-500 sm:px-5 sm:py-4 dark:text-slate-400">
                     {introVideoUrl ? mediaLabel(introVideoUrl, 'Select video') : 'Select video'}
                   </span>
                 </div>
-                <div className="flex shrink-0 flex-wrap gap-3 sm:flex-nowrap">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <button
                     onClick={() => setShowCanvaModal(true)}
-                    className="group flex flex-1 items-center justify-center gap-2 rounded-[16px] border border-[#00C4CC]/30 bg-[#00C4CC]/10 px-5 py-4 text-[13px] font-bold text-[#00C4CC] transition-all hover:border-[#00C4CC] hover:bg-[#00C4CC] hover:text-white active:scale-95 sm:flex-none"
+                    className="group flex w-full items-center justify-center gap-2 rounded-[16px] border border-[#00C4CC]/30 bg-[#00C4CC]/10 px-3 py-3.5 text-[13px] font-bold whitespace-nowrap text-[#00C4CC] transition-colors hover:border-[#00C4CC] hover:bg-[#00C4CC] hover:text-white sm:px-4 sm:py-4"
                   >
-                    <Palette className="h-4 w-4 group-hover:animate-pulse" /> Connect Canva
+                    <Palette className="h-4 w-4 shrink-0 group-hover:animate-pulse" />
+                    Connect Canva
                   </button>
                   <button
                     onClick={() => setShowGalleryModal(true)}
-                    className="bg-primary-50 dark:bg-primary-500/10 hover:bg-primary-100 hover:dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 border-primary-500/20 hover:border-primary-500 flex flex-1 items-center justify-center gap-2 rounded-[16px] border px-5 py-4 text-[13px] font-bold transition-all active:scale-95 sm:flex-none"
+                    className="bg-primary-50 dark:bg-primary-500/10 hover:bg-primary-100 hover:dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 border-primary-500/20 hover:border-primary-500 flex w-full items-center justify-center gap-2 rounded-[16px] border px-3 py-3.5 text-[13px] font-bold whitespace-nowrap transition-colors sm:px-4 sm:py-4"
                   >
-                    <Grid className="h-4 w-4" /> Gallery
+                    <Grid className="h-4 w-4 shrink-0" /> Gallery
                   </button>
                   <button
                     onClick={() => setShowCustomModal(true)}
-                    className="bg-primary-50 dark:bg-primary-500/10 hover:bg-primary-100 hover:dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 border-primary-500/20 hover:border-primary-500 flex flex-1 items-center justify-center gap-2 rounded-[16px] border px-5 py-4 text-[13px] font-bold shadow-sm transition-all active:scale-95 sm:flex-none"
+                    className="bg-primary-50 dark:bg-primary-500/10 hover:bg-primary-100 hover:dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 border-primary-500/20 hover:border-primary-500 flex w-full items-center justify-center gap-2 rounded-[16px] border px-3 py-3.5 text-[13px] font-bold whitespace-nowrap shadow-sm transition-colors sm:px-4 sm:py-4"
                   >
-                    <Wand2 className="h-4 w-4" /> Custom Made
+                    <Wand2 className="h-4 w-4 shrink-0" /> Custom Made
                   </button>
                 </div>
               </div>
@@ -561,13 +562,13 @@ export function Tab4HomeMedia() {
 
         {/* Background Music */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-emerald-100 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/10">
               <Music className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Background Music</h4>
           </div>
-          <div className="space-y-8 p-8">
+          <div className="space-y-8 p-4 sm:p-8">
             <div className="space-y-4">
               <p className="text-[12px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                 Plays quietly in the background
@@ -633,13 +634,13 @@ export function Tab4HomeMedia() {
 
         {/* Background Video / Image */}
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm lg:col-span-2 dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <ImageIcon className="text-primary-600 dark:text-primary-400 h-5 w-5" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Background Media</h4>
           </div>
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             <div className="max-w-xl space-y-4">
               <p className="text-[12px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                 Displayed as the background of your entire vCard. Image or Video loop.

@@ -2,80 +2,27 @@
 
 import type { ResolvedProfileDesign } from '@/lib/resolvedProfileDesign'
 import { designToCssVars, resolveProfileDesign } from '@/lib/resolvedProfileDesign'
-import { getNavTabBackgroundColor, TAB_ID_TO_NAV_LABEL } from '@/lib/vcardDisplaySettings'
-import {
-  Award,
-  Briefcase,
-  Calendar,
-  Camera,
-  FileEdit,
-  Film,
-  GraduationCap,
-  Home,
-  Lightbulb,
-  Moon,
-  PlaySquare,
-  ScrollText,
-  Settings,
-  Star,
-  Sun,
-  User,
-  Users,
-  Wrench,
-} from 'lucide-react'
+import { filterNavItemsByVisibility, NAV_BAR_NAV_ITEMS } from '@/lib/vcardNavbar'
+import { Moon, Sun } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AboutSection } from './components/AboutSection'
 import { CursorTrail } from './components/CursorTrail'
 import { DoneModal } from './components/DoneModal'
-import { EducationSection } from './components/EducationSection'
-import { ExperienceSection } from './components/ExperienceSection'
-import { FAQSection } from './components/FAQSection'
-import { GeneralPostsSection } from './components/GeneralPostsSection'
-import { HomeSection } from './components/HomeSection'
-import { ImageGallerySection } from './components/ImageGallerySection'
 import { LiveAgent } from './components/LiveAgent'
 import { NotificationAskModal } from './components/NotificationAskModal'
 import { NotificationModal } from './components/NotificationModal'
 import { NotificationSettingsModal } from './components/NotificationSettingsModal'
 import { NotificationToast } from './components/NotificationToast'
-import { PublicCardsSection } from './components/PublicCardsSection'
 import { SaveContactModal } from './components/SaveContactModal'
 import { SaveToWalletModal } from './components/SaveToWalletModal'
-import { ServicesSection } from './components/ServicesSection'
-import {
-  AdditionalServicesSection,
-  CalendarSection,
-  CertificatesSection,
-  ExplainerSection,
-  MissionSection,
-  ReviewsSection,
-} from './components/SimpleSections'
 import { SiteGeometricGrid } from './components/SiteGeometricGrid'
-import { VideoLinksSection } from './components/VideoLinksSection'
+import { useDragScroll } from './hooks/useDragScroll'
 import { useProfileDisplay } from './lib/profileDisplayContext'
+import { renderProfileNavContent } from './lib/profileNavContent'
+import { PROFILE_NAV_MAX_WIDTH_CLASS } from './profileLayout'
 import type { VBizProfileAppProps } from './profilePublicProps'
 import { DEMO_PROFILE_PROPS } from './profilePublicProps'
 import { ProfileThemeStyles } from './ProfileThemeStyles'
-
-const V1_TABS = [
-  { id: 'home', icon: Home, label: 'Home' },
-  { id: 'about', icon: User, label: 'About' },
-  { id: 'mission', icon: ScrollText, label: 'Mission' },
-  { id: 'services', icon: Wrench, label: 'Services' },
-  { id: 'gallery', icon: Camera, label: 'Images' },
-  { id: 'videos', icon: Film, label: 'Videos' },
-  { id: 'public-cards', icon: Users, label: 'Public Cards' },
-  { id: 'certificates', icon: Award, label: 'Awards' },
-  { id: 'education', icon: GraduationCap, label: 'Education' },
-  { id: 'work', icon: Briefcase, label: 'Experience' },
-  { id: 'reviews', icon: Star, label: 'Reviews' },
-  { id: 'calendar', icon: Calendar, label: 'Calendar' },
-  { id: 'faq', icon: Lightbulb, label: 'FAQ' },
-  { id: 'additional', icon: Settings, label: 'More' },
-  { id: 'explainer', icon: PlaySquare, label: 'Demo' },
-  { id: 'blog', icon: FileEdit, label: 'Blog' },
-]
 
 type ModalState = 'none' | 'contact' | 'wallet' | 'notification' | 'settings' | 'done'
 
@@ -89,16 +36,8 @@ export function VBizProfileAppV1({
   previewTheme,
   onPreviewThemeChange,
 }: VBizProfileAppProps) {
-  const { isVisible, settings: displaySettings, pageColors } = useProfileDisplay()
-  const visibleV1Tabs = useMemo(
-    () =>
-      V1_TABS.filter((tab) => {
-        const navLabel = TAB_ID_TO_NAV_LABEL[tab.id]
-        if (!navLabel) return true
-        return isVisible(navLabel)
-      }),
-    [isVisible]
-  )
+  const { settings: displaySettings, pageColors } = useProfileDisplay()
+  const visibleV1Tabs = useMemo(() => filterNavItemsByVisibility(NAV_BAR_NAV_ITEMS, displaySettings), [displaySettings])
 
   const design: ResolvedProfileDesign =
     designProp ??
@@ -131,6 +70,7 @@ export function VBizProfileAppV1({
   const [activeModal, setActiveModal] = useState<ModalState>('none')
   const [showPreloader, setShowPreloader] = useState(!embedded)
   const [introAllowed, setIntroAllowed] = useState(embedded)
+  const v1NavScrollRef = useDragScroll<HTMLDivElement>()
 
   const endPreloader = useCallback(() => {
     setShowPreloader(false)
@@ -178,44 +118,7 @@ export function VBizProfileAppV1({
     ...(pageColors.pageBg ? { backgroundColor: pageColors.pageBg } : {}),
   }
 
-  const renderContent = () => {
-    switch (effectiveActiveTab) {
-      case 'home':
-        return <HomeSection key="home" />
-      case 'about':
-        return <AboutSection key="about" />
-      case 'mission':
-        return <MissionSection key="mission" />
-      case 'services':
-        return <ServicesSection key="services" />
-      case 'gallery':
-        return <ImageGallerySection key="gallery" />
-      case 'videos':
-        return <VideoLinksSection key="videos" />
-      case 'public-cards':
-        return <PublicCardsSection key="public-cards" />
-      case 'certificates':
-        return <CertificatesSection key="certificates" />
-      case 'education':
-        return <EducationSection key="education" />
-      case 'work':
-        return <ExperienceSection key="work" />
-      case 'reviews':
-        return <ReviewsSection key="reviews" />
-      case 'calendar':
-        return <CalendarSection key="calendar" />
-      case 'faq':
-        return <FAQSection key="faq" />
-      case 'additional':
-        return <AdditionalServicesSection key="additional" />
-      case 'explainer':
-        return <ExplainerSection key="explainer" />
-      case 'blog':
-        return <GeneralPostsSection key="blog" />
-      default:
-        return <HomeSection key="home" />
-    }
-  }
+  const renderContent = () => renderProfileNavContent(effectiveActiveTab, { template: 'v1' })
 
   const shellClass = embedded
     ? 'vbiz-profile-root vbiz-profile-v1 relative isolate flex min-h-0 w-full max-w-full flex-col overflow-x-clip overflow-y-visible'
@@ -227,7 +130,7 @@ export function VBizProfileAppV1({
 
   const v1NavInnerClass = embedded
     ? 'pointer-events-auto relative flex w-full min-w-0 max-w-[calc(100%-0.5rem)] items-center overflow-hidden rounded-full border border-black/5 bg-white p-1 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]'
-    : 'pointer-events-auto relative flex w-full max-w-[95vw] items-center overflow-hidden rounded-full border border-black/5 bg-white p-1.5 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] md:max-w-fit md:p-2 dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]'
+    : `pointer-events-auto relative flex w-full min-w-0 ${PROFILE_NAV_MAX_WIDTH_CLASS} items-center overflow-hidden rounded-full border border-black/5 bg-white p-1.5 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.15)] md:p-2 dark:border-white/15 dark:bg-black/80 dark:shadow-[0_30px_70px_-10px_rgba(0,0,0,0.9)]`
 
   const v1MainClass = embedded
     ? 'vbiz-v1-main relative z-10 flex w-full flex-1 flex-col bg-white pt-16 pb-4 transition-colors duration-700 dark:bg-[#050505]'
@@ -307,11 +210,10 @@ export function VBizProfileAppV1({
 
       {embedded ? (
         <header className={v1NavClass}>
-          <div className={v1NavInnerClass} style={pageColors.navBg ? { backgroundColor: pageColors.navBg } : undefined}>
+          <div className={v1NavInnerClass}>
             <div className="vbiz-v1-nav-scroll mask-edges no-scrollbar flex min-w-0 flex-1 cursor-grab items-center gap-1.5 overflow-x-auto scroll-smooth px-2 py-0.5 active:cursor-grabbing">
               {visibleV1Tabs.map((tab) => {
                 const isActive = effectiveActiveTab === tab.id
-                const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
                 return (
                   <motion.button
                     key={tab.id}
@@ -331,7 +233,7 @@ export function VBizProfileAppV1({
                       <motion.div
                         layoutId="v1-activeTabIndicator"
                         className="absolute inset-0 rounded-full shadow-[0_0_16px_rgba(234,179,8,0.45)]"
-                        style={{ backgroundColor: tabBg || accent }}
+                        style={{ backgroundColor: accent }}
                         transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
                       />
                     )}
@@ -356,11 +258,18 @@ export function VBizProfileAppV1({
 
       {!embedded ? (
         <header className={v1NavClass}>
-          <div className={v1NavInnerClass} style={pageColors.navBg ? { backgroundColor: pageColors.navBg } : undefined}>
-            <div className="no-scrollbar flex w-full cursor-grab items-center gap-2 overflow-x-auto scroll-smooth px-3 py-1 active:cursor-grabbing sm:gap-2.5 md:justify-center">
+          <div className={v1NavInnerClass}>
+            <div
+              ref={v1NavScrollRef}
+              className="vbiz-v1-nav-scroll no-scrollbar mask-edges flex w-full min-w-0 cursor-grab touch-pan-x flex-nowrap items-center justify-start gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain scroll-smooth px-3 py-1 active:cursor-grabbing sm:gap-2.5"
+              onWheel={(e) => {
+                if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return
+                e.currentTarget.scrollLeft += e.deltaY
+                e.preventDefault()
+              }}
+            >
               {visibleV1Tabs.map((tab) => {
                 const isActive = effectiveActiveTab === tab.id
-                const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
                 return (
                   <motion.button
                     key={tab.id}
@@ -380,7 +289,7 @@ export function VBizProfileAppV1({
                       <motion.div
                         layoutId="v1-activeTabIndicator"
                         className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(234,179,8,0.5)]"
-                        style={{ backgroundColor: tabBg || accent }}
+                        style={{ backgroundColor: accent }}
                         transition={{ type: 'spring', stiffness: 400, damping: 30, mass: 0.8 }}
                       />
                     )}

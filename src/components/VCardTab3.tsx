@@ -81,13 +81,13 @@ export function Tab3SocialGames() {
 
       <div className="space-y-8">
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <Share2 className="text-primary-600 dark:text-primary-400 h-5 w-5" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Social Handles</h4>
           </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-8 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-4 sm:p-8 md:grid-cols-2">
             {SOCIAL_FIELDS.map(({ key, label, placeholder }) => (
               <div key={key} className="group flex flex-col space-y-1.5">
                 <label className="pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors group-focus-within:text-slate-500 dark:text-slate-400">
@@ -110,7 +110,7 @@ export function Tab3SocialGames() {
           </div>
         </section>
 
-        <section className="space-y-6 overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-8 shadow-sm dark:border-white/5 dark:bg-white/2">
+        <section className="space-y-6 overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-4 shadow-sm sm:p-8 dark:border-white/5 dark:bg-white/2">
           <div className="mb-2 flex items-center gap-4">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <LinkIcon className="text-primary-600 dark:text-primary-400 h-5 w-5" />
@@ -177,13 +177,13 @@ export function Tab3SocialGames() {
         </section>
 
         <section className="overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm dark:border-white/5 dark:bg-white/2">
-          <div className="flex items-center gap-4 border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+          <div className="flex items-center gap-4 border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-purple-100 bg-purple-50 dark:border-purple-500/20 dark:bg-purple-500/10">
               <Gamepad2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </div>
             <h4 className="text-[16px] font-black text-slate-900 dark:text-white">Game IDs</h4>
           </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-4 sm:p-8 md:grid-cols-2 lg:grid-cols-3">
             {GAME_PLATFORMS.map(([id, label, placeholder]) => (
               <div key={id} className="group flex flex-col space-y-1.5">
                 <label className="pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors group-focus-within:text-slate-500 dark:text-slate-400">

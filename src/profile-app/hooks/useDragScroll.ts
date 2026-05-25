@@ -15,7 +15,7 @@ export function useDragScroll<T extends HTMLElement>() {
       isDown = true
       ele.style.cursor = 'grabbing'
       ele.style.userSelect = 'none'
-      startX = e.pageX - ele.offsetLeft
+      startX = e.pageX
       scrollLeft = ele.scrollLeft
     }
 
@@ -34,8 +34,7 @@ export function useDragScroll<T extends HTMLElement>() {
     const onMouseMove = (e: MouseEvent) => {
       if (!isDown) return
       e.preventDefault()
-      const x = e.pageX - ele.offsetLeft
-      const walk = (x - startX) * 2 // Scroll-fast
+      const walk = (e.pageX - startX) * 1.5
       ele.scrollLeft = scrollLeft - walk
     }
 

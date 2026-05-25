@@ -56,7 +56,7 @@ const CATEGORY_FIELDS: Record<string, readonly string[]> = {
 function SettingSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-8 flex flex-col gap-3">
-      <h3 className="text-[14px] font-bold text-slate-900 dark:text-white">{title}</h3>
+      <h3 className="text-[.875rem] font-bold text-slate-900 dark:text-white">{title}</h3>
       {children}
     </div>
   )
@@ -93,7 +93,7 @@ function OptionCard({
       <div className="mb-2 flex h-12 w-full items-center justify-center">{children}</div>
       <span
         className={cn(
-          'text-[12px] font-semibold transition-colors',
+          'text-[.75rem] font-semibold transition-colors',
           selected ? 'dark:text-primary-400 text-slate-900' : 'text-slate-500 dark:text-slate-400'
         )}
       >
@@ -126,21 +126,21 @@ function ColorPicker({
   }
 
   return (
-    <div className="hover:border-primary-500/50 flex items-center justify-between rounded-[16px] border border-slate-200 bg-white px-4 py-3 shadow-sm transition-colors dark:border-white/10 dark:bg-[#070a13]">
-      <span className="text-[13px] font-semibold text-slate-900 dark:text-white">{label}</span>
+    <div className="hover:border-primary-500/50 flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-colors dark:border-white/10 dark:bg-[#070a13]">
+      <span className="text-[.8125rem] font-semibold text-slate-900 dark:text-white">{label}</span>
       <div className="flex items-center gap-3">
         <input
           type="text"
           value={displayValue}
           onChange={(e) => handleChange(e.target.value)}
-          className="focus:text-primary-600 dark:focus:text-primary-400 w-20 bg-transparent text-right font-mono text-[12px] font-medium text-slate-500 uppercase outline-none dark:text-slate-400"
+          className="focus:text-primary-600 dark:focus:text-primary-400 w-20 bg-transparent text-right font-mono text-[.75rem] font-medium text-slate-500 uppercase outline-none dark:text-slate-400"
         />
         <div className="relative h-7 w-7 shrink-0 cursor-pointer overflow-hidden rounded-full border border-slate-200 shadow-sm dark:border-white/20">
           <input
             type="color"
             value={displayValue}
             onChange={(e) => handleChange(e.target.value)}
-            className="absolute inset-[-10px] h-14 w-14 cursor-pointer"
+            className="absolute -inset-2.5 h-14 w-14 cursor-pointer"
           />
         </div>
       </div>
@@ -171,7 +171,7 @@ function Toggle({
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
         />
-        <div className="peer peer-checked:bg-primary-600 h-6 w-11 rounded-full bg-slate-200 shadow-sm peer-hover:bg-slate-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700 dark:peer-hover:bg-slate-600"></div>
+        <div className="peer peer-checked:bg-primary-600 h-6 w-11 rounded-full bg-slate-200 shadow-sm peer-hover:bg-slate-300 peer-focus:outline-none after:absolute after:top-[.125rem] after:left-[.125rem] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white dark:bg-slate-700 dark:peer-hover:bg-slate-600"></div>
       </label>
     </div>
   )
@@ -234,19 +234,19 @@ function TemplateDesigner() {
           <div className="bg-primary-50 dark:bg-primary-500/5 border-primary-100 dark:border-primary-500/20 rounded-2xl border p-5">
             <div className="mb-3 flex items-center gap-3">
               <Globe className="text-primary-600 dark:text-primary-400 h-4 w-4" />
-              <span className="text-[13px] font-semibold text-slate-900 dark:text-white">Custom Profile Slug</span>
+              <span className="text-[.8125rem] font-semibold text-slate-900 dark:text-white">Custom Profile Slug</span>
             </div>
             <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#070a13]">
-              <span className="text-[13px] font-medium text-slate-400">vbiz.me/</span>
+              <span className="text-[.8125rem] font-medium text-slate-400">vbiz.me/</span>
               <input
                 type="text"
                 value={vCardData.slug}
                 onChange={(e) => updateData('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                 placeholder="your-name"
-                className="dark:text-primary-400 flex-1 bg-transparent text-[13px] font-semibold text-slate-900 outline-none"
+                className="dark:text-primary-400 flex-1 bg-transparent text-[.8125rem] font-semibold text-slate-900 outline-none"
               />
             </div>
-            <p className="mt-2.5 ml-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+            <p className="mt-2.5 ml-1 text-[.6875rem] font-medium text-slate-500 dark:text-slate-400">
               This will be your live URL. Use only lowercase letters, numbers, and dashes.
             </p>
           </div>
@@ -254,7 +254,7 @@ function TemplateDesigner() {
       </SettingSection>
 
       <div className="mb-8 flex gap-4 border-b border-slate-200 pb-4 dark:border-white/10">
-        <button className="dark:text-primary-400 dark:border-primary-400 mb-[-17px] border-b-2 border-slate-900 pb-4 text-sm font-semibold text-slate-900 transition-colors">
+        <button className="dark:text-primary-400 dark:border-primary-400 -mb-4.25 border-b-2 border-slate-900 pb-4 text-sm font-semibold text-slate-900 transition-colors">
           Customizable
         </button>
         <button className="pb-4 text-sm font-semibold text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
@@ -283,10 +283,12 @@ function TemplateDesigner() {
       </SettingSection>
 
       <SettingSection title="Canva Integration">
-        <div className="flex items-center justify-between rounded-[16px] border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#070a13]">
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#070a13]">
           <div className="flex flex-col">
-            <span className="text-[14px] font-semibold text-slate-900 dark:text-white">Canva</span>
-            <span className="text-[12px] text-slate-500">Status: {canvaConnected ? 'Connected' : 'Not connected'}</span>
+            <span className="text-[.875rem] font-semibold text-slate-900 dark:text-white">Canva</span>
+            <span className="text-[.75rem] text-slate-500">
+              Status: {canvaConnected ? 'Connected' : 'Not connected'}
+            </span>
           </div>
           <button
             onClick={() => {
@@ -298,7 +300,7 @@ function TemplateDesigner() {
               }
             }}
             className={cn(
-              'min-w-[100px] rounded-full px-4 py-2 text-[13px] font-semibold transition-colors',
+              'min-w-25 rounded-full px-4 py-2 text-[.8125rem] font-semibold transition-colors',
               canvaConnected
                 ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
                 : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100'
@@ -373,7 +375,9 @@ function TemplateDesigner() {
             <div className="flex flex-col gap-4">
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 transition-colors hover:bg-slate-100 dark:border-white/10 dark:bg-white/2 dark:hover:bg-white/5">
                 <ImageIcon className="h-5 w-5 text-slate-400" />
-                <span className="text-[14px] font-semibold text-slate-600 dark:text-slate-300">Upload Hero Image</span>
+                <span className="text-[.875rem] font-semibold text-slate-600 dark:text-slate-300">
+                  Upload Hero Image
+                </span>
                 <input type="file" className="hidden" accept="image/*" />
               </label>
               <input
@@ -394,7 +398,7 @@ function TemplateDesigner() {
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
             </svg>
           </div>
-          <button className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-[13px] font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+          <button className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-[.8125rem] font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
             + Add
           </button>
         </div>
@@ -440,15 +444,15 @@ function TemplateDesigner() {
 
           {titleStyle === 'Logo' && (
             <div className="animate-in fade-in zoom-in-95 duration-200">
-              <label className="group relative flex h-32 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[20px] border-2 border-dashed border-black/10 bg-slate-50 transition-all hover:border-black/20 hover:bg-slate-100 dark:border-white/10 dark:bg-[#0b0f19] dark:hover:bg-[#27272a]">
+              <label className="group relative flex h-32 w-full cursor-pointer flex-col items-center justify-center overflow-hidden rounded-[1.25rem] border-2 border-dashed border-black/10 bg-slate-50 transition-all hover:border-black/20 hover:bg-slate-100 dark:border-white/10 dark:bg-[#0b0f19] dark:hover:bg-[#27272a]">
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   {logoFile ? (
                     <div className="flex flex-col items-center gap-2">
                       <ImageIcon className="text-primary-600 dark:text-primary-400 h-8 w-8" />
-                      <span className="max-w-[200px] truncate text-[13px] font-bold text-slate-900 dark:text-white">
+                      <span className="max-w-50 truncate text-[.8125rem] font-bold text-slate-900 dark:text-white">
                         {logoFile.name}
                       </span>
-                      <span className="text-[11px] font-medium text-slate-500">Click to change</span>
+                      <span className="text-[.6875rem] font-medium text-slate-500">Click to change</span>
                     </div>
                   ) : (
                     <>
@@ -469,11 +473,11 @@ function TemplateDesigner() {
                           />
                         </svg>
                       </div>
-                      <p className="mb-1 text-[13px] text-slate-500 dark:text-slate-400">
+                      <p className="mb-1 text-[.8125rem] text-slate-500 dark:text-slate-400">
                         <span className="font-bold text-slate-900 dark:text-white">Click to upload logo</span> or drag
                         and drop
                       </p>
-                      <p className="mt-1 text-[11px] font-medium tracking-widest text-slate-500 uppercase dark:text-slate-400">
+                      <p className="mt-1 text-[.6875rem] font-medium tracking-widest text-slate-500 uppercase dark:text-slate-400">
                         SVG, PNG, JPG (MAX. 2MB)
                       </p>
                     </>
@@ -493,8 +497,8 @@ function TemplateDesigner() {
 
       <div className="mt-2 mb-8 flex items-center justify-between">
         <div>
-          <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">Matches page font by default</p>
+          <h3 className="text-[.8125rem] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
+          <p className="text-[.6875rem] text-slate-500 dark:text-slate-400">Matches page font by default</p>
         </div>
         <Toggle isPro checked={false} onChange={() => {}} />
       </div>
@@ -508,17 +512,17 @@ function TemplateDesigner() {
         <SettingSection title="Button style">
           <div className="grid grid-cols-3 gap-4">
             <OptionCard label="Solid" selected={btnStyle === 'Solid'} onClick={() => setBtnStyle('Solid')}>
-              <div className="flex h-7 w-16 items-center justify-center rounded-[8px] bg-slate-200 dark:bg-[#1e2333]">
+              <div className="flex h-7 w-16 items-center justify-center rounded-[.5rem] bg-slate-200 dark:bg-[#1e2333]">
                 <div className="bg-slate-1000/30 h-1.5 w-6 rounded-full" />
               </div>
             </OptionCard>
             <OptionCard label="Glass" selected={btnStyle === 'Glass'} onClick={() => setBtnStyle('Glass')} isPro>
-              <div className="flex h-7 w-16 items-center justify-center rounded-[8px] border border-black/20 bg-black/5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-blur-md dark:border-white/20 dark:bg-white/5">
+              <div className="flex h-7 w-16 items-center justify-center rounded-[.5rem] border border-black/20 bg-black/5 shadow-[0_.25rem_.75rem_rgba(0,0,0,0.1)] backdrop-blur-md dark:border-white/20 dark:bg-white/5">
                 <div className="h-1.5 w-6 rounded-full bg-white/30" />
               </div>
             </OptionCard>
             <OptionCard label="Outline" selected={btnStyle === 'Outline'} onClick={() => setBtnStyle('Outline')}>
-              <div className="flex h-7 w-16 items-center justify-center rounded-[8px] border-2 border-slate-600 bg-transparent">
+              <div className="flex h-7 w-16 items-center justify-center rounded-[.5rem] border-2 border-slate-600 bg-transparent">
                 <div className="h-1.5 w-6 rounded-full bg-slate-600" />
               </div>
             </OptionCard>
@@ -528,16 +532,16 @@ function TemplateDesigner() {
         <SettingSection title="Corner roundness">
           <div className="grid grid-cols-4 gap-4">
             <OptionCard label="Square" selected={btnRadius === 'Square'} onClick={() => setBtnRadius('Square')}>
-              <div className="h-6 w-6 border-t-[3px] border-l-[3px] border-slate-400"></div>
+              <div className="h-6 w-6 border-t-[.1875rem] border-l-[.1875rem] border-slate-400"></div>
             </OptionCard>
             <OptionCard label="Round" selected={btnRadius === 'Round'} onClick={() => setBtnRadius('Round')}>
-              <div className="h-6 w-6 rounded-tl-md border-t-[3px] border-l-[3px] border-slate-400"></div>
+              <div className="h-6 w-6 rounded-tl-md border-t-[.1875rem] border-l-[.1875rem] border-slate-400"></div>
             </OptionCard>
             <OptionCard label="Rounder" selected={btnRadius === 'Rounder'} onClick={() => setBtnRadius('Rounder')}>
-              <div className="h-6 w-6 rounded-tl-[12px] border-t-[3px] border-l-[3px] border-slate-400"></div>
+              <div className="h-6 w-6 rounded-tl-[.75rem] border-t-[.1875rem] border-l-[.1875rem] border-slate-400"></div>
             </OptionCard>
             <OptionCard label="Full" selected={btnRadius === 'Full'} onClick={() => setBtnRadius('Full')}>
-              <div className="h-6 w-6 rounded-tl-full border-t-[3px] border-l-[3px] border-slate-400"></div>
+              <div className="h-6 w-6 rounded-tl-full border-t-[.1875rem] border-l-[.1875rem] border-slate-400"></div>
             </OptionCard>
           </div>
         </SettingSection>
@@ -549,7 +553,7 @@ function TemplateDesigner() {
                 key={s}
                 onClick={() => setBtnShadow(s)}
                 className={cn(
-                  'min-w-[100px] rounded-2xl border px-6 py-4 text-[13px] font-semibold transition-all',
+                  'min-w-25 rounded-2xl border px-6 py-4 text-[.8125rem] font-semibold transition-all',
                   btnShadow === s
                     ? 'border-primary-600 bg-primary-600/5 dark:text-primary-400 dark:bg-primary-500/15 dark:border-primary-500/30 text-slate-900 shadow-sm'
                     : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100 dark:border-white/10 dark:bg-slate-800 dark:hover:bg-white/5'
@@ -591,8 +595,8 @@ function TemplateDesigner() {
 
         <div className="mt-2 mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Matches page font by default</p>
+            <h3 className="text-[.8125rem] font-bold text-slate-900 dark:text-white">Alternative title font</h3>
+            <p className="text-[.6875rem] text-slate-500 dark:text-slate-400">Matches page font by default</p>
           </div>
           <Toggle isPro checked={false} onChange={() => {}} />
         </div>
@@ -637,17 +641,17 @@ function TemplateDesigner() {
         <SettingSection title="Wallpaper style">
           <div className="no-scrollbar flex gap-3 overflow-x-auto pt-2 pb-4">
             <OptionCard label="Fill" selected={wallpaperStyle === 'Fill'} onClick={() => setWallpaperStyle('Fill')}>
-              <div className="h-12 w-12 rounded-[10px] bg-slate-200 dark:bg-[#1e2333]"></div>
+              <div className="h-12 w-12 rounded-[.625rem] bg-slate-200 dark:bg-[#1e2333]"></div>
             </OptionCard>
             <OptionCard
               label="Gradient"
               selected={wallpaperStyle === 'Gradient'}
               onClick={() => setWallpaperStyle('Gradient')}
             >
-              <div className="h-12 w-12 rounded-[10px] bg-linear-to-t from-[#B04C40] via-[#D1A0A6] to-[#A3C6D3]"></div>
+              <div className="h-12 w-12 rounded-[.625rem] bg-linear-to-t from-[#B04C40] via-[#D1A0A6] to-[#A3C6D3]"></div>
             </OptionCard>
             <OptionCard label="Blur" selected={wallpaperStyle === 'Blur'} onClick={() => setWallpaperStyle('Blur')}>
-              <div className="h-12 w-12 rounded-[10px] bg-[#e2e4e9]"></div>
+              <div className="h-12 w-12 rounded-[.625rem] bg-[#e2e4e9]"></div>
             </OptionCard>
             <OptionCard
               label="Pattern"
@@ -655,9 +659,9 @@ function TemplateDesigner() {
               onClick={() => setWallpaperStyle('Pattern')}
               isPro
             >
-              <div className="grid h-12 w-12 grid-cols-3 grid-rows-3 gap-[2px] overflow-hidden rounded-[10px] bg-[#e2e4e9] p-1">
+              <div className="grid h-12 w-12 grid-cols-3 grid-rows-3 gap-[.125rem] overflow-hidden rounded-[.625rem] bg-[#e2e4e9] p-1">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className="rounded-[2px] bg-white dark:bg-[#0b0f19]" />
+                  <div key={i} className="rounded-[.125rem] bg-white dark:bg-[#0b0f19]" />
                 ))}
               </div>
             </OptionCard>
@@ -667,7 +671,7 @@ function TemplateDesigner() {
               onClick={() => setWallpaperStyle('Image')}
               isPro
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-[#e2e4e9]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[.625rem] bg-[#e2e4e9]">
                 <ImageIcon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
               </div>
             </OptionCard>
@@ -677,7 +681,7 @@ function TemplateDesigner() {
               onClick={() => setWallpaperStyle('Video')}
               isPro
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-[10px] bg-[#e2e4e9]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[.625rem] bg-[#e2e4e9]">
                 <svg
                   className="h-5 w-5 text-slate-500 dark:text-slate-400"
                   fill="none"
@@ -760,8 +764,8 @@ function TemplateDesigner() {
 
         <div className="mt-8 flex items-center justify-between">
           <div>
-            <h3 className="text-[13px] font-bold text-slate-900 dark:text-white">Noise</h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Add a subtle grain texture</p>
+            <h3 className="text-[.8125rem] font-bold text-slate-900 dark:text-white">Noise</h3>
+            <p className="text-[.6875rem] text-slate-500 dark:text-slate-400">Add a subtle grain texture</p>
           </div>
           <Toggle checked={false} onChange={() => {}} />
         </div>
@@ -794,18 +798,18 @@ const FieldCard: React.FC<{
   toggleLabel = '',
 }) => {
   return (
-    <div className="relative flex flex-col rounded-[20px] border border-black/5 bg-white p-5 shadow-sm transition-all hover:border-black/10 hover:shadow-md dark:border-white/5 dark:bg-[#0b0f19] dark:hover:border-white/10">
+    <div className="relative flex flex-col rounded-[1.25rem] border border-black/5 bg-white p-5 shadow-sm transition-all hover:border-black/10 hover:shadow-md dark:border-white/5 dark:bg-[#0b0f19] dark:hover:border-white/10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="-m-1 hidden cursor-grab p-1 text-slate-400 transition-colors hover:text-slate-600 sm:block dark:text-slate-500 dark:hover:text-slate-300">
             <Menu className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-[15px] font-bold text-slate-900 dark:text-white">{title}</h3>
+            <h3 className="text-[.9375rem] font-bold text-slate-900 dark:text-white">{title}</h3>
             {toggleLabel ? (
-              <p className="mt-0.5 text-[12px] font-medium text-slate-500 dark:text-slate-400">{toggleLabel}</p>
+              <p className="mt-0.5 text-[.75rem] font-medium text-slate-500 dark:text-slate-400">{toggleLabel}</p>
             ) : (
-              <p className="mt-0.5 text-[12px] font-medium text-slate-500 dark:text-slate-400">
+              <p className="mt-0.5 text-[.75rem] font-medium text-slate-500 dark:text-slate-400">
                 Manage visibility and styling
               </p>
             )}
@@ -827,7 +831,7 @@ const FieldCard: React.FC<{
               value={config.customValue ?? ''}
               onChange={(e) => onPatch({ customValue: e.target.value })}
               placeholder="Enter URL or value..."
-              className="focus:border-primary-500 focus:ring-primary-500 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[13px] font-medium text-slate-900 shadow-sm transition-shadow outline-none focus:ring-1 dark:border-white/10 dark:bg-slate-800 dark:text-white"
+              className="focus:border-primary-500 focus:ring-primary-500 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[.8125rem] font-medium text-slate-900 shadow-sm transition-shadow outline-none focus:ring-1 dark:border-white/10 dark:bg-slate-800 dark:text-white"
             />
           )}
 
@@ -923,15 +927,15 @@ export function TabSetting() {
 
   return (
     <div className="animate-in fade-in mx-auto flex h-full w-full max-w-7xl flex-col pb-12 duration-500">
-      <div className="relative flex min-h-[850px] w-full flex-col overflow-hidden rounded-[40px] border border-black/10 bg-slate-100/80 shadow-xl backdrop-blur-2xl md:flex-row dark:border-white/10 dark:bg-[#0b0f19]/80">
+      <div className="relative flex min-h-212.5 w-full flex-col overflow-hidden rounded-[2.5rem] border border-black/10 bg-slate-100/80 shadow-sm backdrop-blur-2xl md:flex-row dark:border-white/10 dark:bg-[#0b0f19]/80">
         {/* Subtle inner top highlight */}
-        <div className="absolute inset-x-0 top-0 z-20 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent" />
+        <div className="absolute inset-x-0 top-0 z-20 h-[.125rem] bg-linear-to-r from-transparent via-white/20 to-transparent" />
 
         {/* Left Sidebar for Settings */}
         <div
           className={cn(
             'hidden-scrollbar z-10 flex shrink-0 flex-col gap-2 overflow-y-auto border-b border-black/5 bg-transparent transition-all duration-300 md:border-r md:border-b-0 dark:border-white/5',
-            isSidebarCollapsed ? 'w-full p-2 md:w-[90px] md:p-4' : 'w-full p-8 md:w-[300px]'
+            isSidebarCollapsed ? 'w-full p-2 md:w-22.5 md:p-4' : 'w-full p-8 md:w-75'
           )}
         >
           <div
@@ -940,12 +944,12 @@ export function TabSetting() {
               isSidebarCollapsed ? 'justify-center gap-0' : 'gap-4'
             )}
           >
-            <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border shadow-sm">
+            <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.125rem] border shadow-sm">
               <Settings2 className="text-primary-600 dark:text-primary-400 h-6 w-6" />
             </div>
             <h2
               className={cn(
-                'text-[18px] leading-tight font-black whitespace-nowrap text-slate-900 transition-all duration-300 dark:text-white',
+                'text-[1.125rem] leading-tight font-black whitespace-nowrap text-slate-900 transition-all duration-300 dark:text-white',
                 isSidebarCollapsed ? 'hidden w-0 opacity-0 md:block' : 'opacity-100'
               )}
             >
@@ -956,7 +960,7 @@ export function TabSetting() {
           <div className="mt-4 mb-3 flex items-center justify-between px-2">
             <h3
               className={cn(
-                'text-[11px] font-black tracking-widest whitespace-nowrap text-slate-500 uppercase transition-all duration-300 dark:text-slate-400',
+                'text-[.6875rem] font-black tracking-widest whitespace-nowrap text-slate-500 uppercase transition-all duration-300 dark:text-slate-400',
                 isSidebarCollapsed ? 'hidden w-0 opacity-0 md:block' : 'opacity-100'
               )}
             >
@@ -975,7 +979,7 @@ export function TabSetting() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'group relative flex w-full items-center overflow-hidden rounded-[20px] px-5 py-4 text-left text-[13.5px] font-bold transition-all duration-300',
+                'group relative flex w-full items-center overflow-hidden rounded-[1.25rem] px-5 py-4 text-left text-[.8438rem] font-bold transition-all duration-300',
                 activeTab === tab.id
                   ? 'bg-primary-600 border-primary-500/50 dark:bg-primary-500/15 dark:text-primary-400 dark:border-primary-500/30 my-1 scale-[1.02] border text-white shadow-sm'
                   : 'border border-transparent text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-slate-200',
@@ -1003,21 +1007,21 @@ export function TabSetting() {
 
         {/* Right Content Area */}
         <div className="relative z-0 flex h-full flex-1 flex-col bg-transparent pb-10">
-          <div className="bg-primary-500/5 pointer-events-none absolute top-0 right-0 h-[500px] w-[500px] rounded-full blur-[150px]" />
+          <div className="bg-primary-500/5 pointer-events-none absolute top-0 right-0 h-125 w-125 rounded-full blur-[9.375rem]" />
 
           {/* Sticky Header */}
-          <div className="relative z-10 flex shrink-0 flex-col justify-between gap-6 p-8 md:flex-row md:items-start md:p-10">
+          <div className="relative z-10 flex shrink-0 flex-col justify-between gap-6 p-4 sm:p-8 md:flex-row md:items-start md:p-10">
             <div className="relative z-10 max-w-xl">
               <h2 className="mb-2 text-2xl font-black text-slate-900 dark:text-white">
                 {settingTabs.find((t) => t.id === activeTab)?.label}
               </h2>
-              <p className="text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
+              <p className="text-[.875rem] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
                 Configure how elements are displayed on your vCard. Changes take effect automatically.
               </p>
             </div>
             {activeTab !== 'template' && (
               <div className="relative z-10 flex items-center gap-4 self-start rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/5 dark:bg-[#070a13]">
-                <span className="text-[13px] font-bold text-slate-900 dark:text-white">Enable All</span>
+                <span className="text-[.8125rem] font-bold text-slate-900 dark:text-white">Enable All</span>
                 <Toggle
                   checked={activeTab === 'info' ? display.globalEnabled : categoryAllEnabled}
                   onChange={(enabled) => {
@@ -1036,7 +1040,7 @@ export function TabSetting() {
           </div>
 
           {/* Scrollable Grid */}
-          <div className="relative z-10 flex-1 overflow-y-auto scroll-smooth px-8 pb-32 md:px-10">
+          <div className="relative z-10 flex-1 overflow-y-auto scroll-smooth px-4 pb-32 sm:px-8 md:px-10">
             <div
               className={cn(
                 'animate-in fade-in slide-in-from-bottom-8 fill-mode-both duration-700',

@@ -8,121 +8,29 @@ import {
   designToCssVars,
   resolveProfileDesign,
 } from '@/lib/resolvedProfileDesign'
-import { getNavTabBackgroundColor, TAB_ID_TO_NAV_LABEL } from '@/lib/vcardDisplaySettings'
-import {
-  Award,
-  Bell,
-  Briefcase,
-  Calendar,
-  Camera,
-  CheckCircle2,
-  Download,
-  FileEdit,
-  Film,
-  GraduationCap,
-  Home,
-  Lightbulb,
-  Moon,
-  PlaySquare,
-  ScrollText,
-  Settings,
-  Share2,
-  Star,
-  Sun,
-  User,
-  Users,
-  Wrench,
-} from 'lucide-react'
+import { filterNavItemsByVisibility, NAV_BAR_NAV_ITEMS } from '@/lib/vcardNavbar'
+import { cn } from '@/utils/cn'
+import { Bell, CheckCircle2, Download, Moon, Share2, Star, Sun } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AboutSection } from './components/AboutSection'
 import { CursorTrail } from './components/CursorTrail'
 import { DoneModal } from './components/DoneModal'
-import { EducationSection } from './components/EducationSection'
-import { ExperienceSection } from './components/ExperienceSection'
-import { FAQSection } from './components/FAQSection'
-import { GeneralPostsSection } from './components/GeneralPostsSection'
-import { HomeSectionV2 as HomeSection } from './components/HomeSectionV2'
-import { ImageGallerySection } from './components/ImageGallerySection'
 import { LiveAgent } from './components/LiveAgent'
 import { NotificationAskModal } from './components/NotificationAskModal'
 import { NotificationModal } from './components/NotificationModal'
 import { NotificationSettingsModal } from './components/NotificationSettingsModal'
 import { NotificationToast } from './components/NotificationToast'
-import { PublicCardsSection } from './components/PublicCardsSection'
 import { SaveContactModal } from './components/SaveContactModal'
 import { SaveToWalletModal } from './components/SaveToWalletModal'
-import { ServicesSection } from './components/ServicesSection'
-import {
-  AdditionalServicesSection,
-  CalendarSection,
-  CertificatesSection,
-  ExplainerSection,
-  MissionSection,
-  ReviewsSection,
-} from './components/SimpleSections'
-import { VideoLinksSection } from './components/VideoLinksSection'
 import { useDragScroll } from './hooks/useDragScroll'
 import { useProfileDisplay } from './lib/profileDisplayContext'
+import { renderProfileNavContent } from './lib/profileNavContent'
 import { shareProfile } from './lib/shareProfile'
+import { PROFILE_NAV_MAX_WIDTH_CLASS } from './profileLayout'
 import type { VBizProfileAppProps } from './profilePublicProps'
 import { DEMO_PROFILE_PROPS, resolveProfileAvatarSrc } from './profilePublicProps'
 import { ProfileThemeStyles } from './ProfileThemeStyles'
-
-const NAV_CATEGORIES = [
-  {
-    title: 'Overview',
-    items: [
-      { id: 'home', icon: Home, label: 'Dashboard' },
-      { id: 'about', icon: User, label: 'My Story' },
-      { id: 'mission', icon: ScrollText, label: 'Mission & Vision' },
-    ],
-  },
-  {
-    title: 'Expertise',
-    items: [
-      { id: 'services', icon: Wrench, label: 'Core Services' },
-      { id: 'additional', icon: Settings, label: 'Add-ons' },
-      { id: 'blog', icon: FileEdit, label: 'Blog' },
-    ],
-  },
-  {
-    title: 'Media & Work',
-    items: [
-      { id: 'videos', icon: Film, label: 'Video Showcase' },
-      { id: 'gallery', icon: Camera, label: 'Image Vault' },
-      { id: 'explainer', icon: PlaySquare, label: 'Demo Reel' },
-    ],
-  },
-  {
-    title: 'Trust & Voice',
-    items: [
-      { id: 'reviews', icon: Star, label: 'Client Reviews' },
-      { id: 'certificates', icon: Award, label: 'Certifications' },
-      { id: 'education', icon: GraduationCap, label: 'Education' },
-      { id: 'work', icon: Briefcase, label: 'Experience' },
-    ],
-  },
-  {
-    title: 'Network',
-    items: [
-      { id: 'public-cards', icon: Users, label: 'Connections' },
-      { id: 'calendar', icon: Calendar, label: 'Book Time' },
-      { id: 'faq', icon: Lightbulb, label: 'FAQ' },
-    ],
-  },
-]
-
-const ALL_TABS = NAV_CATEGORIES.flatMap((c) => c.items)
-
-function filterTabsByDisplay<T extends { id: string }>(tabs: T[], isVisible: (key: string) => boolean): T[] {
-  return tabs.filter((tab) => {
-    const navLabel = TAB_ID_TO_NAV_LABEL[tab.id]
-    if (!navLabel) return true
-    return isVisible(navLabel)
-  })
-}
 
 export type { VBizProfileAppProps } from './profilePublicProps'
 
@@ -141,12 +49,10 @@ export function VBizProfileApp({
   onPreviewThemeChange,
 }: VBizProfileAppProps) {
   const { isVisible, pageColors, field, settings: displaySettings } = useProfileDisplay()
-  const visibleTabs = useMemo(() => filterTabsByDisplay(ALL_TABS, isVisible), [isVisible])
+  const visibleTabs = useMemo(() => filterNavItemsByVisibility(NAV_BAR_NAV_ITEMS, displaySettings), [displaySettings])
   const showSaveContact = isVisible('Save Contact')
   const showShareBtn = isVisible('Share Btn')
   const headerTextColor = field('vCard Header Color').textColor || field('MyInfo section Name').textColor || undefined
-  const navBgColor = pageColors.navBg
-
   const design: ResolvedProfileDesign =
     designProp ??
     resolveProfileDesign(
@@ -257,44 +163,7 @@ export function VBizProfileApp({
     console.log('🚀 vBiz Profile App Mounted (Version 2 - Link in Bio)')
   }, [])
 
-  const renderContent = () => {
-    switch (effectiveActiveTab) {
-      case 'home':
-        return <HomeSection key="home" />
-      case 'about':
-        return <AboutSection key="about" />
-      case 'mission':
-        return <MissionSection key="mission" />
-      case 'services':
-        return <ServicesSection key="services" />
-      case 'gallery':
-        return <ImageGallerySection key="gallery" />
-      case 'videos':
-        return <VideoLinksSection key="videos" />
-      case 'public-cards':
-        return <PublicCardsSection key="public-cards" />
-      case 'certificates':
-        return <CertificatesSection key="certificates" />
-      case 'education':
-        return <EducationSection key="education" />
-      case 'work':
-        return <ExperienceSection key="work" />
-      case 'reviews':
-        return <ReviewsSection key="reviews" />
-      case 'calendar':
-        return <CalendarSection key="calendar" />
-      case 'faq':
-        return <FAQSection key="faq" />
-      case 'additional':
-        return <AdditionalServicesSection key="additional" />
-      case 'explainer':
-        return <ExplainerSection key="explainer" />
-      case 'blog':
-        return <GeneralPostsSection key="blog" />
-      default:
-        return <HomeSection key="home" />
-    }
-  }
+  const renderContent = () => renderProfileNavContent(effectiveActiveTab)
 
   const isHeroLayout = design.layoutStyle === 'hero'
   const cornerRadius = cornerStyleToRadius(design.cornerStyle)
@@ -512,24 +381,32 @@ export function VBizProfileApp({
         </header>
 
         {/* Floating Top Nav (Scrollable Pills) */}
-        <div className="vbiz-floating-nav sticky top-4 z-50 mx-auto mb-8 flex w-full max-w-full justify-center sm:top-6">
+        <div
+          className={cn(
+            'vbiz-floating-nav sticky top-4 z-50 mx-auto mb-8 flex w-full justify-center sm:top-6',
+            embedded ? 'max-w-full' : PROFILE_NAV_MAX_WIDTH_CLASS
+          )}
+        >
           <motion.div
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className={`vbiz-floating-nav-inner relative rounded-4xl border border-zinc-200/80 bg-white/80 p-2 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-3xl sm:rounded-full dark:border-zinc-700/50 dark:bg-zinc-900/80 dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] ${embedded ? 'w-full max-w-[calc(100%-0.5rem)] min-w-0 overflow-hidden' : 'w-full max-w-full'}`}
-            style={navBgColor ? { backgroundColor: navBgColor } : undefined}
+            className={`vbiz-floating-nav-inner relative flex w-full max-w-full min-w-0 overflow-hidden rounded-4xl border border-zinc-200/80 bg-white/80 p-2 shadow-[0_8px_30px_rgba(0,0,0,0.08)] backdrop-blur-3xl sm:rounded-full dark:border-zinc-700/50 dark:bg-zinc-900/80 dark:shadow-[0_8px_30px_rgba(0,0,0,0.3)] ${embedded ? 'max-w-[calc(100%-0.5rem)]' : ''}`}
           >
             <div
               ref={scrollRef}
               role="tablist"
               aria-label="Profile navigation"
               aria-orientation="horizontal"
-              className={`vbiz-floating-nav-scroll no-scrollbar mask-edges flex cursor-grab items-center gap-1.5 overflow-x-auto px-1 active:cursor-grabbing sm:gap-2 sm:px-2 ${embedded ? 'min-w-0 flex-1' : 'max-w-full'}`}
+              className="vbiz-floating-nav-scroll no-scrollbar mask-edges flex w-full min-w-0 cursor-grab touch-pan-x flex-nowrap items-center gap-1.5 overflow-x-auto overflow-y-hidden overscroll-x-contain scroll-smooth px-1 active:cursor-grabbing sm:gap-2 sm:px-2"
+              onWheel={(e) => {
+                if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return
+                e.currentTarget.scrollLeft += e.deltaY
+                e.preventDefault()
+              }}
             >
               {visibleTabs.map((tab, index) => {
                 const isActive = effectiveActiveTab === tab.id
-                const tabBg = getNavTabBackgroundColor(displaySettings, tab.id)
                 return (
                   <motion.button
                     key={tab.id}
@@ -560,6 +437,7 @@ export function VBizProfileApp({
                       }
                     }}
                     title={tab.label}
+                    aria-label={tab.label}
                     className={`vbiz-nav-tab relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 sm:h-14 sm:w-14 ${
                       isActive
                         ? 'z-10 mx-0.5 shadow-[0_4px_15px_rgba(0,0,0,0.1)] sm:mx-1 dark:shadow-[0_4px_15px_rgba(255,255,255,0.1)]'
@@ -570,8 +448,7 @@ export function VBizProfileApp({
                       <motion.div
                         layoutId="active-tab-indicator"
                         initial={false}
-                        className={`absolute inset-0 rounded-full ${tabBg ? '' : 'bg-zinc-900 dark:bg-white'}`}
-                        style={tabBg ? { backgroundColor: tabBg } : undefined}
+                        className="absolute inset-0 rounded-full bg-zinc-900 dark:bg-white"
                         transition={{ type: 'spring', stiffness: 500, damping: 25, mass: 1.5 }}
                       />
                     )}

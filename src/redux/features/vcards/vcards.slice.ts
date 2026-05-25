@@ -1,5 +1,5 @@
 import { createDefaultVCardData, type VCardData, type VCardRecord } from '@/types/vcard'
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 export type VCardsState = {
   byId: Record<string, VCardRecord>
@@ -193,6 +193,9 @@ export function selectVCardIdBySlug(state: { vcards: VCardsState }, slug: string
   return state.vcards.slugToId[slug] ?? null
 }
 
-export function selectVCardList(state: { vcards: VCardsState }) {
-  return state.vcards.ids.map((id) => state.vcards.byId[id]).filter(Boolean)
-}
+const selectVCardIds = (state: { vcards: VCardsState }) => state.vcards.ids
+const selectVCardByIdMap = (state: { vcards: VCardsState }) => state.vcards.byId
+
+export const selectVCardList = createSelector([selectVCardIds, selectVCardByIdMap], (ids, byId) =>
+  ids.map((id) => byId[id]).filter((card): card is VCardRecord => Boolean(card))
+)

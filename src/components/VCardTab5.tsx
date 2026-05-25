@@ -40,7 +40,7 @@ export function Tab5ExtraFields() {
       </div>
 
       <div className="space-y-8">
-        <section className="space-y-6 overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-8 shadow-sm dark:border-white/5 dark:bg-white/2">
+        <section className="space-y-6 overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 p-4 shadow-sm sm:p-8 dark:border-white/5 dark:bg-white/2">
           <div className="mb-2 flex items-center gap-4">
             <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 flex h-10 w-10 items-center justify-center rounded-[14px] border">
               <ListPlus className="text-primary-600 dark:text-primary-400 h-5 w-5" />

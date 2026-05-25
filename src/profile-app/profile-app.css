@@ -26,6 +26,32 @@
   }
 }
 
+/* Profile nav — horizontal scroll, no visible scrollbar */
+.vbiz-floating-nav-inner {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.vbiz-floating-nav-scroll,
+.vbiz-v1-nav-scroll {
+  display: flex;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.vbiz-floating-nav-scroll::-webkit-scrollbar,
+.vbiz-v1-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 /* Live preview phone frame — container queries apply to embedded profile at any viewport */
 .vbiz-preview-frame {
   container-type: inline-size;

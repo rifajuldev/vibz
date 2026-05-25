@@ -6,11 +6,11 @@ import {
   getHomeMediaUrls,
   getPageColors,
   getPersonalValueForField,
+  isFieldVisible,
   isFieldVisibleInProfile,
   resolveDisplaySettings,
 } from '@/lib/vcardDisplaySettings'
 import { createDefaultVCardSocial, getSocialHrefForDisplayLabel } from '@/lib/vcardSocial'
-import { useIsMobileViewport } from '@/profile-app/lib/useIsMobileViewport'
 import type {
   VCardEducationEntry,
   VCardExperienceEntry,
@@ -34,6 +34,8 @@ export type ProfileDisplayContextValue = {
   generalPosts: VCardGeneralPost[]
   design: ResolvedProfileDesign | null
   isVisible: (key: string) => boolean
+  /** Nav Bar enable/disable — always respected (including live preview). */
+  isNavVisible: (label: string) => boolean
   field: (key: string) => ReturnType<typeof getFieldConfig>
   personalValue: (fieldKey: string) => string
   socialHref: (displayLabel: string) => string
@@ -68,6 +70,7 @@ const defaultValue: ProfileDisplayContextValue = {
   generalPosts: [],
   design: null,
   isVisible: () => true,
+  isNavVisible: () => true,
   field: (key) => getFieldConfig(resolveDisplaySettings(), key),
   personalValue: () => '',
   socialHref: () => '',
@@ -106,8 +109,6 @@ export function ProfileDisplayProvider({
   avatarMediaUrl?: string
   embedded?: boolean
 }) {
-  const isMobileViewport = useIsMobileViewport()
-
   const value = useMemo<ProfileDisplayContextValue>(() => {
     const settings = resolveDisplaySettings(displaySettings)
     const p = personal ?? FALLBACK_PERSONAL
@@ -127,7 +128,8 @@ export function ProfileDisplayProvider({
       services: svc,
       generalPosts: posts,
       design: design ?? null,
-      isVisible: (key: string) => (embedded ? true : isFieldVisibleInProfile(settings, key, { isMobileViewport })),
+      isVisible: (key: string) => (embedded ? true : isFieldVisibleInProfile(settings, key)),
+      isNavVisible: (label: string) => isFieldVisible(settings, label),
       field: (key: string) => getFieldConfig(settings, key),
       personalValue: (fieldKey: string) => getPersonalValueForField(p, fieldKey),
       socialHref: (label: string) => getSocialHrefForDisplayLabel(label, soc, p.website),
@@ -150,7 +152,6 @@ export function ProfileDisplayProvider({
     design,
     avatarMediaUrl,
     embedded,
-    isMobileViewport,
   ])
 
   return <ProfileDisplayContext.Provider value={value}>{children}</ProfileDisplayContext.Provider>

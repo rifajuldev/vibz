@@ -1,3 +1,4 @@
+import { NAV_BAR_FIELDS, TAB_ID_TO_NAV_LABEL } from '@/lib/vcardNavbar'
 import type { VCardData, VCardPersonal } from '@/types/vcard'
 import {
   createDefaultDisplaySettings,
@@ -6,6 +7,8 @@ import {
   type DisplayFieldConfig,
   type VCardDisplaySettings,
 } from '@/types/vcardDisplaySettings'
+
+export { NAV_BAR_FIELDS } from '@/lib/vcardNavbar'
 
 export {
   createDefaultDisplaySettings,
@@ -93,48 +96,6 @@ export const HOME_PAGE_FIELDS = [
   'Repeat Background Music',
 ] as const
 
-export const NAV_BAR_FIELDS = [
-  'About Me',
-  'Additional Services',
-  'Announcement',
-  'BBB',
-  'Blog',
-  'Booking',
-  'Breakfast',
-  'Calender',
-  'Certifications/Licenses',
-  'Clients',
-  'Company Mission Statement',
-  'Contact Us',
-  'DCP',
-  'Dinner',
-  'Events',
-  'Faq',
-  'Gallery',
-  'Home',
-  'Home Solar',
-  'Inventory',
-  'Join My Team',
-  'Lunch',
-  'Menu',
-  'Meet Our Team',
-  'Nav Background Color',
-  'Press/Media',
-  'Property Listing',
-  'Public Cards',
-  'Resiliency Products',
-  'Resume',
-  'Work Experience',
-  'Reviews',
-  'See Product',
-  'Services',
-  '24/h SalesPerson',
-  'Video Links',
-  'Videos',
-  'Who We Are',
-  '2D Explainer',
-] as const
-
 export const ALL_DISPLAY_FIELD_KEYS = [
   ...MY_INFO_FIELDS,
   ...SOCIAL_LINK_FIELDS,
@@ -165,47 +126,7 @@ export const MY_INFO_TO_PERSONAL: Record<string, keyof VCardPersonal> = {
   'About Me': 'about',
 }
 
-/** Maps nav bar setting labels to profile tab ids (v2 shell). */
-export const TAB_ID_TO_NAV_LABEL: Record<string, string> = {
-  home: 'Home',
-  about: 'About Me',
-  mission: 'Company Mission Statement',
-  services: 'Services',
-  additional: 'Additional Services',
-  blog: 'Blog',
-  videos: 'Videos',
-  gallery: 'Gallery',
-  explainer: '2D Explainer',
-  reviews: 'Reviews',
-  certificates: 'Certifications/Licenses',
-  education: 'Resume',
-  work: 'Work Experience',
-  calendar: 'Calender',
-  'public-cards': 'Public Cards',
-  faq: 'Faq',
-}
-
-export const NAV_LABEL_TO_TAB_ID: Record<string, string> = {
-  Home: 'home',
-  'About Me': 'about',
-  'Company Mission Statement': 'mission',
-  Services: 'services',
-  'Additional Services': 'additional',
-  Blog: 'blog',
-  Videos: 'videos',
-  'Video Links': 'videos',
-  Gallery: 'gallery',
-  '2D Explainer': 'explainer',
-  Reviews: 'reviews',
-  'Certifications/Licenses': 'certificates',
-  Resume: 'education',
-  'Work Experience': 'work',
-  Calender: 'calendar',
-  Calendar: 'calendar',
-  'Public Cards': 'public-cards',
-  Faq: 'faq',
-  FAQ: 'faq',
-}
+export { NAV_LABEL_TO_TAB_ID, TAB_ID_TO_NAV_LABEL } from '@/lib/vcardNavbar'
 
 /** Maps social link setting labels to lucide/network keys used in the profile home grid. */
 export const SOCIAL_LABEL_TO_NETWORK: Record<string, string> = {
@@ -256,20 +177,12 @@ export function getFieldConfig(settings: VCardDisplaySettings, key: string): Dis
   return settings.fields[key] ?? createDefaultFieldConfig()
 }
 
-/** Content sections that always appear on mobile; desktop may still respect Card Settings visibility. */
-export const MOBILE_ALWAYS_VISIBLE_NAV_FIELDS = new Set(['Resume', 'Work Experience', 'Services', 'Blog'])
-
 export function isFieldVisible(settings: VCardDisplaySettings, key: string): boolean {
   if (!settings.globalEnabled) return false
   return getFieldConfig(settings, key).visible
 }
 
-export function isFieldVisibleInProfile(
-  settings: VCardDisplaySettings,
-  key: string,
-  options?: { isMobileViewport?: boolean }
-): boolean {
-  if (options?.isMobileViewport && MOBILE_ALWAYS_VISIBLE_NAV_FIELDS.has(key)) return true
+export function isFieldVisibleInProfile(settings: VCardDisplaySettings, key: string): boolean {
   return isFieldVisible(settings, key)
 }
 
@@ -322,7 +235,7 @@ export function getHomeMediaUrls(settings: VCardDisplaySettings, personal: VCard
   return { introVideo, bgMedia, profileMedia }
 }
 
-/** Background color for a profile nav tab from Card Settings → Nav Bar (e.g. "About Me"). */
+/** Background color for editor nav tabs from Card Settings → Nav Bar (not used on public vCard). */
 export function getNavTabBackgroundColor(settings: VCardDisplaySettings, tabId: string): string | undefined {
   const navLabel = TAB_ID_TO_NAV_LABEL[tabId]
   if (!navLabel) return undefined

@@ -142,7 +142,7 @@ export function ServicesEditorPanel({
               key={service.id}
               className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
             >
-              <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+              <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
                 <div className="flex items-center gap-4">
                   <div
                     className={`flex h-10 w-10 items-center justify-center rounded-[14px] border font-black shadow-sm ${a.badgeBorder} ${a.badgeBg} ${a.badgeText}`}
@@ -163,7 +163,7 @@ export function ServicesEditorPanel({
                 </button>
               </div>
 
-              <div className="p-8">
+              <div className="p-4 sm:p-8">
                 <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="group flex flex-col space-y-1.5">
                     <label className="flex items-center gap-2 pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">

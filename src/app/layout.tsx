@@ -1,9 +1,9 @@
-import { Providers } from '@/components/providers'
+import ClientProviders from '@/providers/ClientProviders'
 import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'vbiz.me — Backoffice',
+  title: 'Vbiz - Backoffice',
   description: 'Manage your vCards and digital business presence',
 }
 
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen font-sans antialiased">
-        <Providers>{children}</Providers>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   )

@@ -167,7 +167,7 @@ export function TabPortfolio() {
                 key={portfolio.id}
                 className="group/card overflow-hidden rounded-[32px] border border-slate-200/50 bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
               >
-                <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+                <div className="flex flex-col items-center justify-between gap-2 border-b border-slate-200/50 px-4 py-6 sm:px-8 md:flex-row dark:border-white/5">
                   <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-teal-100 bg-teal-50 font-black text-teal-600 shadow-sm dark:border-teal-500/20 dark:bg-teal-500/10 dark:text-teal-400">
                       {portfolios.length - index}
@@ -178,14 +178,14 @@ export function TabPortfolio() {
                   </div>
                   <button
                     onClick={() => removePortfolio(portfolio.id)}
-                    className="flex items-center gap-2 rounded-[12px] bg-red-50 px-4 py-2.5 font-bold text-red-500 opacity-0 transition-all group-hover/card:opacity-100 hover:bg-red-100 hover:text-red-600 focus:opacity-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+                    className="flex items-center gap-2 rounded-[12px] bg-red-50 px-4 py-2.5 font-bold text-red-500 transition-all hover:bg-red-100 hover:text-red-600 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
                     title="Remove Portfolio"
                   >
                     <Trash2 className="h-4 w-4" /> Remove
                   </button>
                 </div>
 
-                <div className="p-8">
+                <div className="p-4 sm:p-8">
                   <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div className="group flex flex-col space-y-1.5">
                       <label className="flex items-center gap-2 pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors group-focus-within:text-slate-500 dark:text-slate-400">

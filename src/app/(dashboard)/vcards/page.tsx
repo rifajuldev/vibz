@@ -1,5 +1,7 @@
-import VCardsList from '@/views/VCardsList'
+import DashboardVCardsView from '@/views/DashboardVCardsView'
 
-export default function VCardsPage() {
-  return <VCardsList />
+const DashboardVCardsPage = () => {
+  return <DashboardVCardsView />
 }
+
+export default DashboardVCardsPage

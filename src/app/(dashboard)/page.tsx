@@ -1,5 +1,5 @@
-import Dashboard from '@/views/Dashboard'
+import DashboardHomeView from '@/views/DashboardHomeView'
 
-export default function DashboardPage() {
-  return <Dashboard />
+export default function DashboardHomePage() {
+  return <DashboardHomeView />
 }

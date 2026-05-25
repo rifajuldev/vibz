@@ -1,12 +1,13 @@
 'use client'
 
 import { cn } from '@/utils/cn'
-import { Contact, LayoutDashboard, Menu, Moon, Settings, Sun, UserCircle, X } from 'lucide-react'
+import { Contact, LayoutDashboard, LogOut, Menu, Moon, Settings, Sun, UserCircle, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { logout, useAuth } from './Auth'
+import { LogoutConfirmModal } from './LogoutConfirmModal'
 
 function subscribeToTheme(callback: () => void) {
   window.addEventListener('theme-change', callback)
@@ -21,11 +22,13 @@ function getServerDarkModeSnapshot() {
   return false
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
   const router = useRouter()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const isDarkMode = useSyncExternalStore(subscribeToTheme, getDarkModeSnapshot, getServerDarkModeSnapshot)
   const { user } = useAuth()
   const menuRef = useRef<HTMLDivElement>(null)
@@ -55,8 +58,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   const handleLogout = async () => {
-    await logout()
-    router.push('/login')
+    setIsLoggingOut(true)
+    try {
+      await logout()
+      setShowLogoutModal(false)
+      router.push('/login')
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   const navItems = [
@@ -165,9 +174,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <Settings className="h-4 w-4" /> Account Settings
                     </Link>
                     <button
-                      onClick={handleLogout}
+                      onClick={() => {
+                        setIsProfileOpen(false)
+                        setShowLogoutModal(true)
+                      }}
                       className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-[13px] font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10"
                     >
+                      <LogOut className="h-[18px] w-[18px]" />
                       Sign Out
                     </button>
                   </div>
@@ -190,7 +203,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {isMobileMenuOpen && (
           <div
             ref={mobileMenuRef}
-            className="animate-in slide-in-from-top-2 absolute top-full right-0 left-0 rounded-b-2xl border-t border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-xl md:hidden dark:border-white/5 dark:bg-[#0b0f19]/95"
+            className="animate-in slide-in-from-top-2 absolute top-full right-0 left-0 rounded-2xl border-t border-slate-200 bg-white p-4 shadow-lg backdrop-blur-xl md:hidden dark:border-white/5 dark:bg-[#0b0f19]"
           >
             <nav className="flex flex-col gap-1">
               {navItems.map((item) => {
@@ -227,9 +240,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content Area */}
-      <main id="main-scroll" className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-4 py-8 md:px-8">
+      <main id="main-scroll" className="wrapper relative flex-1 py-8">
         {children}
       </main>
+
+      {showLogoutModal && (
+        <LogoutConfirmModal
+          onCancel={() => setShowLogoutModal(false)}
+          onConfirm={handleLogout}
+          isLoading={isLoggingOut}
+        />
+      )}
     </div>
   )
 }
+
+export default Layout

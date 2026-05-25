@@ -73,7 +73,7 @@ export function TabExperience() {
             key={exp.id}
             className="group/card overflow-visible rounded-[32px] border border-transparent bg-slate-50/50 shadow-sm transition-all hover:border-slate-200/80 hover:bg-slate-50 dark:border-white/5 dark:bg-white/2"
           >
-            <div className="flex items-center justify-between border-b border-slate-200/50 px-8 py-6 dark:border-white/5">
+            <div className="flex items-center justify-between border-b border-slate-200/50 px-4 py-6 sm:px-8 dark:border-white/5">
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-orange-100 bg-orange-50 font-black text-orange-600 shadow-sm dark:border-orange-500/20 dark:bg-orange-500/10 dark:text-orange-400">
                   {index + 1}
@@ -94,7 +94,7 @@ export function TabExperience() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-8 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-6 gap-y-8 p-4 sm:p-8 md:grid-cols-2">
               <div className="group flex flex-col space-y-1.5 md:col-span-2">
                 <label className="pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors group-focus-within:text-slate-500 dark:text-slate-400">
                   Company Name

@@ -1,6 +1,8 @@
 'use client'
 
 import { logout, useAuth } from '@/components/Auth'
+import { LogoutConfirmModal } from '@/components/LogoutConfirmModal'
+import { ModalPortal } from '@/components/ModalPortal'
 import { ProfileTemplateLayoutSettings } from '@/components/ProfileTemplateLayoutSettings'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useTheme } from '@/lib/ThemeProvider'
@@ -16,8 +18,10 @@ import {
   AlertTriangle,
   BarChart2,
   Bell,
+  Bot,
   Briefcase,
   ChevronRight,
+  FileText,
   Key,
   Layers,
   LayoutTemplate,
@@ -29,13 +33,14 @@ import {
   Search,
   Settings,
   Shield,
+  Upload,
   User,
   X,
 } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, type MouseEventHandler, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type MouseEventHandler, type ReactNode } from 'react'
 
 const inputClasses =
   'w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-[14px] px-4 py-3.5 text-[13px] font-medium text-slate-900 dark:text-white transition-all outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 shadow-sm'
@@ -97,7 +102,7 @@ function CanvaSettingsModal({ onClose, onConnect }: { onClose: () => void; onCon
   }
 
   return (
-    <div className="animate-in fade-in fixed inset-0 z-100 flex items-center justify-center bg-slate-400/20 p-4 backdrop-blur-sm duration-200 dark:bg-black/60">
+    <div className="animate-in fade-in fixed inset-0 z-200 flex items-center justify-center bg-slate-400/20 p-4 backdrop-blur-sm duration-200 dark:bg-black/60">
       <div className="animate-in zoom-in-95 relative w-full max-w-[400px] overflow-hidden rounded-[28px] border border-slate-200 bg-white p-8 shadow-2xl duration-300 dark:border-white/10 dark:bg-[#0b0f19]">
         <button
           onClick={onClose}
@@ -147,6 +152,141 @@ function CanvaSettingsModal({ onClose, onConnect }: { onClose: () => void; onCon
   )
 }
 
+const LIVE_AGENT_ACCEPT = '.pdf,.txt,application/pdf,text/plain'
+
+function LiveAgentSettingsModal({ onClose, onConnect }: { onClose: () => void; onConnect: () => void }) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [businessTitle, setBusinessTitle] = useState('')
+  const [businessDescription, setBusinessDescription] = useState('')
+
+  const handleFileChange = (files: FileList | null) => {
+    const selected = files?.[0]
+    if (!selected) return
+    const ext = selected.name.split('.').pop()?.toLowerCase()
+    if (ext !== 'pdf' && ext !== 'txt') return
+    setFile(selected)
+  }
+
+  const clearFile = () => {
+    setFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleConnect = () => {
+    onConnect()
+    onClose()
+  }
+
+  return (
+    <div className="animate-in fade-in fixed inset-0 z-200 flex items-center justify-center bg-slate-400/20 p-4 backdrop-blur-sm duration-200 dark:bg-black/60">
+      <div className="animate-in zoom-in-95 relative max-h-[min(90vh,100dvh)] w-full max-w-[440px] overflow-y-auto rounded-[28px] border border-slate-200 bg-white p-6 shadow-2xl duration-300 sm:p-8 dark:border-white/10 dark:bg-[#0b0f19]">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 rounded-full bg-slate-200 p-2 transition-colors hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/10"
+        >
+          <X className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+        </button>
+
+        <div className="text-center">
+          <div className="from-primary-500 to-primary-700 mx-auto mb-6 h-20 w-20 rounded-[24px] bg-linear-to-tr p-[2px] shadow-[0_0_30px_rgba(59,130,246,0.25)]">
+            <div className="flex h-full w-full items-center justify-center rounded-[22px] bg-white dark:bg-[#0b0f19]">
+              <Bot className="text-primary-600 dark:text-primary-400 h-10 w-10" />
+            </div>
+          </div>
+
+          <h3 className="mb-2 text-[22px] font-black text-slate-900 dark:text-white">Live Agent Integration</h3>
+          <p className="mb-6 text-[14px] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
+            Upload your business knowledge base and describe your business so the live agent can assist visitors.
+          </p>
+        </div>
+
+        <div className="space-y-5">
+          <div>
+            <label className="mb-2 block pl-1 text-[13px] font-bold text-slate-900 dark:text-white">
+              Knowledge base file
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="sr-only"
+              accept={LIVE_AGENT_ACCEPT}
+              onChange={(e) => handleFileChange(e.target.files)}
+            />
+            {file ? (
+              <div className="flex items-center gap-3 rounded-[16px] border border-slate-200 bg-slate-50 px-4 py-3.5 dark:border-white/10 dark:bg-slate-800/50">
+                <FileText className="text-primary-600 dark:text-primary-400 h-5 w-5 shrink-0" />
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-slate-900 dark:text-white">
+                  {file.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={clearFile}
+                  className="shrink-0 rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-900 dark:hover:bg-white/10 dark:hover:text-white"
+                  aria-label="Remove file"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="hover:border-primary-400 hover:bg-primary-50/50 dark:hover:border-primary-500/40 dark:hover:bg-primary-500/5 flex w-full flex-col items-center justify-center gap-2 rounded-[16px] border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center transition-all dark:border-white/15 dark:bg-white/5"
+              >
+                <Upload className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                <span className="text-[13px] font-bold text-slate-900 dark:text-white">Click to upload</span>
+                <span className="text-[12px] font-medium text-slate-500 dark:text-slate-400">PDF or TXT only</span>
+              </button>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="live-agent-business-title"
+              className="mb-2 block pl-1 text-[13px] font-bold text-slate-900 dark:text-white"
+            >
+              Business title
+            </label>
+            <input
+              id="live-agent-business-title"
+              type="text"
+              value={businessTitle}
+              onChange={(e) => setBusinessTitle(e.target.value)}
+              placeholder="Enter your business title"
+              className={inputClasses}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="live-agent-business-description"
+              className="mb-2 block pl-1 text-[13px] font-bold text-slate-900 dark:text-white"
+            >
+              Business description
+            </label>
+            <textarea
+              id="live-agent-business-description"
+              value={businessDescription}
+              onChange={(e) => setBusinessDescription(e.target.value)}
+              placeholder="Describe your business for the live agent"
+              className={inputClasses + ' min-h-[100px] resize-none'}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleConnect}
+            className="w-full rounded-[16px] bg-slate-900 py-4 text-[15px] font-bold text-white transition-all hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.3)] active:scale-95 dark:bg-white dark:text-slate-900"
+          >
+            Connect Live Agent
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 type TabButtonProps = {
   active: boolean
   icon: LucideIcon
@@ -162,9 +302,9 @@ function TabButton({ active, icon: Icon, label, onClick, isCollapsed }: TabButto
       className={cn(
         'group relative flex w-full items-center gap-3.5 overflow-hidden rounded-[16px] px-4 py-3 text-[13.5px] font-bold transition-all',
         active
-          ? 'scale-[1.02] bg-slate-900 text-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.3)] dark:bg-white dark:text-slate-900 dark:shadow-[0_8px_20px_-6px_rgba(255,255,255,0.3)]'
+          ? 'bg-slate-900 text-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.3)] dark:bg-white dark:text-slate-900 dark:shadow-[0_8px_20px_-6px_rgba(255,255,255,0.3)]'
           : 'border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white',
-        isCollapsed ? 'mx-auto h-12 w-12 justify-center rounded-[14px] px-0' : ''
+        isCollapsed ? 'mx-auto h-12 w-12 justify-center rounded-[14px] px-0 lg:mx-auto' : ''
       )}
       title={isCollapsed ? label : undefined}
     >
@@ -174,7 +314,7 @@ function TabButton({ active, icon: Icon, label, onClick, isCollapsed }: TabButto
       <span
         className={cn(
           'font-bold tracking-wide whitespace-nowrap transition-all duration-300',
-          isCollapsed ? 'w-0 opacity-0 md:hidden' : 'opacity-100'
+          isCollapsed ? 'w-0 opacity-0 lg:hidden' : 'opacity-100'
         )}
       >
         {label}
@@ -197,27 +337,26 @@ function Section({ id, title, children, active }: SectionProps) {
   if (!active) return null
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }}
-      animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
       id={id}
-      className="scroll-mt-28 space-y-6"
+      className="min-w-0 scroll-mt-28 space-y-6"
     >
-      <div className="flex flex-col overflow-hidden rounded-[32px] border border-slate-200/80 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl dark:border-white/10 dark:bg-[#070a13]/70 dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
-        <div className="relative p-8 sm:p-10">
+      <div className="flex min-w-0 flex-col overflow-hidden rounded-[24px] border border-slate-200/80 bg-white/70 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl sm:rounded-[28px] lg:rounded-[32px] dark:border-white/10 dark:bg-[#070a13]/70 dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
+        <div className="relative p-5 sm:p-6 md:p-8 lg:p-10">
           <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-slate-200 to-transparent dark:via-white/10" />
 
-          <div className="mb-8 flex items-center justify-between">
-            <h3 className="flex items-center gap-4 text-[28px] font-black tracking-tight text-slate-900 dark:text-white">
+          <div className="mb-6 flex items-start justify-between gap-3 sm:mb-8 sm:items-center">
+            <h3 className="min-w-0 text-xl leading-tight font-black tracking-tight wrap-break-word text-slate-900 sm:text-2xl lg:text-[28px] dark:text-white">
               {title}
             </h3>
-            {/* Optional decorative element */}
-            <div className="pointer-events-none flex h-12 w-12 items-center justify-center rounded-[18px] border border-slate-200/50 bg-slate-50 shadow-inner dark:border-white/5 dark:bg-white/5">
-              <Settings className="h-5 w-5 text-slate-400 opacity-50" />
+            <div className="pointer-events-none flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-slate-200/50 bg-slate-50 shadow-inner sm:h-12 sm:w-12 sm:rounded-[18px] dark:border-white/5 dark:bg-white/5">
+              <Settings className="h-4 w-4 text-slate-400 opacity-50 sm:h-5 sm:w-5" />
             </div>
           </div>
 
-          <div className="space-y-10">{children}</div>
+          <div className="space-y-8 sm:space-y-10">{children}</div>
         </div>
       </div>
     </motion.div>
@@ -272,8 +411,8 @@ type ConnectRowProps = {
 
 function ConnectRow({ icon: Icon, title, isConnected, color, iconStyle, onClick, onDisconnect }: ConnectRowProps) {
   return (
-    <div className="group flex items-center justify-between rounded-[20px] border border-slate-200 bg-white p-4 font-medium shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] transition-all hover:shadow-md dark:border-white/5 dark:bg-[#0b0f19]">
-      <div className="flex items-center gap-4">
+    <div className="group flex flex-col gap-4 rounded-[20px] border border-slate-200 bg-white p-4 font-medium shadow-[0_2px_10px_-3px_rgba(0,0,0,0.02)] transition-all hover:shadow-md sm:flex-row sm:items-center sm:justify-between dark:border-white/5 dark:bg-[#0b0f19]">
+      <div className="flex min-w-0 items-center gap-4">
         <div
           className={cn(
             'flex h-12 w-12 items-center justify-center rounded-[16px] shadow-sm transition-transform group-hover:scale-105',
@@ -282,12 +421,12 @@ function ConnectRow({ icon: Icon, title, isConnected, color, iconStyle, onClick,
         >
           <Icon className={cn('h-5 w-5', color || 'text-slate-900 dark:text-white')} />
         </div>
-        <span className="text-[15px] font-bold text-slate-900 dark:text-white">{title}</span>
+        <span className="truncate text-[15px] font-bold text-slate-900 dark:text-white">{title}</span>
       </div>
       {isConnected ? (
         <button
           onClick={onDisconnect || onClick}
-          className="group/btn flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-[12px] font-bold text-emerald-600 shadow-sm transition-all hover:bg-red-50 hover:text-red-600 active:scale-95 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+          className="group/btn flex w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-[12px] font-bold text-emerald-600 shadow-sm transition-all hover:bg-red-50 hover:text-red-600 active:scale-95 sm:w-auto sm:justify-start dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 dark:hover:text-red-400"
         >
           <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-colors group-hover/btn:bg-red-500 dark:bg-emerald-400" />
           <span className="group-hover/btn:hidden">Connected</span>
@@ -296,7 +435,7 @@ function ConnectRow({ icon: Icon, title, isConnected, color, iconStyle, onClick,
       ) : (
         <button
           onClick={onClick}
-          className="flex items-center gap-2 rounded-[14px] bg-slate-900 px-5 py-2.5 text-[13px] font-bold text-white shadow-sm transition-all hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.3)] active:scale-95 dark:bg-white dark:text-slate-900"
+          className="flex w-full shrink-0 items-center justify-center gap-2 rounded-[14px] bg-slate-900 px-5 py-2.5 text-[13px] font-bold text-white shadow-sm transition-all hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.3)] active:scale-95 sm:w-auto dark:bg-white dark:text-slate-900"
         >
           Connect <ChevronRight className="h-4 w-4" />
         </button>
@@ -318,7 +457,11 @@ export default function SettingsDialog() {
   const [activeTab, setActiveTab] = useState('profile')
   const [showCanvaModal, setShowCanvaModal] = useState(false)
   const [canvaConnected, setCanvaConnected] = useState(false)
+  const [showLiveAgentModal, setShowLiveAgentModal] = useState(false)
+  const [liveAgentConnected, setLiveAgentConnected] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     'dark-mode': document.documentElement.classList.contains('dark'),
@@ -356,51 +499,55 @@ export default function SettingsDialog() {
   // Removed scrollToSection in favor of content swapping
 
   const handleLogout = async () => {
-    await logout()
-    router.push('/login')
+    setIsLoggingOut(true)
+    try {
+      await logout()
+      setShowLogoutModal(false)
+      router.push('/login')
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden">
+    <div className="relative min-h-screen w-full min-w-0 overflow-x-hidden">
       <div className="bg-primary-600/10 pointer-events-none absolute top-20 left-1/2 h-[400px] w-full max-w-[800px] -translate-x-1/2 rounded-full blur-[150px]" />
-      <div className="relative z-10 mx-auto max-w-[1100px] px-4 pt-10 pb-20 sm:px-6 lg:px-8">
-        <div className="mb-14 flex items-center justify-between gap-5">
-          <div className="flex items-center gap-5">
-            <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 relative flex h-16 w-16 items-center justify-center rounded-[20px] border shadow-sm">
-              <div className="from-primary-500/10 pointer-events-none absolute inset-0 rounded-[20px] bg-linear-to-tr to-transparent" />
-              <Settings className="text-primary-600 dark:text-primary-400 h-8 w-8" />
-            </div>
-            <div>
-              <h2 className="text-[32px] leading-tight font-black tracking-tight text-slate-900 dark:text-white">
-                Account Settings
-              </h2>
-              <p className="mt-1 text-[15px] font-medium text-slate-500 dark:text-slate-400">
-                Manage your profile, preferences, and integrations.
-              </p>
-            </div>
+      <div className="relative z-10 mx-auto w-full max-w-[1100px] min-w-0 pt-6 pb-16 sm:pt-8 sm:pb-20 lg:pt-10">
+        <div className="mb-8 flex items-start gap-3 sm:mb-10 sm:gap-4 lg:mb-14 lg:gap-5">
+          <div className="bg-primary-50 dark:bg-primary-500/10 border-primary-100 dark:border-primary-500/20 relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] border shadow-sm sm:h-14 sm:w-14 sm:rounded-[18px] lg:h-16 lg:w-16 lg:rounded-[20px]">
+            <div className="from-primary-500/10 pointer-events-none absolute inset-0 rounded-[inherit] bg-linear-to-tr to-transparent" />
+            <Settings className="text-primary-600 dark:text-primary-400 h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-xl leading-tight font-black tracking-tight wrap-break-word text-slate-900 sm:text-2xl md:text-[28px] lg:text-[32px] dark:text-white">
+              Account Settings
+            </h2>
+            <p className="mt-1 text-[13px] leading-snug font-medium text-slate-500 sm:text-[14px] lg:text-[15px] dark:text-slate-400">
+              Manage your profile, preferences, and integrations.
+            </p>
           </div>
         </div>
 
-        <div className="relative flex flex-col items-start gap-10 md:flex-row lg:gap-14">
+        <div className="relative flex w-full min-w-0 flex-col items-stretch gap-6 sm:gap-8 lg:flex-row lg:items-start lg:gap-10 xl:gap-14">
           {/* Sidebar Nav */}
           <div
             className={cn(
-              'no-scrollbar max-h-[calc(100vh-140px)] shrink-0 space-y-1.5 overflow-y-auto rounded-[32px] border border-slate-200/80 bg-white/70 pb-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl transition-all duration-400 ease-[0.23,1,0.32,1] md:sticky md:top-28 dark:border-white/10 dark:bg-[#070a13]/70 dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
-              isSidebarCollapsed ? 'w-full p-2 md:w-[84px] md:p-3' : 'w-full p-4 sm:p-5 md:w-[280px]'
+              'no-scrollbar max-h-none w-full min-w-0 space-y-1.5 overflow-y-auto rounded-[24px] border border-slate-200/80 bg-white/70 pb-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-3xl transition-all duration-400 ease-[0.23,1,0.32,1] sm:rounded-[28px] sm:pb-8 lg:sticky lg:top-28 lg:max-h-[calc(100vh-140px)] lg:shrink-0 lg:rounded-[32px] lg:pb-10 dark:border-white/10 dark:bg-[#070a13]/70 dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
+              isSidebarCollapsed ? 'p-2 lg:w-[84px] lg:p-3' : 'p-4 sm:p-5 lg:w-[260px] xl:w-[280px]'
             )}
           >
             <div className="mt-1 mb-3 flex items-center justify-between px-4">
               <h3
                 className={cn(
                   'text-[11px] font-black tracking-[0.2em] whitespace-nowrap text-slate-500 uppercase transition-all duration-300 dark:text-slate-400',
-                  isSidebarCollapsed ? 'hidden w-0 opacity-0 md:block' : 'opacity-100'
+                  isSidebarCollapsed ? 'hidden w-0 opacity-0 lg:block' : 'opacity-100'
                 )}
               >
                 Settings
               </h3>
               <button
                 onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="hidden rounded-2xl p-2 text-slate-500 transition-colors hover:bg-slate-200/50 md:flex dark:bg-white/5 dark:hover:bg-white/10"
+                className="hidden rounded-2xl p-2 text-slate-500 transition-colors hover:bg-slate-200/50 lg:flex dark:bg-white/5 dark:hover:bg-white/10"
               >
                 <Menu className="h-4 w-4" />
               </button>
@@ -430,9 +577,9 @@ export default function SettingsDialog() {
                 </div>
               ))}
             </div>
-            <div className="mx-2 my-6 h-px bg-slate-200/60 dark:bg-white/10"></div>
+            <div className="mx-2 my-3 h-px bg-slate-200/60 sm:my-6 dark:bg-white/10"></div>
             <button
-              onClick={handleLogout}
+              onClick={() => setShowLogoutModal(true)}
               className={cn(
                 'group flex w-full items-center overflow-hidden rounded-2xl border border-transparent px-4 py-3.5 text-[13.5px] font-bold text-red-500 transition-all hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400',
                 isSidebarCollapsed ? 'mx-auto h-12 w-12 justify-center rounded-[18px] px-0' : 'gap-3'
@@ -443,7 +590,7 @@ export default function SettingsDialog() {
               <span
                 className={cn(
                   'font-semibold whitespace-nowrap transition-all duration-300',
-                  isSidebarCollapsed ? 'w-0 opacity-0 md:hidden' : 'opacity-100'
+                  isSidebarCollapsed ? 'w-0 opacity-0 lg:hidden' : 'opacity-100'
                 )}
               >
                 Sign Out
@@ -452,9 +599,9 @@ export default function SettingsDialog() {
           </div>
 
           {/* Content Area */}
-          <div className="w-full flex-1 space-y-12 pb-32">
+          <div className="w-full min-w-0 flex-1 space-y-8 pb-20 sm:space-y-10 sm:pb-24 lg:space-y-12 lg:pb-32">
             <Section id="profile" active={activeTab === 'profile'} title="My Profile">
-              <div className="flex flex-col items-start gap-6 rounded-[24px] border border-slate-200/50 bg-slate-50/50 p-6 sm:flex-row sm:items-center dark:border-white/5 dark:bg-white/2">
+              <div className="flex w-full min-w-0 flex-col items-start gap-5 rounded-[20px] border border-slate-200/50 bg-slate-50/50 p-4 sm:flex-row sm:items-center sm:gap-6 sm:rounded-[24px] sm:p-6 dark:border-white/5 dark:bg-white/2">
                 <div className="group relative flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-[#0b0f19]">
                   {user?.photoURL ? (
                     <Image
@@ -471,16 +618,18 @@ export default function SettingsDialog() {
                     <span className="text-[11px] font-bold tracking-wider text-white uppercase">Change</span>
                   </div>
                 </div>
-                <div>
-                  <h4 className="mb-1 text-[20px] leading-tight font-black tracking-tight text-slate-900 dark:text-white">
+                <div className="w-full min-w-0 sm:flex-1">
+                  <h4 className="mb-1 truncate text-lg leading-tight font-black tracking-tight text-slate-900 sm:text-[20px] dark:text-white">
                     {user?.displayName || 'User'}
                   </h4>
-                  <p className="mb-4 text-[14px] font-medium text-slate-500 dark:text-slate-400">{user?.email}</p>
-                  <div className="flex gap-3">
-                    <button className="flex h-10 items-center rounded-[14px] border border-slate-200 bg-white px-5 py-2.5 text-[13px] font-bold text-slate-900 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md active:scale-95 dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700">
+                  <p className="mb-4 truncate text-[13px] font-medium text-slate-500 sm:text-[14px] dark:text-slate-400">
+                    {user?.email}
+                  </p>
+                  <div className="flex flex-wrap gap-2 sm:gap-3">
+                    <button className="flex h-10 items-center rounded-[14px] border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-bold text-slate-900 shadow-sm transition-all hover:bg-slate-50 hover:shadow-md active:scale-95 sm:px-5 dark:border-white/10 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700">
                       Upload new
                     </button>
-                    <button className="flex h-10 items-center rounded-[14px] bg-transparent px-5 py-2.5 text-[13px] font-bold text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 active:scale-95 dark:hover:bg-red-500/10 dark:hover:text-red-400">
+                    <button className="flex h-10 items-center rounded-[14px] bg-transparent px-4 py-2.5 text-[13px] font-bold text-slate-500 transition-all hover:bg-red-50 hover:text-red-600 active:scale-95 sm:px-5 dark:hover:bg-red-500/10 dark:hover:text-red-400">
                       Remove
                     </button>
                   </div>
@@ -488,8 +637,8 @@ export default function SettingsDialog() {
               </div>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div className="group space-y-2">
+                <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2">
+                  <div className="group min-w-0 space-y-2">
                     <label className="group-focus-within:text-primary-500 pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors dark:text-slate-400">
                       Display Name
                     </label>
@@ -500,18 +649,21 @@ export default function SettingsDialog() {
                       placeholder="Jane Doe"
                     />
                   </div>
-                  <div className="group space-y-2">
+                  <div className="group min-w-0 space-y-2">
                     <label className="pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
                       Email Address
                     </label>
-                    <div className="relative">
+                    <div className="relative min-w-0">
                       <input
                         type="email"
                         defaultValue={user?.email || ''}
                         readOnly
-                        className={inputClasses + ' cursor-not-allowed bg-slate-100 opacity-60 dark:bg-slate-800/50'}
+                        className={
+                          inputClasses +
+                          ' cursor-not-allowed truncate bg-slate-100 pr-22 opacity-60 sm:pr-28 dark:bg-slate-800/50'
+                        }
                       />
-                      <span className="absolute top-1/2 right-3 -translate-y-1/2 rounded-[6px] bg-slate-200 px-2 py-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase dark:bg-slate-700 dark:text-slate-400">
+                      <span className="pointer-events-none absolute top-1/2 right-2 max-w-[40%] -translate-y-1/2 truncate rounded-[6px] bg-slate-200 px-1.5 py-1 text-[9px] font-bold tracking-wider text-slate-500 uppercase sm:right-3 sm:max-w-none sm:px-2 sm:text-[10px] sm:tracking-widest dark:bg-slate-700 dark:text-slate-400">
                         Read Only
                       </span>
                     </div>
@@ -540,8 +692,8 @@ export default function SettingsDialog() {
                 </div>
               </div>
 
-              <div className="flex justify-end border-t border-slate-200/50 pt-4 dark:border-white/5">
-                <button className="rounded-[16px] bg-slate-900 px-8 py-3.5 text-[14px] font-bold text-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.3)] transition-all hover:shadow-[0_8px_25px_-6px_rgba(0,0,0,0.4)] active:scale-95 dark:bg-white dark:text-slate-900">
+              <div className="flex border-t border-slate-200/50 pt-4 sm:justify-end dark:border-white/5">
+                <button className="w-full rounded-[16px] bg-slate-900 px-8 py-3.5 text-[14px] font-bold text-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.3)] transition-all hover:shadow-[0_8px_25px_-6px_rgba(0,0,0,0.4)] active:scale-95 sm:w-auto dark:bg-white dark:text-slate-900">
                   Save Changes
                 </button>
               </div>
@@ -856,14 +1008,13 @@ export default function SettingsDialog() {
 
             <Section id="security" active={activeTab === 'security'} title="Security">
               <div className="space-y-8">
-                <div className="space-y-6 rounded-[24px] border border-slate-200/50 bg-slate-50/50 p-6 dark:border-white/5 dark:bg-white/2">
+                <div className="space-y-6 rounded-[24px] border border-slate-200/50 bg-slate-50/50 p-4 sm:p-6 dark:border-white/5 dark:bg-white/2">
                   <div className="group space-y-2">
                     <label className="group-focus-within:text-primary-500 pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors dark:text-slate-400">
                       Current Password
                     </label>
                     <input type="password" placeholder="••••••••" className={inputClasses} />
                   </div>
-                  <div className="h-px bg-slate-200/50 dark:bg-white/5"></div>
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div className="group space-y-2">
                       <label className="group-focus-within:text-primary-500 pl-1 text-[11px] font-bold tracking-wider text-slate-500 uppercase transition-colors dark:text-slate-400">
@@ -878,8 +1029,8 @@ export default function SettingsDialog() {
                       <input type="password" placeholder="••••••••" className={inputClasses} />
                     </div>
                   </div>
-                  <div className="flex justify-end pt-2">
-                    <button className="rounded-[14px] bg-slate-900 px-6 py-3 text-[13px] font-bold text-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.3)] transition-all hover:shadow-[0_8px_25px_-6px_rgba(0,0,0,0.4)] active:scale-95 dark:bg-white dark:text-slate-900">
+                  <div className="flex w-full justify-end pt-2">
+                    <button className="w-full rounded-[14px] bg-slate-900 px-6 py-3 text-[13px] font-bold text-white shadow-[0_8px_20px_-6px_rgba(0,0,0,0.3)] transition-all hover:shadow-[0_8px_25px_-6px_rgba(0,0,0,0.4)] active:scale-95 sm:w-auto dark:bg-white dark:text-slate-900">
                       Update Password
                     </button>
                   </div>
@@ -983,6 +1134,17 @@ export default function SettingsDialog() {
                         if (!canvaConnected) setShowCanvaModal(true)
                       }}
                       onDisconnect={() => setCanvaConnected(false)}
+                    />
+                    <ConnectRow
+                      icon={Bot}
+                      title="Live Agent Integration"
+                      iconStyle="bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20"
+                      color="text-indigo-600 dark:text-indigo-400"
+                      isConnected={liveAgentConnected}
+                      onClick={() => {
+                        if (!liveAgentConnected) setShowLiveAgentModal(true)
+                      }}
+                      onDisconnect={() => setLiveAgentConnected(false)}
                     />
                   </div>
                 </div>
@@ -1145,7 +1307,28 @@ export default function SettingsDialog() {
         </div>
 
         {showCanvaModal && (
-          <CanvaSettingsModal onClose={() => setShowCanvaModal(false)} onConnect={() => setCanvaConnected(true)} />
+          <ModalPortal>
+            <CanvaSettingsModal onClose={() => setShowCanvaModal(false)} onConnect={() => setCanvaConnected(true)} />
+          </ModalPortal>
+        )}
+
+        {showLiveAgentModal && (
+          <ModalPortal>
+            <LiveAgentSettingsModal
+              onClose={() => setShowLiveAgentModal(false)}
+              onConnect={() => setLiveAgentConnected(true)}
+            />
+          </ModalPortal>
+        )}
+
+        {showLogoutModal && (
+          <ModalPortal>
+            <LogoutConfirmModal
+              onCancel={() => setShowLogoutModal(false)}
+              onConfirm={handleLogout}
+              isLoading={isLoggingOut}
+            />
+          </ModalPortal>
         )}
       </div>
     </div>
