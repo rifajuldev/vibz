@@ -86,7 +86,7 @@ export function ProfileTemplateLayoutSettings({
         </p>
       )}
 
-      <div>
+      <div id="tour-card-template-picker" data-tour-id="tour-card-template-picker">
         <h4 className={cn('mb-4 font-black text-slate-900 dark:text-white', isCompact ? 'text-[14px]' : 'text-[15px]')}>
           Profile template
         </h4>

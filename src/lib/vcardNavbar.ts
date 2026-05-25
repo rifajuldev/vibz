@@ -37,8 +37,12 @@ import {
   Wrench,
 } from 'lucide-react'
 
+/** Card Settings → Nav Bar field order (primary tabs first, chrome last). */
 export const NAV_BAR_FIELDS = [
+  'Home',
   'About Me',
+  'Company Mission Statement',
+  'Services',
   'Additional Services',
   'Announcement',
   'BBB',
@@ -48,21 +52,18 @@ export const NAV_BAR_FIELDS = [
   'Calender',
   'Certifications/Licenses',
   'Clients',
-  'Company Mission Statement',
   'Contact Us',
   'DCP',
   'Dinner',
   'Events',
   'Faq',
   'Gallery',
-  'Home',
   'Home Solar',
   'Inventory',
   'Join My Team',
   'Lunch',
   'Menu',
   'Meet Our Team',
-  'Nav Background Color',
   'Press/Media',
   'Property Listing',
   'Public Cards',
@@ -71,12 +72,12 @@ export const NAV_BAR_FIELDS = [
   'Work Experience',
   'Reviews',
   'See Product',
-  'Services',
   '24/h SalesPerson',
   'Video Links',
   'Videos',
   'Who We Are',
   '2D Explainer',
+  'Nav Background Color',
 ] as const
 
 /** Global nav chrome color — not a profile tab. */

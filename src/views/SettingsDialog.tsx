@@ -4,6 +4,7 @@ import { logout, useAuth } from '@/components/Auth'
 import { LogoutConfirmModal } from '@/components/LogoutConfirmModal'
 import { ModalPortal } from '@/components/ModalPortal'
 import { ProfileTemplateLayoutSettings } from '@/components/ProfileTemplateLayoutSettings'
+import { useDashboardTour } from '@/context/DashboardTourContext'
 import { useAppDispatch, useAppSelector } from '@/hooks/redux'
 import { useTheme } from '@/lib/ThemeProvider'
 import {
@@ -293,12 +294,14 @@ type TabButtonProps = {
   label: string
   onClick: MouseEventHandler<HTMLButtonElement>
   isCollapsed: boolean
+  tourId?: string
 }
 
-function TabButton({ active, icon: Icon, label, onClick, isCollapsed }: TabButtonProps) {
+function TabButton({ active, icon: Icon, label, onClick, isCollapsed, tourId }: TabButtonProps) {
   return (
     <button
       onClick={onClick}
+      data-tour-id={tourId}
       className={cn(
         'group relative flex w-full items-center gap-3.5 overflow-hidden rounded-[16px] px-4 py-3 text-[13.5px] font-bold transition-all',
         active
@@ -454,7 +457,7 @@ export default function SettingsDialog() {
   const fontFamily = useAppSelector((s) => s.designSettings.fontFamily)
   const vcardPrimaryColor = useAppSelector((s) => s.designSettings.vcardPrimaryColor)
   const vcardAccentColor = useAppSelector((s) => s.designSettings.vcardAccentColor)
-  const [activeTab, setActiveTab] = useState('profile')
+  const [selectedTab, setSelectedTab] = useState('profile')
   const [showCanvaModal, setShowCanvaModal] = useState(false)
   const [canvaConnected, setCanvaConnected] = useState(false)
   const [showLiveAgentModal, setShowLiveAgentModal] = useState(false)
@@ -462,6 +465,9 @@ export default function SettingsDialog() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const { isActive: isTourActive, settingsAssist, currentStep } = useDashboardTour()
+
+  const activeTab = isTourActive && currentStep?.id && settingsAssist.activeTab ? settingsAssist.activeTab : selectedTab
 
   const [toggles, setToggles] = useState<Record<string, boolean>>({
     'dark-mode': document.documentElement.classList.contains('dark'),
@@ -570,8 +576,9 @@ export default function SettingsDialog() {
                       active={activeTab === s.id}
                       icon={s.icon}
                       label={s.label}
-                      onClick={() => setActiveTab(s.id)}
+                      onClick={() => setSelectedTab(s.id)}
                       isCollapsed={isSidebarCollapsed}
+                      tourId={s.id === 'template' ? 'tour-account-template' : undefined}
                     />
                   ))}
                 </div>

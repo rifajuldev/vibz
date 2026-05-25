@@ -1,6 +1,7 @@
 'use client'
 
 import { ProfileTemplateLayoutSettings } from '@/components/ProfileTemplateLayoutSettings'
+import { useDashboardTour } from '@/context/DashboardTourContext'
 import { useAppSelector } from '@/hooks/redux'
 import { useVCard } from '@/lib/VCardContext'
 import { appearanceFromDesignSettings } from '@/lib/vcardDesignDefaults'
@@ -43,6 +44,17 @@ const settingTabs = [
   { id: 'navbar', label: 'Nav Bar settings', icon: Menu },
   { id: 'template', label: 'Template', icon: LayoutTemplate },
 ]
+
+const settingTabTourIds: Record<string, string> = {
+  home: 'tour-card-home-tab',
+  navbar: 'tour-card-navbar-tab',
+  template: 'tour-card-template-tab',
+}
+
+const settingContentTourIds: Record<string, string> = {
+  home: 'tour-card-home-content',
+  navbar: 'tour-card-navbar-content',
+}
 
 const CATEGORY_FIELDS: Record<string, readonly string[]> = {
   info: MY_INFO_FIELDS,
@@ -869,8 +881,11 @@ const FieldCard: React.FC<{
 export function TabSetting() {
   const { vCardData, updateData } = useVCard()
   const display = getDisplaySettingsFromVCard(vCardData)
-  const [activeTab, setActiveTab] = useState('info')
+  const [selectedTab, setSelectedTab] = useState('info')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const { isActive: isTourActive, editorAssist, currentStep } = useDashboardTour()
+
+  const activeTab = isTourActive && currentStep?.id && editorAssist.settingsTab ? editorAssist.settingsTab : selectedTab
 
   const patchDisplay = (next: VCardDisplaySettings) => updateData('displaySettings', next)
 
@@ -881,6 +896,7 @@ export function TabSetting() {
   const categoryKeys = CATEGORY_FIELDS[activeTab] ?? []
   const categoryAllEnabled =
     categoryKeys.length > 0 && categoryKeys.every((key) => display.fields[key]?.visible !== false)
+  const contentTourId = settingContentTourIds[activeTab]
 
   const profileTemplate = (vCardData.appearance?.profileTemplate ?? 'v2') as 'v1' | 'v2'
   const colorPreview = {
@@ -977,7 +993,8 @@ export function TabSetting() {
           {settingTabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              data-tour-id={settingTabTourIds[tab.id]}
+              onClick={() => setSelectedTab(tab.id)}
               className={cn(
                 'group relative flex w-full items-center overflow-hidden rounded-[1.25rem] px-5 py-4 text-left text-[.8438rem] font-bold transition-all duration-300',
                 activeTab === tab.id
@@ -1009,45 +1026,47 @@ export function TabSetting() {
         <div className="relative z-0 flex h-full flex-1 flex-col bg-transparent pb-10">
           <div className="bg-primary-500/5 pointer-events-none absolute top-0 right-0 h-125 w-125 rounded-full blur-[9.375rem]" />
 
-          {/* Sticky Header */}
-          <div className="relative z-10 flex shrink-0 flex-col justify-between gap-6 p-4 sm:p-8 md:flex-row md:items-start md:p-10">
-            <div className="relative z-10 max-w-xl">
-              <h2 className="mb-2 text-2xl font-black text-slate-900 dark:text-white">
-                {settingTabs.find((t) => t.id === activeTab)?.label}
-              </h2>
-              <p className="text-[.875rem] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
-                Configure how elements are displayed on your vCard. Changes take effect automatically.
-              </p>
-            </div>
-            {activeTab !== 'template' && (
-              <div className="relative z-10 flex items-center gap-4 self-start rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/5 dark:bg-[#070a13]">
-                <span className="text-[.8125rem] font-bold text-slate-900 dark:text-white">Enable All</span>
-                <Toggle
-                  checked={activeTab === 'info' ? display.globalEnabled : categoryAllEnabled}
-                  onChange={(enabled) => {
-                    if (activeTab === 'info') {
-                      patchDisplay(
-                        setCategoryEnableAll({ ...display, globalEnabled: enabled }, MY_INFO_FIELDS, enabled)
-                      )
-                      return
-                    }
-                    const keys = CATEGORY_FIELDS[activeTab]
-                    if (keys) patchDisplay(setCategoryEnableAll(display, keys, enabled))
-                  }}
-                />
+          <div id={contentTourId} data-tour-id={contentTourId} className="relative z-10 flex min-h-0 flex-1 flex-col">
+            {/* Sticky Header */}
+            <div className="relative z-10 flex shrink-0 flex-col justify-between gap-6 p-4 sm:p-8 md:flex-row md:items-start md:p-10">
+              <div className="relative z-10 max-w-xl">
+                <h2 className="mb-2 text-2xl font-black text-slate-900 dark:text-white">
+                  {settingTabs.find((t) => t.id === activeTab)?.label}
+                </h2>
+                <p className="text-[.875rem] leading-relaxed font-medium text-slate-500 dark:text-slate-400">
+                  Configure how elements are displayed on your vCard. Changes take effect automatically.
+                </p>
               </div>
-            )}
-          </div>
-
-          {/* Scrollable Grid */}
-          <div className="relative z-10 flex-1 overflow-y-auto scroll-smooth px-4 pb-32 sm:px-8 md:px-10">
-            <div
-              className={cn(
-                'animate-in fade-in slide-in-from-bottom-8 fill-mode-both duration-700',
-                activeTab === 'template' ? '' : 'mx-auto flex w-full max-w-4xl flex-col gap-4'
+              {activeTab !== 'template' && (
+                <div className="relative z-10 flex items-center gap-4 self-start rounded-3xl border border-slate-200 bg-white px-6 py-4 shadow-sm dark:border-white/5 dark:bg-[#070a13]">
+                  <span className="text-[.8125rem] font-bold text-slate-900 dark:text-white">Enable All</span>
+                  <Toggle
+                    checked={activeTab === 'info' ? display.globalEnabled : categoryAllEnabled}
+                    onChange={(enabled) => {
+                      if (activeTab === 'info') {
+                        patchDisplay(
+                          setCategoryEnableAll({ ...display, globalEnabled: enabled }, MY_INFO_FIELDS, enabled)
+                        )
+                        return
+                      }
+                      const keys = CATEGORY_FIELDS[activeTab]
+                      if (keys) patchDisplay(setCategoryEnableAll(display, keys, enabled))
+                    }}
+                  />
+                </div>
               )}
-            >
-              {renderContent()}
+            </div>
+
+            {/* Scrollable Grid */}
+            <div className="relative z-10 flex-1 overflow-y-auto scroll-smooth px-4 pb-32 sm:px-8 md:px-10">
+              <div
+                className={cn(
+                  'animate-in fade-in slide-in-from-bottom-8 fill-mode-both duration-700',
+                  activeTab === 'template' ? '' : 'mx-auto flex w-full max-w-4xl flex-col gap-4'
+                )}
+              >
+                {renderContent()}
+              </div>
             </div>
           </div>
         </div>

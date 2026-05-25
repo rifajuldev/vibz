@@ -29,6 +29,7 @@ export function VCardsListHeader({ query, onQueryChange }: VCardsListHeaderProps
         </div>
         <Link
           href="/vcards/create"
+          data-tour-id="tour-create-vcard"
           className="bg-primary-600 hover:bg-primary-700 hover:shadow-primary-500/20 flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-[13.5px] font-semibold text-white shadow-sm transition-all hover:shadow-md active:scale-95 sm:w-auto"
         >
           <Plus className="h-4 w-4" /> Create New

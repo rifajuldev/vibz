@@ -15,6 +15,7 @@ import { Tab2PersonalInfo } from '@/components/VCardTab2'
 import { Tab3SocialGames } from '@/components/VCardTab3'
 import { Tab4HomeMedia } from '@/components/VCardTab4'
 import { Tab5ExtraFields } from '@/components/VCardTab5'
+import { useDashboardTour } from '@/context/DashboardTourContext'
 import { useVCard } from '@/lib/VCardContext'
 import { getDisplaySettingsFromVCard } from '@/lib/vcardDisplaySettings'
 import { filterNavItemsByVisibility, getNavItemById, NAV_BAR_NAV_ITEMS, type EditorNavPanel } from '@/lib/vcardNavbar'
@@ -113,10 +114,27 @@ export default function VCardEdit() {
   const { vCardData, updateData, saveVCard, isCreateMode } = useVCard()
   const display = useMemo(() => getDisplaySettingsFromVCard(vCardData), [vCardData])
   const visibleNavItems = useMemo(() => filterNavItemsByVisibility(NAV_BAR_NAV_ITEMS, display), [display])
-  const [activeTab, setActiveTab] = useState(1)
-  const [activeNavId, setActiveNavId] = useState('home')
+  const [selectedTab, setSelectedTab] = useState(1)
+  const [selectedNavId, setSelectedNavId] = useState('home')
   const [showPreview, setShowPreview] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const { isActive: isTourActive, editorAssist, currentStep } = useDashboardTour()
+
+  const tourNavAssist = useMemo(() => {
+    if (!isTourActive || !currentStep?.id) return null
+    if (editorAssist.settingsOpen) {
+      return { navId: '__settings__' as const, subTab: undefined as number | undefined }
+    }
+    if (!editorAssist.activeNavId) return null
+    const navItem = getNavItemById(editorAssist.activeNavId)
+    if (!navItem) return null
+    const subTab =
+      navItem.editorPanel.kind === 'personal' && navItem.editorPanel.subTab ? navItem.editorPanel.subTab : undefined
+    return { navId: navItem.id, subTab }
+  }, [isTourActive, currentStep?.id, editorAssist.settingsOpen, editorAssist.activeNavId])
+
+  const activeNavId = tourNavAssist?.navId ?? selectedNavId
+  const activeTab = tourNavAssist?.subTab ?? selectedTab
 
   const activeNavItem = getNavItemById(activeNavId)
   const editorPanel = activeNavItem?.editorPanel ?? { kind: 'empty' as const }
@@ -128,9 +146,9 @@ export default function VCardEdit() {
   const subNavScroll = useDragScroll()
 
   const selectNavItem = (id: string, panel: EditorNavPanel) => {
-    setActiveNavId(id)
+    setSelectedNavId(id)
     if (panel.kind === 'personal' && panel.subTab) {
-      setActiveTab(panel.subTab)
+      setSelectedTab(panel.subTab)
     }
   }
 
@@ -163,6 +181,7 @@ export default function VCardEdit() {
                   <button
                     key={item.id}
                     type="button"
+                    data-tour-id={`tour-nav-${item.id}`}
                     title={item.label}
                     onClick={(e) => {
                       if (mainNavScroll.didDrag) {
@@ -197,12 +216,13 @@ export default function VCardEdit() {
               className={cn('flex shrink-0 items-center gap-3 px-2 pb-2 md:pb-0', rightNavScroll.className)}
             >
               <button
+                data-tour-id="tour-editor-settings"
                 onClick={(e) => {
                   if (rightNavScroll.didDrag) {
                     e.preventDefault()
                     return
                   }
-                  setActiveNavId('__settings__')
+                  setSelectedNavId('__settings__')
                 }}
                 className={cn(
                   'flex shrink-0 items-center gap-2 rounded-2xl px-5 py-3 text-[13.5px] font-semibold whitespace-nowrap transition-all duration-300',
@@ -248,7 +268,10 @@ export default function VCardEdit() {
           {isSettingsOpen ? (
             <TabSetting />
           ) : (
-            <div className="relative flex min-h-[700px] flex-col overflow-visible rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#0b0f19]">
+            <div
+              className="relative flex min-h-[700px] flex-col overflow-visible rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/5 dark:bg-[#0b0f19]"
+              data-tour-id={isPersonalEditor ? `tour-editor-panel-${activeNavId}` : undefined}
+            >
               {/* Subtle inner top highlight */}
               <div className="via-primary-500/10 absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent" />
 
@@ -272,7 +295,7 @@ export default function VCardEdit() {
                               e.preventDefault()
                               return
                             }
-                            setActiveTab(tab.id)
+                            setSelectedTab(tab.id)
                           }}
                           className={cn(
                             'group relative shrink-0 pb-4 text-[14px] font-semibold whitespace-nowrap transition-colors duration-200',
@@ -311,7 +334,10 @@ export default function VCardEdit() {
               <div className="relative flex-1 p-6 sm:p-12">
                 <div className="animate-in fade-in zoom-in-95 fill-mode-both h-full duration-500">
                   {editorPanel.kind === 'empty' ? (
-                    <EditorNavEmptyPanel title={activeNavItem?.label ?? 'Section'} />
+                    <EditorNavEmptyPanel
+                      title={activeNavItem?.label ?? 'Section'}
+                      tourTargetId={`tour-editor-panel-${activeNavId}`}
+                    />
                   ) : (
                     renderEditorPanel(editorPanel, activeTab)
                   )}
@@ -323,7 +349,7 @@ export default function VCardEdit() {
                 <div className="mt-auto flex items-center justify-between rounded-b-3xl border-t border-slate-200 bg-slate-50 p-6 sm:px-12 dark:border-white/5 dark:bg-white/2">
                   {activeTab > 1 ? (
                     <button
-                      onClick={() => setActiveTab(activeTab - 1)}
+                      onClick={() => setSelectedTab(activeTab - 1)}
                       className="group mobile:px-7 flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-5 py-3 text-[13.5px] font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-[#1e2333] dark:text-slate-300 dark:hover:bg-[#252b3d]"
                     >
                       <ChevronLeft className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-1" />{' '}
@@ -334,7 +360,7 @@ export default function VCardEdit() {
                   )}
                   {activeTab < 5 ? (
                     <button
-                      onClick={() => setActiveTab(activeTab + 1)}
+                      onClick={() => setSelectedTab(activeTab + 1)}
                       className="group mobile:px-7 flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-5 py-3 text-[13.5px] font-semibold text-slate-900 shadow-sm transition-all hover:bg-slate-50 dark:border-white/10 dark:bg-[#1e2333] dark:text-white dark:hover:bg-[#252b3d]"
                     >
                       Next Step{' '}

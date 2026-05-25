@@ -1,5 +1,6 @@
 'use client'
 
+import { useDashboardTour } from '@/context/DashboardTourContext'
 import { cn } from '@/utils/cn'
 import { Contact, LayoutDashboard, LogOut, Menu, Moon, Settings, Sun, UserCircle, X } from 'lucide-react'
 import Image from 'next/image'
@@ -31,8 +32,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const isDarkMode = useSyncExternalStore(subscribeToTheme, getDarkModeSnapshot, getServerDarkModeSnapshot)
   const { user } = useAuth()
+  const { registerMobileNavOpener } = useDashboardTour()
   const menuRef = useRef<HTMLDivElement>(null)
   const mobileMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    registerMobileNavOpener(() => setIsMobileMenuOpen(true))
+  }, [registerMobileNavOpener])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -69,9 +75,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   }
 
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'My vCards', path: '/vcards', icon: Contact },
-    { name: 'Settings', path: '/settings', icon: Settings },
+    { name: 'Dashboard', path: '/', icon: LayoutDashboard, tourId: 'tour-nav-dashboard' },
+    { name: 'My vCards', path: '/vcards', icon: Contact, tourId: 'tour-nav-vcards' },
+    { name: 'Settings', path: '/settings', icon: Settings, tourId: 'tour-nav-settings' },
   ]
 
   return (
@@ -99,7 +105,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 return (
                   <Link
                     key={item.name}
+                    id={item.tourId}
                     href={item.path}
+                    data-tour-id={item.tourId}
                     className={cn(
                       'group relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold',
                       isActive
@@ -110,7 +118,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     <span
                       aria-hidden
                       className={cn(
-                        'absolute inset-0 rounded-xl',
+                        'pointer-events-none absolute inset-0 rounded-xl',
                         isActive
                           ? 'dark:bg-primary-500/15 bg-slate-900'
                           : 'bg-transparent group-hover:bg-slate-100 dark:group-hover:bg-white/5'
@@ -212,6 +220,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   <Link
                     key={item.name}
                     href={item.path}
+                    data-tour-id={item.tourId}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
                       'group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold',
@@ -223,7 +232,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     <span
                       aria-hidden
                       className={cn(
-                        'absolute inset-0 rounded-xl',
+                        'pointer-events-none absolute inset-0 rounded-xl',
                         isActive
                           ? 'dark:bg-primary-500/15 bg-slate-900'
                           : 'bg-transparent group-hover:bg-slate-100 dark:group-hover:bg-white/5'
@@ -240,7 +249,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       </header>
 
       {/* Main Content Area */}
-      <main id="main-scroll" className="wrapper relative flex-1 py-8">
+      <main id="main-scroll" className="wrapper relative min-h-0 flex-1 py-8">
         {children}
       </main>
 

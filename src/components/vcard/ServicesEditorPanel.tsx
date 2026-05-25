@@ -93,7 +93,10 @@ export function ServicesEditorPanel({
 
   return (
     <div className="mb-12">
-      <div className={`mb-8 rounded-[24px] border p-6 ${a.headerBorder} ${a.headerBg}`}>
+      <div
+        className={`mb-8 rounded-[24px] border p-6 ${a.headerBorder} ${a.headerBg}`}
+        data-tour-id="tour-editor-panel-services"
+      >
         <div className="mb-2 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div
